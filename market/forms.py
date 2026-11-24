@@ -1,3 +1,4 @@
+import re
 from django import forms
 from django.core.exceptions import ValidationError
 from django.forms import inlineformset_factory
@@ -100,6 +101,16 @@ class RapportMarcheForm(forms.ModelForm):
         if len(titre) < 3:
             raise ValidationError("Le titre du rapport doit contenir au moins 3 caractères.")
         return titre
+
+    def clean_contenu_detaille(self):
+        html = (self.cleaned_data.get('contenu_detaille') or '').strip()
+        if html in ('<p><br></p>', '<p></p>'):
+            return ''
+        # Strip unsafe script/iframe tags and inline event handlers while keeping Quill formatting
+        html = re.sub(r'<\s*(script|iframe|object|embed)[^>]*>[\s\S]*?<\s*/\s*\1\s*>', '', html, flags=re.IGNORECASE)
+        html = re.sub(r'\s+on\w+\s*=\s*(?:"[^"]*"|\'[^\']*\'|[^\s>]+)', '', html, flags=re.IGNORECASE)
+        html = re.sub(r'javascript\s*:', '', html, flags=re.IGNORECASE)
+        return html
 
     def clean(self):
         cleaned_data = super().clean()

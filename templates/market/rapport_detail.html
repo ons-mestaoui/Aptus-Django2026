@@ -57,7 +57,11 @@
             {{ rapport.description }}
           </div>
           {% endif %}
+          {% if '<' in rapport.contenu_detaille and '>' in rapport.contenu_detaille %}
+          <div class="rapport-rich-body" style="color:var(--text-secondary); line-height:1.75; font-size:1rem;">{{ rapport.contenu_detaille|safe }}</div>
+          {% else %}
           <div style="white-space: pre-line; color:var(--text-secondary); line-height:1.75; font-size:1rem;">{{ rapport.contenu_detaille }}</div>
+          {% endif %}
         {% else %}
           <div style="white-space: pre-line; color:var(--text-secondary); line-height:1.75; font-size:1rem;">{{ rapport.description|default:"Aucune analyse détaillée renseignée." }}</div>
         {% endif %}
