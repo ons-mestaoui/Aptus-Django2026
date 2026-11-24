@@ -13,7 +13,10 @@ class OffreEmploiForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Description du poste...'}),
             'competences_requises': forms.Textarea(attrs={'class': 'form-control', 'rows': 2, 'placeholder': 'Python, Django, React, SQL...'}),
             'salaire': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'ex: 45000'}),
-            'date_expir': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'date_expir': forms.DateInput(
+                format='%Y-%m-%d',
+                attrs={'class': 'form-control', 'type': 'date'}
+            ),
             'domaine': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ex: Informatique / IT'}),
             'experience_requise': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ex: 2 ans'}),
             'question': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Question personnalisée pour le candidat'}),
@@ -21,8 +24,13 @@ class OffreEmploiForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        today_str = date.today().isoformat()
-        self.fields['date_expir'].widget.attrs['min'] = today_str
+        self.fields['date_expir'].input_formats = ['%Y-%m-%d', '%d/%m/%Y']
+        if self.instance and self.instance.pk:
+            candidates = [d for d in (self.instance.date_publication, self.instance.date_expir) if d is not None]
+            min_date = min(candidates) if candidates else date.today()
+        else:
+            min_date = date.today()
+        self.fields['date_expir'].widget.attrs['min'] = min_date.isoformat()
 
     def clean_titre(self):
         titre = (self.cleaned_data.get('titre') or '').strip()
@@ -45,6 +53,8 @@ class OffreEmploiForm(forms.ModelForm):
     def clean_date_expir(self):
         date_expir = self.cleaned_data.get('date_expir')
         if date_expir:
+            if self.instance and self.instance.pk and date_expir == self.instance.date_expir:
+                return date_expir
             # Vérifie que la date d'expiration n'est pas antérieure à la date de publication
             # (si une date de publication existe sur l'instance, sinon date.today())
             ref_date = date.today()

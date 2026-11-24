@@ -25,8 +25,14 @@ class FormationForm(forms.ModelForm):
             'domaine': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ex: Data Science, Web, Cloud'}),
             'niveau': forms.Select(attrs={'class': 'form-select'}),
             'duree': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ex: 10h'}),
-            'date_formation': forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'datetime-local'}),
-            'date_fin': forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'datetime-local'}),
+            'date_formation': forms.DateTimeInput(
+                format='%Y-%m-%dT%H:%M',
+                attrs={'class': 'form-control', 'type': 'datetime-local'}
+            ),
+            'date_fin': forms.DateTimeInput(
+                format='%Y-%m-%dT%H:%M',
+                attrs={'class': 'form-control', 'type': 'datetime-local'}
+            ),
             'tuteur': forms.Select(attrs={'class': 'form-select'}),
             'prerequis': forms.Select(attrs={'class': 'form-select'}),
             'image': forms.ClearableFileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
@@ -35,8 +41,27 @@ class FormationForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        now_str = timezone.now().strftime('%Y-%m-%dT%H:%M')
-        self.fields['date_formation'].widget.attrs['min'] = now_str
+        dt_formats = [
+            '%Y-%m-%dT%H:%M',
+            '%Y-%m-%d %H:%M:%S',
+            '%Y-%m-%d %H:%M',
+            '%d/%m/%Y %H:%M',
+            '%d/%m/%Y %H:%M:%S',
+        ]
+        self.fields['date_formation'].input_formats = dt_formats
+        self.fields['date_fin'].input_formats = dt_formats
+
+        now_local = timezone.localtime(timezone.now())
+        if self.instance and self.instance.pk and self.instance.date_formation:
+            existing_dt = self.instance.date_formation
+            if timezone.is_aware(existing_dt):
+                existing_dt = timezone.localtime(existing_dt)
+            else:
+                existing_dt = timezone.make_aware(existing_dt)
+            min_dt = min(existing_dt, now_local)
+        else:
+            min_dt = now_local
+        self.fields['date_formation'].widget.attrs['min'] = min_dt.strftime('%Y-%m-%dT%H:%M')
         # Filtrer les tuteurs disponibles (Tuteurs ou Admins)
         self.fields['tuteur'].queryset = Utilisateur.objects.filter(role__in=['Tuteur', 'Admin']).order_by('nom')
         self.fields['tuteur'].empty_label = "Sélectionnez un tuteur référent..."
@@ -62,17 +87,40 @@ class FormationForm(forms.ModelForm):
             raise ValidationError("Le domaine technique est requis.")
         return domaine
 
+    @staticmethod
+    def _same_minute(dt_a, dt_b):
+        """Compare two datetimes at minute precision in the active local timezone."""
+        a = timezone.localtime(dt_a) if timezone.is_aware(dt_a) else timezone.make_aware(dt_a)
+        b = timezone.localtime(dt_b) if timezone.is_aware(dt_b) else timezone.make_aware(dt_b)
+        return a.replace(second=0, microsecond=0) == b.replace(second=0, microsecond=0)
+
     def clean_date_formation(self):
         date_formation = self.cleaned_data.get('date_formation')
-        if date_formation and date_formation < timezone.now():
-            raise ValidationError("La date de la formation ne peut pas être planifiée dans le passé.")
+        if date_formation:
+            if (
+                self.instance
+                and self.instance.pk
+                and self.instance.date_formation
+                and self._same_minute(date_formation, self.instance.date_formation)
+            ):
+                return self.instance.date_formation
+            if date_formation < timezone.now():
+                raise ValidationError("La date de la formation ne peut pas être planifiée dans le passé.")
         return date_formation
 
     def clean_date_fin(self):
         date_formation = self.cleaned_data.get('date_formation')
         date_fin = self.cleaned_data.get('date_fin')
-        if date_fin and date_formation and date_fin <= date_formation:
-            raise ValidationError("La date de fin doit être postérieure à la date de début de formation.")
+        if date_fin:
+            if (
+                self.instance
+                and self.instance.pk
+                and self.instance.date_fin
+                and self._same_minute(date_fin, self.instance.date_fin)
+            ):
+                date_fin = self.instance.date_fin
+            if date_formation and date_fin <= date_formation:
+                raise ValidationError("La date de fin doit être postérieure à la date de début de formation.")
         return date_fin
 
     def clean_image(self):
