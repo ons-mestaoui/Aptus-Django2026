@@ -98,9 +98,9 @@
           <td class="text-success fw-bold">{% if r.salaire_moyen_global is not None %}{{ r.salaire_moyen_global|floatformat:"-2" }} TND{% else %}N/C{% endif %}</td>
           <td><span class="badge badge-success">{{ r.tendance_generale|default:'Stable' }}</span></td>
           <td>
-            <span class="badge badge-secondary">{{ r.references_count|default:0 }} source{{ r.references_count|default:0|pluralize }}</span>
+            <span class="badge" style="background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color);">{{ r.references_count|default:0 }} source{{ r.references_count|default:0|pluralize }}</span>
           </td>
-          <td class="text-end">
+          <td class="text-end text-nowrap">
             <a href="{% url 'market:rapport_detail' r.pk %}" class="btn btn-sm btn-ghost text-primary" title="Voir le détail"><i data-lucide="eye" style="width: 16px; height: 16px;"></i></a>
             <a href="{% url 'market:rapport_update' r.pk %}" class="btn btn-sm btn-ghost text-warning" title="Modifier"><i data-lucide="pencil" style="width: 16px; height: 16px;"></i></a>
             <button type="button" class="btn btn-sm btn-ghost text-danger" title="Supprimer définitivement" onclick="aptusConfirmDelete('{% url 'market:rapport_delete' r.pk %}', 'Êtes-vous sûr de vouloir supprimer définitivement le rapport « {{ r.titre|escapejs }} » ?')"><i data-lucide="trash-2" style="width: 16px; height: 16px;"></i></button>
