@@ -776,7 +776,7 @@ const RECEIVER_INJECT_HTML = `
           }
         });
       } else if (d.field === 'photo') {
-        const imgs = document.querySelectorAll('#preview-photo, .cv-photo img, .profile-img, #profile-pic, .photo-wrapper img, [data-cv-zone="photo"] img');
+        const imgs = document.querySelectorAll('#preview-photo, .cv-photo img, .profile-img, #profile-pic, .photo-wrapper img, [data-cv-zone="photo"] img, img.cv-photo');
         imgs.forEach(img => {
           if (d.value) {
             img.src = d.value;
@@ -786,8 +786,12 @@ const RECEIVER_INJECT_HTML = `
             }
           } else {
             img.removeAttribute('src');
+            img.removeAttribute('alt');
             img.style.display = 'none';
           }
+        });
+        document.querySelectorAll('#photo-wrapper, .photo-wrapper').forEach(w => {
+          w.style.display = d.value ? 'flex' : 'none';
         });
         document.querySelectorAll('#photo-text, .photo-text').forEach(t => {
           t.style.display = d.value ? 'none' : 'block';
@@ -838,7 +842,7 @@ function buildTemplateDocument(rawHtml, accent) {
   if (!/<html/i.test(html)) {
     html = '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet"></head><body style="margin:0;padding:0;background:#fff;">' + html + '</body></html>';
   }
-  const headInject = `<style>html,body{overflow-x:hidden!important;background:#fff!important;margin:0!important;} :root{--cv-accent:${accent};--primary:${accent};} .cv-container,.cv-page,.ats-cv{width:100%!important;box-shadow:none!important;margin:0!important;}</style>`;
+  const headInject = `<style>html,body{overflow-x:hidden!important;background:#fff!important;margin:0!important;} :root{--cv-accent:${accent};--primary:${accent};} .cv-container,.cv-page,.ats-cv{width:100%!important;box-shadow:none!important;margin:0!important;} img[src=""],img:not([src]){display:none!important;}</style>`;
   if (/<\/head>/i.test(html)) {
     html = html.replace(/<\/head>/i, headInject + '</head>');
   } else {
@@ -916,7 +920,7 @@ function syncAllData() {
   syncEducation(false);
   syncLangs(false);
   const photo = document.getElementById('photo-b64')?.value || '';
-  if (photo) postToPreview({ type: 'cv-update', field: 'photo', value: photo });
+  postToPreview({ type: 'cv-update', field: 'photo', value: photo });
   applyAccentColor(document.getElementById('color-picker')?.value || '#6b34a3');
   if (smartFitEnabled) setTimeout(runSmartFit, 250);
 }
@@ -1429,12 +1433,12 @@ function renderLanguages() {
         <span class="language-card-title">${getFlagEmoji(l.lang)} Langue #${i + 1}</span>
         <button type="button" class="text-danger" style="background:none;border:none;cursor:pointer;font-size:1.1rem;" onclick="removeLanguage(${i})">&times;</button>
       </div>
-      <div class="input-icon-group" style="margin-bottom:10px; position:relative;">
+      <div class="level-selector" style="margin-top:0; margin-bottom:10px;">
+        ${levels.map(lvl => `<div class="level-pill ${l.level === lvl ? 'active' : ''}" onclick="currentLangs[${i}].level='${lvl}'; renderLanguages(); syncLangs();">${lvl}</div>`).join('')}
+      </div>
+      <div class="input-icon-group" style="position:relative;">
         <i data-lucide="languages"></i>
         <input type="text" class="form-control lang-input-field" placeholder="ex: Français, Anglais, Arabe..." value="${escAttr(l.lang)}" data-index="${i}" autocomplete="off">
-      </div>
-      <div class="level-selector">
-        ${levels.map(lvl => `<div class="level-pill ${l.level === lvl ? 'active' : ''}" onclick="currentLangs[${i}].level='${lvl}'; renderLanguages(); syncLangs();">${lvl}</div>`).join('')}
       </div>
     `;
     c.appendChild(d);
@@ -1480,7 +1484,8 @@ function setupSmartAutocomplete(inp, db, isSkill = false) {
       const item = document.createElement('div');
       item.className = 'tag-suggest-item';
       item.textContent = match;
-      item.onclick = () => {
+      item.addEventListener('mousedown', e => {
+        e.preventDefault();
         if (isSkill) {
           addSkillFromInput(match, inp.id.includes('soft') ? 'soft' : 'hard');
           inp.value = '';
@@ -1489,10 +1494,18 @@ function setupSmartAutocomplete(inp, db, isSkill = false) {
           inp.dispatchEvent(new Event('input'));
         }
         sD.style.display = 'none';
-      };
+      });
       sD.appendChild(item);
     });
     sD.style.display = 'block';
+  });
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'Escape' || e.key === 'Enter') {
+      sD.style.display = 'none';
+    }
+  });
+  inp.addEventListener('blur', () => {
+    setTimeout(() => { sD.style.display = 'none'; }, 120);
   });
   document.addEventListener('click', e => {
     if (e.target !== inp && !sD.contains(e.target)) sD.style.display = 'none';
