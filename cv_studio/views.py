@@ -104,6 +104,7 @@ def _build_rendered_cv_srcdoc(cv):
         '::-webkit-scrollbar{display:none!important;}'
         f':root{{--cv-accent:{accent}!important;--primary:{accent}!important;}}'
         '#cv-preview-content,.cv-render,.cv-container,.cv-page,.ats-cv{width:100%!important;min-height:100%!important;margin:0!important;box-shadow:none!important;}'
+        'img[src=""],img:not([src]){display:none!important;}'
         '.skill-pill{display:inline-block;background:#f1f5f9;color:#334155;padding:3px 10px;border-radius:6px;font-size:12px;margin:0 5px 5px 0;border:1px solid #e2e8f0;}'
         '.lang-row{display:flex;justify-content:space-between;margin-bottom:6px;border-bottom:1px dashed #e2e8f0;padding-bottom:3px;font-size:13px;}'
         '</style>'
@@ -155,7 +156,7 @@ def _build_rendered_cv_srcdoc(cv):
     setHtml('#preview-infoContact, [data-cv-zone="contact"], .contact-info, .cv-contact, .contact-details', clean);
   }}
   if (d.urlPhoto) {{
-    document.querySelectorAll('#preview-photo, .cv-photo img, .profile-img, #profile-pic, .photo-wrapper img, [data-cv-zone="photo"] img').forEach(img => {{
+    document.querySelectorAll('#preview-photo, .cv-photo img, .profile-img, #profile-pic, .photo-wrapper img, [data-cv-zone="photo"] img, img.cv-photo').forEach(img => {{
       img.src = d.urlPhoto;
       img.style.display = 'block';
       if (img.parentElement && img.parentElement.classList.contains('photo-wrapper')) {{
@@ -167,6 +168,13 @@ def _build_rendered_cv_srcdoc(cv):
     if (hp && !hp.querySelector('img')) {{
       hp.innerHTML = '<img src="' + d.urlPhoto + '" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">';
     }}
+  }} else {{
+    document.querySelectorAll('#preview-photo, .cv-photo img, .profile-img, #profile-pic, .photo-wrapper img, [data-cv-zone="photo"] img, img.cv-photo').forEach(img => {{
+      img.removeAttribute('src');
+      img.removeAttribute('alt');
+      img.style.display = 'none';
+    }});
+    document.querySelectorAll('#photo-wrapper, .photo-wrapper, #photo-text, .photo-text').forEach(w => {{ w.style.display = 'none'; }});
   }}
 }})();
 </script>"""

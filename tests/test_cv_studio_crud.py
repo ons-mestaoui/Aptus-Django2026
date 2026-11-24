@@ -286,3 +286,25 @@ class CVStudioCRUDTestCase(TestCase):
         self.assertEqual(res.status_code, 200)
         html = res.content.decode('utf-8')
         self.assertIn('flex-wrap: nowrap', html)
+
+    def test_empty_photo_hides_alt_bleed_and_lang_autocomplete_non_overlapping(self):
+        cv_empty_photo = CV.objects.create(
+            candidat=self.candidat_a,
+            template=self.template,
+            nom_document='CV Sans Photo',
+            nom_complet='Amira Ben Ali',
+            titre_poste='Backend Dev',
+            info_contact='amira@aptus.tn',
+            url_photo='',
+        )
+        self._login(self.user_a)
+        for route in ('cv_studio:cv_list',):
+            html = self.client.get(reverse(route)).content.decode('utf-8')
+            self.assertIn('img[src=&quot;&quot;]', html)
+        for route in ('cv_studio:cv_print',):
+            html = self.client.get(reverse(route, args=[cv_empty_photo.pk])).content.decode('utf-8')
+            self.assertIn('img[src=""]', html)
+            self.assertIn("removeAttribute('alt')", html)
+        form_html = self.client.get(reverse('cv_studio:cv_create')).content.decode('utf-8')
+        # Level pills are rendered before lang-input-field inside language cards so suggestions never overlap them
+        self.assertLess(form_html.index('class="level-selector"'), form_html.index('class="form-control lang-input-field"'))
