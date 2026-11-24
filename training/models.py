@@ -6,6 +6,7 @@ class Formation(models.Model):
         ('Débutant', 'Débutant'),
         ('Intermédiaire', 'Intermédiaire'),
         ('Avancé', 'Avancé'),
+        ('Expert', 'Expert'),
     ]
 
     id_formation = models.AutoField(primary_key=True)
@@ -13,14 +14,42 @@ class Formation(models.Model):
     description = models.TextField(null=True, blank=True)
     domaine = models.CharField(max_length=255, null=True, blank=True)
     niveau = models.CharField(max_length=50, choices=NIVEAU_CHOICES, default='Débutant')
-    date_formation = models.DateTimeField(null=True, blank=True)
+    duree = models.CharField(max_length=50, null=True, blank=True, default='10h', verbose_name="Durée")
+    date_formation = models.DateTimeField(null=True, blank=True, verbose_name="Date de début")
+    date_fin = models.DateTimeField(null=True, blank=True, verbose_name="Date de fin")
+    image = models.ImageField(upload_to='formations/', null=True, blank=True, verbose_name="Image de couverture")
     image_base64 = models.TextField(null=True, blank=True)
     tuteur = models.ForeignKey(
         Utilisateur, on_delete=models.SET_NULL, null=True, blank=True,
-        db_column='id_tuteur', related_name='formations_dispensees'
+        db_column='id_tuteur', related_name='formations_dispensees',
+        verbose_name="Tuteur référent"
     )
-    is_online = models.BooleanField(default=False)
-    lien_api_room = models.CharField(max_length=255, null=True, blank=True)
+    prerequis = models.ForeignKey(
+        'self', on_delete=models.SET_NULL, null=True, blank=True,
+        db_column='prerequis_id', related_name='formations_suivantes',
+        verbose_name="Prérequis optionnel"
+    )
+    is_online = models.BooleanField(default=False, verbose_name="Format / En ligne")
+    lien_api_room = models.CharField(max_length=255, null=True, blank=True, verbose_name="Lien Visioconférence")
+
+    @property
+    def date_debut(self):
+        return self.date_formation
+
+    @date_debut.setter
+    def date_debut(self, value):
+        self.date_formation = value
+
+    @property
+    def get_image_url(self):
+        if self.image:
+            try:
+                return self.image.url
+            except Exception:
+                pass
+        if self.image_base64:
+            return self.image_base64
+        return None
 
     class Meta:
         db_table = 'formation'

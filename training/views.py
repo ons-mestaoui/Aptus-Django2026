@@ -11,7 +11,12 @@ def formation_list(request):
     niveau = (request.GET.get('niveau') or '').strip()
     query = (request.GET.get('q') or '').strip()
     
-    formations = Formation.objects.select_related('tuteur').all()
+    formations = Formation.objects.select_related('tuteur', 'prerequis').all()
+    
+    # Règle métier : masquage automatique 48h après la date de fin
+    limit_time = timezone.now() - timezone.timedelta(hours=48)
+    formations = formations.exclude(date_fin__isnull=False, date_fin__lt=limit_time)
+
     if domaine:
         formations = formations.filter(domaine__icontains=domaine)
     if niveau:
@@ -224,7 +229,7 @@ def formation_detail(request, pk):
 @admin_required
 def formation_create(request):
     if request.method == 'POST':
-        form = FormationForm(request.POST)
+        form = FormationForm(request.POST, request.FILES)
         if form.is_valid():
             f = form.save()
             messages.success(request, f"Formation '{f.titre}' créée avec succès!")
@@ -237,14 +242,14 @@ def formation_create(request):
 def formation_update(request, pk):
     formation = get_object_or_404(Formation, pk=pk)
     if request.method == 'POST':
-        form = FormationForm(request.POST, instance=formation)
+        form = FormationForm(request.POST, request.FILES, instance=formation)
         if form.is_valid():
             form.save()
             messages.success(request, "Formation mise à jour avec succès!")
             return redirect('backoffice_formations')
     else:
         form = FormationForm(instance=formation)
-    return render(request, 'training/formation_form.html', {'form': form, 'title': f'Modifier {formation.titre}'})
+    return render(request, 'training/formation_form.html', {'form': form, 'title': f'Modifier {formation.titre}', 'formation': formation})
 
 @admin_required
 def formation_delete(request, pk):

@@ -95,9 +95,17 @@
         {% for t in templates %}
         <tr>
           <td style="width: 70px;">
-            <div style="width: 48px; height: 60px; border-radius: 8px; background: linear-gradient(135deg, rgba(79, 181, 255, 0.1), rgba(168, 100, 228, 0.1)); border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; color: var(--accent-primary);">
-              <i data-lucide="file-text" style="width: 24px; height: 24px;"></i>
-            </div>
+            {% if t.url_miniature %}
+              <img src="{{ t.url_miniature }}" alt="{{ t.nom }}" style="width: 48px; height: 60px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 2px 6px rgba(0,0,0,0.08);">
+            {% elif t.structure_html %}
+              <div style="width: 48px; height: 60px; border-radius: 8px; overflow: hidden; position: relative; border: 1px solid var(--border-color); background: #fff;">
+                <iframe srcdoc="{{ t.structure_html|escape }}" style="width: 240px; height: 300px; transform: scale(0.2); transform-origin: top left; border: 0; pointer-events: none;"></iframe>
+              </div>
+            {% else %}
+              <div style="width: 48px; height: 60px; border-radius: 8px; background: linear-gradient(135deg, rgba(79, 181, 255, 0.1), rgba(168, 100, 228, 0.1)); border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; color: var(--accent-primary);">
+                <i data-lucide="file-text" style="width: 24px; height: 24px;"></i>
+              </div>
+            {% endif %}
           </td>
           <td>
             <div class="fw-bold" style="color:var(--text-primary); font-size:1rem;">{{ t.nom }}</div>
