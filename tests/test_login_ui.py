@@ -48,6 +48,8 @@ class LoginUITestCase(TestCase):
         self.assertIn('id="signUp"', html)
         self.assertIn('id="signIn"', html)
         self.assertIn(reverse('signup_candidat'), html)
+        self.assertIn('/inscription/entreprise/', html)
+        self.assertIn('/inscription/tuteur/', html)
         for role in ('candidat', 'entreprise', 'admin', 'tuteur'):
             self.assertIn(f'?demo={role}', html)
         self.assertNotIn('id="sidebar"', html)
