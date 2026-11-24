@@ -53,6 +53,15 @@ class MarketRapportCRUDTestCase(TestCase):
         self.assertIn('En baisse', html)
         # Sidebar active highlight on /marche/creer/
         self.assertRegex(html, r'class="sidebar-link active"[^>]*id="sidebar-veille"')
+        # 4-step wizard + local ECharts/Quill/NoUiSlider assets
+        self.assertIn('data-step-indicator="1"', html)
+        self.assertIn('data-step-indicator="4"', html)
+        self.assertIn('echarts-map', html)
+        self.assertIn('tunisia.json', html)
+        self.assertIn('editor-container', html)
+        self.assertIn('salary-slider', html)
+        self.assertIn('interactive-demand-blocks', html)
+        self.assertIn('final-summary-counter', html)
 
     def test_create_post_binds_admin_computes_avg_and_saves_references(self):
         self._login_as(self.admin_user)

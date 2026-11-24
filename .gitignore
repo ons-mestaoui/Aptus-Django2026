@@ -36,3 +36,4 @@ Thumbs.db
 # User uploads
 media/
 
+db.sqlite3
