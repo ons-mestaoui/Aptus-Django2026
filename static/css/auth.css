@@ -897,3 +897,351 @@
     display: none;
   }
 }
+
+/* ── Split Sliding Login Parity Overrides (Scoped to .auth-page--split) ── */
+.auth-page--split {
+  padding: 0;
+  background: var(--bg-body);
+  overflow-x: hidden;
+}
+
+.auth-page--split .auth-container {
+  position: relative;
+  overflow: hidden;
+  width: 1000px;
+  max-width: 95vw;
+  min-height: 760px;
+  margin: 20px auto;
+  background: var(--bg-card);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-2xl);
+}
+
+.auth-page--split .auth-split-form {
+  background-color: var(--bg-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: var(--space-8) 44px;
+  height: 100%;
+  text-align: center;
+  gap: var(--space-4);
+  overflow-y: auto;
+}
+
+.auth-page--split .auth-split-form h1 {
+  font-size: var(--fs-xl);
+  font-weight: 800;
+  margin-bottom: var(--space-1);
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.auth-page--split .auth-split-subtitle {
+  margin-bottom: var(--space-4);
+  color: var(--text-secondary);
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+}
+
+.auth-split-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  text-decoration: none;
+  margin-bottom: var(--space-1);
+}
+
+.auth-split-logo img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.auth-split-logo span {
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.auth-page--split .overlay-panel h1 {
+  color: #FFFFFF !important;
+  font-size: var(--fs-xl);
+  font-weight: 800;
+  margin-bottom: var(--space-3);
+  line-height: 1.15;
+}
+
+.auth-page--split .overlay-panel p {
+  color: rgba(255, 255, 255, 0.92) !important;
+  font-size: var(--fs-sm);
+  font-weight: 400;
+  line-height: 1.6;
+  margin-top: 10px;
+  margin-bottom: 24px;
+  max-width: 320px;
+}
+
+.auth-page--split .btn-outline-white {
+  transition: all 0.3s ease;
+  border: 1.5px solid #FFFFFF;
+  color: #FFFFFF;
+  background: transparent;
+}
+
+.auth-page--split .btn-outline-white:hover {
+  background-color: #FFFFFF;
+  color: var(--accent-primary) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.3);
+}
+
+.auth-page--split .sign-in-container .form-group + .form-group {
+  margin-top: var(--space-1);
+}
+
+.auth-page--split .form-error {
+  min-height: 0;
+  text-align: left;
+}
+
+/* Inline Django Alerts inside Split Form */
+.auth-alerts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.auth-alert {
+  padding: 0.65rem 0.9rem;
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  text-align: center;
+  line-height: 1.45;
+  border: 1px solid transparent;
+}
+
+.auth-alert--danger {
+  background: var(--bg-danger);
+  color: var(--text-danger);
+  border-color: rgba(239, 68, 68, 0.28);
+}
+
+.auth-alert--success {
+  background: var(--bg-success);
+  color: var(--text-success);
+  border-color: rgba(16, 185, 129, 0.28);
+}
+
+.auth-alert--info {
+  background: var(--bg-info);
+  color: var(--text-info);
+  border-color: rgba(59, 130, 246, 0.28);
+}
+
+.auth-alert--warning {
+  background: var(--bg-warning);
+  color: var(--text-warning);
+  border-color: rgba(245, 158, 11, 0.28);
+}
+
+/* Quick Demo Row (Clean, Uncluttered) */
+.demo-divider {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-tertiary);
+  font-weight: 600;
+  margin-top: var(--space-1);
+}
+
+.demo-divider::before,
+.demo-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border-color);
+}
+
+.demo-quick-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.demo-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 0.5rem 0.45rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.demo-pill:hover {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+  background: var(--bg-card);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Premium Role Cards on Sign-up Slide Panel */
+.auth-page--split .role-card-mini {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  width: 100%;
+  padding: var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  border-radius: var(--radius-lg);
+  text-align: left;
+}
+
+.auth-page--split .role-card-mini .role-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  transition: transform 0.25s ease, color 0.25s ease;
+}
+
+.auth-page--split .role-card-mini:hover {
+  transform: translateY(-3px);
+  border-color: var(--accent-primary);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-xl);
+}
+
+.auth-page--split .role-card-mini:hover .role-icon {
+  color: var(--accent-primary);
+  transform: scale(1.1);
+}
+
+.auth-page--split .role-card-mini:nth-child(2):hover {
+  border-color: var(--accent-secondary);
+}
+
+.auth-page--split .role-card-mini:nth-child(2):hover .role-icon {
+  color: var(--accent-secondary);
+}
+
+.auth-page--split .role-card-mini:nth-child(3):hover {
+  border-color: var(--accent-tertiary);
+}
+
+.auth-page--split .role-card-mini:nth-child(3):hover .role-icon {
+  color: var(--accent-tertiary);
+}
+
+.auth-page--split .role-card-mini:nth-child(3):hover .role-info h4 {
+  color: var(--accent-tertiary);
+}
+
+.auth-page--split .role-info h4 {
+  margin: 0;
+  font-size: var(--fs-base);
+  font-weight: 700;
+}
+
+.auth-page--split .role-info p {
+  margin: 0;
+  font-size: var(--fs-xs);
+  color: var(--text-secondary);
+}
+
+.auth-theme-float {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  z-index: 1000;
+}
+
+.mobile-auth-switch {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .auth-page--split .auth-container {
+    min-height: auto;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    border-radius: 0;
+  }
+
+  .auth-page--split .auth-split-form {
+    padding: var(--space-8) var(--space-5);
+  }
+
+  .auth-page--split .form-container {
+    position: relative;
+    width: 100%;
+    height: auto;
+    transform: none !important;
+  }
+
+  .auth-page--split .overlay-container {
+    display: none;
+  }
+
+  .auth-page--split .sign-up-container {
+    display: none;
+  }
+
+  .auth-page--split .auth-container.right-panel-active .sign-up-container {
+    display: block;
+    opacity: 1;
+    transform: none !important;
+  }
+
+  .auth-page--split .auth-container.right-panel-active .sign-in-container {
+    display: none;
+  }
+
+  .demo-quick-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .mobile-auth-switch {
+    display: block;
+    font-size: var(--fs-xs);
+    color: var(--text-secondary);
+  }
+
+  .mobile-auth-switch button {
+    color: var(--accent-primary);
+    font-weight: 600;
+    margin-left: 4px;
+  }
+}
+
