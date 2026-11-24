@@ -219,17 +219,21 @@ def entreprise_candidatures(request):
 
         statut_raw = (request.POST.get('update_statut') or '').strip()
         statut_map = {
-            'Shortlisté': 'shortliste',
+            'shortlisté': 'shortliste',
             'shortliste': 'shortliste',
-            'Accepté': 'accepte',
+            'accepté': 'accepte',
             'accepte': 'accepte',
-            'Refusé': 'refuse',
+            'refusé': 'refuse',
             'refuse': 'refuse',
-            'En attente': 'en_attente',
-            'en_attente': 'en_attente'
+            'en attente': 'en_attente',
+            'en_attente': 'en_attente',
         }
-        cand.statut = statut_map.get(statut_raw, 'en_attente')
-        cand.save()
+        new_statut = statut_map.get(statut_raw.lower())
+        if new_statut is None:
+            messages.error(request, "Statut demandé invalide.")
+            return redirect('jobs:entreprise_candidatures')
+        cand.statut = new_statut
+        cand.save(update_fields=['statut'])
         messages.success(request, f"Statut de la candidature de {cand.candidat.utilisateur.prenom} mis à jour : {cand.get_statut_display()}.")
         return redirect('jobs:entreprise_candidatures')
 
