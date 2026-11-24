@@ -1,119 +1,188 @@
 {% extends 'layout_front.html' %}
 {% load static %}
 
-{% block title %}{{ cv.nom_document }} — CV Studio{% endblock %}
+{% block title %}{{ cv.nom_document }} — CV Studio Aptus{% endblock %}
+
+{% block extra_css %}
+<style>
+  .cv-detail-preview-box {
+    width: 100%;
+    aspect-ratio: 1 / 1.414;
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+  }
+  .cv-detail-preview-iframe {
+    width: 794px;
+    height: 1123px;
+    border: none;
+    transform-origin: top left;
+    pointer-events: none;
+    background: #fff;
+  }
+  .cv-photo-avatar {
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid {{ cv.couleur_theme|default:'#6b34a3' }};
+    flex-shrink: 0;
+  }
+  .cv-skill-badge {
+    display: inline-block;
+    padding: 0.35rem 0.85rem;
+    border-radius: 999px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  .cv-color-swatch {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: inline-block;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 1px var(--border-color);
+    vertical-align: middle;
+  }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-  <div class="mb-4">
+<div class="container py-4" style="max-width: 1240px;">
+  <div class="mb-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
     <a href="{% url 'cv_studio:cv_list' %}" class="text-secondary small d-inline-flex align-items-center gap-1" style="text-decoration:none;">
       <i data-lucide="arrow-left" style="width:16px;height:16px;"></i>
-      <span>Retour à la liste des CVs</span>
+      <span>Retour à Mes CVs</span>
     </a>
+    <div class="d-flex gap-2">
+      <a href="{% url 'cv_studio:cv_print' cv.pk %}" target="_blank" class="btn btn-sm btn-primary" style="border-radius:10px;">
+        <i data-lucide="printer" style="width:15px;height:15px;"></i> Imprimer / Export PDF
+      </a>
+      <a href="{% url 'cv_studio:cv_update' cv.pk %}" class="btn btn-sm btn-secondary" style="border-radius:10px;">
+        <i data-lucide="pencil" style="width:15px;height:15px;"></i> Modifier
+      </a>
+      <button type="button" class="btn btn-sm btn-outline-danger" style="border-radius:10px;" onclick="aptusDeleteWithForm('{% url 'cv_studio:cv_delete' cv.pk %}', '{{ csrf_token }}', 'Supprimer ce CV ?', 'Êtes-vous sûr de vouloir supprimer définitivement « {{ cv.nom_document|escapejs }} » ?')">
+        <i data-lucide="trash-2" style="width:15px;height:15px;"></i> Supprimer
+      </button>
+    </div>
   </div>
 
   <div class="row g-4">
-    <!-- Main CV Content -->
-    <div class="col-lg-8">
+    <!-- Left Column: Structured CV Details -->
+    <div class="col-lg-7">
       <div class="card p-4 p-md-5 mb-4" style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:24px; box-shadow:0 10px 40px rgba(0,0,0,0.05);">
-        <div class="d-flex justify-content-between align-items-start mb-3">
+        <div class="d-flex align-items-center gap-3 mb-3">
+          {% if cv.url_photo %}
+            <img src="{{ cv.url_photo }}" alt="{{ cv.nom_complet }}" class="cv-photo-avatar">
+          {% endif %}
           <div>
             <h2 class="h3 fw-bold mb-1" style="color:var(--text-primary);">{{ cv.nom_complet }}</h2>
-            <h5 class="text-primary fw-medium mb-0">{{ cv.titre_poste|default:'Poste non spécifié' }}</h5>
-          </div>
-          <div class="d-flex gap-2">
-            <a href="{% url 'cv_studio:cv_print' cv.pk %}" target="_blank" class="btn btn-sm btn-primary" style="border-radius:8px;">
-              <i data-lucide="printer" style="width:15px;height:15px;"></i> Imprimer / Export PDF
-            </a>
-            <a href="{% url 'cv_studio:cv_update' cv.pk %}" class="btn btn-sm btn-secondary" style="border-radius:8px;">
-              <i data-lucide="pencil" style="width:15px;height:15px;"></i> Modifier
-            </a>
+            <div class="fw-semibold" style="color:{{ cv.couleur_theme|default:'var(--accent-primary)' }};">{{ cv.titre_poste|default:'Poste non spécifié' }}</div>
           </div>
         </div>
 
-        <p class="text-secondary small mb-4 d-flex align-items-center gap-2">
-          <i data-lucide="template" style="width:16px;height:16px;color:var(--accent-primary);"></i>
-          <span>Template: <strong>{{ cv.template.nom|default:'Moderne Aptus' }}</strong></span>
-        </p>
+        <!-- Coordonnées de Contact -->
+        <div class="d-flex flex-wrap gap-3 small text-secondary mb-3">
+          {% if contact.email %}
+            <span class="d-inline-flex align-items-center gap-1">
+              <i data-lucide="mail" style="width:14px;height:14px;"></i> {{ contact.email }}
+            </span>
+          {% endif %}
+          {% if contact.telephone %}
+            <span class="d-inline-flex align-items-center gap-1">
+              <i data-lucide="phone" style="width:14px;height:14px;"></i> {{ contact.telephone }}
+            </span>
+          {% endif %}
+          {% if contact.localisation %}
+            <span class="d-inline-flex align-items-center gap-1">
+              <i data-lucide="map-pin" style="width:14px;height:14px;"></i> {{ contact.localisation }}
+            </span>
+          {% endif %}
+        </div>
 
         <hr style="border-color:var(--border-color-light);">
 
-        <h5 class="fw-bold mb-3 d-flex align-items-center gap-2" style="color:var(--text-primary);">
+        <h5 class="fw-bold mb-2 d-flex align-items-center gap-2" style="color:var(--text-primary);">
           <i data-lucide="user" style="width:18px;height:18px;color:var(--accent-primary);"></i>
           <span>Résumé Professionnel</span>
         </h5>
         <p style="white-space: pre-line; color:var(--text-secondary); line-height:1.7;">{{ cv.resume|default:'Aucun résumé renseigné.' }}</p>
 
-        <h5 class="fw-bold mt-4 mb-3 d-flex align-items-center gap-2" style="color:var(--text-primary);">
+        <h5 class="fw-bold mt-4 mb-2 d-flex align-items-center gap-2" style="color:var(--text-primary);">
           <i data-lucide="briefcase" style="width:18px;height:18px;color:var(--accent-primary);"></i>
           <span>Expérience Professionnelle</span>
         </h5>
-        <div class="p-3 rounded-3" style="background:var(--bg-secondary); border:1px solid var(--border-color-light); line-height:1.6; white-space: pre-line;">
-          {{ cv.experience|default:'Non renseigné' }}
-        </div>
+        <div class="p-3 rounded-3" style="background:var(--bg-secondary); border:1px solid var(--border-color-light); line-height:1.6; white-space: pre-line;">{{ cv.experience|default:'Non renseigné' }}</div>
 
-        <h5 class="fw-bold mt-4 mb-3 d-flex align-items-center gap-2" style="color:var(--text-primary);">
+        <h5 class="fw-bold mt-4 mb-2 d-flex align-items-center gap-2" style="color:var(--text-primary);">
           <i data-lucide="graduation-cap" style="width:18px;height:18px;color:var(--accent-primary);"></i>
           <span>Formation &amp; Diplômes</span>
         </h5>
-        <div class="p-3 rounded-3" style="background:var(--bg-secondary); border:1px solid var(--border-color-light); line-height:1.6; white-space: pre-line;">
-          {{ cv.formation|default:'Non renseigné' }}
-        </div>
+        <div class="p-3 rounded-3" style="background:var(--bg-secondary); border:1px solid var(--border-color-light); line-height:1.6; white-space: pre-line;">{{ cv.formation|default:'Non renseigné' }}</div>
 
-        <h5 class="fw-bold mt-4 mb-3 d-flex align-items-center gap-2" style="color:var(--text-primary);">
+        <h5 class="fw-bold mt-4 mb-2 d-flex align-items-center gap-2" style="color:var(--text-primary);">
           <i data-lucide="cpu" style="width:18px;height:18px;color:var(--accent-primary);"></i>
-          <span>Compétences Techniques</span>
+          <span>Compétences</span>
         </h5>
-        <div class="p-3 rounded-3" style="background:var(--bg-secondary); border:1px solid var(--border-color-light); line-height:1.6;">
-          {{ cv.competences|default:'Non renseigné' }}
+        <div class="d-flex flex-wrap gap-2">
+          {% for skill in skills_list %}
+            <span class="cv-skill-badge">{{ skill }}</span>
+          {% empty %}
+            <span class="text-secondary small">Aucune compétence renseignée.</span>
+          {% endfor %}
         </div>
-      </div>
 
-      {% if rapports %}
-      <div class="card p-4 mb-4" style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:24px; box-shadow:0 10px 40px rgba(0,0,0,0.05);">
-        <h5 class="fw-bold mb-3 d-flex align-items-center gap-2" style="color:var(--text-primary);">
-          <i data-lucide="sparkles" style="width:18px;height:18px;color:var(--accent-primary);"></i>
-          <span>Analyses IA Associées</span>
+        <h5 class="fw-bold mt-4 mb-2 d-flex align-items-center gap-2" style="color:var(--text-primary);">
+          <i data-lucide="languages" style="width:18px;height:18px;color:var(--accent-primary);"></i>
+          <span>Langues</span>
         </h5>
-        <div class="d-flex flex-column gap-3">
-          {% for r in rapports %}
-          <div class="p-3 rounded-3 border" style="background:var(--bg-secondary);">
-            <div class="d-flex justify-content-between mb-2">
-              <span class="fw-bold">{{ r.date_rapport|date:"d/m/Y à H:i" }}</span>
-              <span class="badge badge-success">Score: {{ r.score_ats }}%</span>
-            </div>
-            <p class="small text-secondary mb-0">{{ r.feedback }}</p>
-          </div>
+        <div class="d-flex flex-wrap gap-2">
+          {% for item in languages_list %}
+            <span class="cv-skill-badge">
+              <strong>{{ item.lang }}</strong>{% if item.level %} &bull; {{ item.level }}{% endif %}
+            </span>
+          {% empty %}
+            <span class="text-secondary small">Aucune langue renseignée.</span>
           {% endfor %}
         </div>
       </div>
-      {% endif %}
     </div>
 
-    <!-- Sidebar Column: Metadata -->
-    <div class="col-lg-4">
+    <!-- Right Column: Metadata + Embedded Live Template Preview -->
+    <div class="col-lg-5">
       <div class="card p-4 mb-4" style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:24px; box-shadow:0 10px 40px rgba(0,0,0,0.06);">
+        <h5 class="fw-bold mb-3 pb-2 border-bottom" style="color:var(--text-primary); border-color:var(--border-color-light) !important;">Aperçu du Rendu Final</h5>
+        <div class="cv-detail-preview-box" id="detail-preview-box">
+          <iframe class="cv-detail-preview-iframe" id="detail-preview-iframe" srcdoc="{{ preview_srcdoc|escape }}" title="Rendu du CV {{ cv.nom_document }}"></iframe>
+        </div>
+      </div>
+
+      <div class="card p-4" style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:24px; box-shadow:0 10px 40px rgba(0,0,0,0.06);">
         <h5 class="fw-bold mb-3 pb-2 border-bottom" style="color:var(--text-primary); border-color:var(--border-color-light) !important;">Métadonnées CV</h5>
-        
-        <div class="d-flex flex-column gap-3">
-          <div class="p-3 rounded-3" style="background:var(--bg-secondary); border:1px solid var(--border-color-light);">
-            <div class="text-secondary small mb-1">Nom du Document</div>
-            <div class="fw-bold" style="color:var(--text-primary);">{{ cv.nom_document }}</div>
+        <div class="d-flex flex-column gap-2 small">
+          <div class="d-flex justify-content-between py-2 border-bottom" style="border-color:var(--border-color-light)!important;">
+            <span class="text-secondary">Nom du document</span>
+            <strong style="color:var(--text-primary);">{{ cv.nom_document }}</strong>
           </div>
-
-          <div class="p-3 rounded-3" style="background:var(--bg-secondary); border:1px solid var(--border-color-light);">
-            <div class="text-secondary small mb-1">Candidat Associé</div>
-            <div class="fw-bold text-primary">{{ cv.candidat.utilisateur.prenom }} {{ cv.candidat.utilisateur.nom|default:'' }}</div>
+          <div class="d-flex justify-content-between py-2 border-bottom" style="border-color:var(--border-color-light)!important;">
+            <span class="text-secondary">Modèle graphique</span>
+            <strong style="color:var(--text-primary);">{{ cv.template.nom|default:'Standard Aptus' }}</strong>
           </div>
-
-          <div class="p-3 rounded-3" style="background:var(--bg-secondary); border:1px solid var(--border-color-light);">
-            <div class="text-secondary small mb-1">Statut</div>
-            <div><span class="badge badge-info">{{ cv.statut|default:'Actif' }}</span></div>
+          <div class="d-flex justify-content-between align-items-center py-2 border-bottom" style="border-color:var(--border-color-light)!important;">
+            <span class="text-secondary">Couleur du thème</span>
+            <span class="d-inline-flex align-items-center gap-2">
+              <span class="cv-color-swatch" style="background:{{ cv.couleur_theme|default:'#6b34a3' }};"></span>
+              <code>{{ cv.couleur_theme|default:'#6b34a3' }}</code>
+            </span>
           </div>
-
-          <div class="p-3 rounded-3" style="background:var(--bg-secondary); border:1px solid var(--border-color-light);">
-            <div class="text-secondary small mb-1">Dernière Mise à Jour</div>
-            <div class="fw-semibold" style="color:var(--text-primary);">{{ cv.date_mise_a_jour|date:"d/m/Y à H:i" }}</div>
+          <div class="d-flex justify-content-between py-2">
+            <span class="text-secondary">Dernière mise à jour</span>
+            <strong style="color:var(--text-primary);">{{ cv.date_mise_a_jour|date:"d/m/Y à H:i" }}</strong>
           </div>
         </div>
       </div>
@@ -124,8 +193,17 @@
 
 {% block extra_js %}
 <script>
-  if (window.lucide) {
-    lucide.createIcons();
+  function scaleDetailPreview() {
+    const box = document.getElementById('detail-preview-box');
+    const iframe = document.getElementById('detail-preview-iframe');
+    if (!box || !iframe || box.clientWidth <= 0) return;
+    const scale = box.clientWidth / 794;
+    iframe.style.transform = `scale(${scale})`;
   }
+  document.addEventListener('DOMContentLoaded', () => {
+    scaleDetailPreview();
+    window.addEventListener('resize', scaleDetailPreview);
+    if (window.lucide) lucide.createIcons();
+  });
 </script>
 {% endblock %}
