@@ -1,0 +1,483 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Aptus — Plateforme intelligente de recrutement et d'apprentissage propulsée par l'IA.">
+  <title>{% block title %}Aptus &bull; Plateforme Carrière &amp; Recrutement IA{% endblock %}</title>
+
+  <!-- Google Fonts Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap 5 Grid & Utilities -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- FontAwesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Authentic Aptus Stylesheets -->
+  <link rel="stylesheet" href="{% static 'css/variables.css' %}">
+  <link rel="stylesheet" href="{% static 'css/global.css' %}">
+  <link rel="stylesheet" href="{% static 'css/layout_front.css' %}">
+  <link rel="stylesheet" href="{% static 'css/landing_dynamic.css' %}">
+  <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+
+  <!-- Early Theme Toggle Script -->
+  <script src="{% static 'js/theme-toggle.js' %}"></script>
+
+  <style>
+    /* ── Frontoffice Theme Bridge ── */
+    body {
+      font-family: var(--font-family) !important;
+      background-color: var(--bg-body) !important;
+      color: var(--text-primary) !important;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .landing-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1030;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0.75rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+    }
+    [data-theme="dark"] .landing-nav {
+      background: rgba(15, 23, 42, 0.85);
+    }
+    .landing-nav__logo {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      text-decoration: none;
+    }
+    .landing-nav__logo img {
+      width: 36px;
+      height: 36px;
+      object-fit: contain;
+    }
+    .landing-nav__logo span {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--accent-primary);
+      letter-spacing: -0.5px;
+    }
+    .landing-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .landing-nav__links a {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.45rem 0.85rem;
+      font-size: var(--fs-sm);
+      font-weight: 500;
+      color: var(--text-secondary);
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      transition: var(--transition-fast);
+      white-space: nowrap;
+    }
+    .landing-nav__links a:hover, .landing-nav__links a.active {
+      color: var(--accent-primary);
+      background: var(--accent-primary-light);
+    }
+    .landing-nav__links a i, .landing-nav__links a svg {
+      width: 17px;
+      height: 17px;
+    }
+    .landing-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .btn-backoffice-switch {
+      background: var(--gradient-primary, linear-gradient(135deg, #6B34A3 0%, #00A3DA 100%)) !important;
+      color: #fff !important;
+      border: none !important;
+      font-weight: 600;
+      font-size: var(--fs-xs);
+      border-radius: 9999px;
+      padding: 0.45rem 1rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      text-decoration: none;
+      box-shadow: 0 4px 12px rgba(107, 52, 163, 0.25);
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .btn-backoffice-switch:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(107, 52, 163, 0.4);
+      color: #fff !important;
+    }
+    .front-main {
+      flex: 1;
+      width: 100%;
+    }
+    .front-footer {
+      background: var(--bg-card);
+      border-top: 1px solid var(--border-color);
+      padding: 2.5rem 0 1.5rem;
+      margin-top: auto;
+    }
+    /* Guaranteed dropdown visibility for Frontoffice */
+    .dropdown {
+      position: relative;
+    }
+    .dropdown.open > .dropdown-menu,
+    .dropdown-menu.show {
+      display: block !important;
+      opacity: 1 !important;
+      visibility: visible !important;
+      transform: translateY(0) !important;
+      pointer-events: auto !important;
+    }
+  </style>
+  {% block extra_css %}{% endblock %}
+</head>
+<body class="landing-page-body">
+
+  <!-- Interactive Cursor Aura -->
+  <div id="cursor-aura"></div>
+
+  <!-- Background Animated Blobs -->
+  <div class="hero-bg-animated" style="opacity: 0.35;">
+      <div class="blob blob-1" style="filter: blur(120px);"></div>
+      <div class="blob blob-2" style="filter: blur(150px);"></div>
+      <div class="blob blob-3" style="filter: blur(140px);"></div>
+      <div class="grid-overlay" style="opacity: 0.04;"></div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       HORIZONTAL TOP NAVBAR (VUE FRONT - NO SIDEBAR)
+       ═══════════════════════════════════════════ -->
+  <nav class="landing-nav" id="landing-nav">
+    <!-- Brand Logo -->
+    <a href="{% if is_admin or current_role == 'Admin' %}{% url 'backoffice' %}{% elif is_entreprise or current_role == 'Entreprise' %}{% url 'jobs:entreprise_posts' %}{% elif is_tuteur or current_role == 'Tuteur' %}{% url 'training:formation_my' %}{% elif is_authenticated %}{% url 'jobs:offre_list' %}{% else %}{% url 'landing' %}{% endif %}" class="landing-nav__logo">
+      <img src="{% static 'img/logo.png' %}" alt="Aptus">
+      <span class="gradient-text accent-font">Aptus</span>
+    </a>
+
+    <!-- Navigation Items (Adaptative according to User Role) -->
+    <div class="landing-nav__links" id="nav-links">
+      {% if is_entreprise or current_role == 'Entreprise' %}
+        <a href="{% url 'jobs:entreprise_posts' %}" class="{% if 'entreprise/postes' in request.path %}active{% endif %}">
+          <i data-lucide="briefcase"></i>
+          <span>Mes Postes</span>
+        </a>
+
+        <a href="{% url 'jobs:entreprise_candidatures' %}" class="{% if 'entreprise/candidatures' in request.path %}active{% endif %}">
+          <i data-lucide="users"></i>
+          <span>Candidatures</span>
+        </a>
+
+        <a href="{% url 'profile' %}" class="{% if 'profil' in request.path %}active{% endif %}">
+          <i data-lucide="building"></i>
+          <span>Profil Entreprise</span>
+        </a>
+
+        <a href="{% url 'market:rapport_list' %}" class="{% if 'marche' in request.path %}active{% endif %}">
+          <i data-lucide="line-chart"></i>
+          <span>Veille Marché</span>
+        </a>
+      {% elif is_tuteur or current_role == 'Tuteur' %}
+        <a href="{% url 'training:formation_my' %}" class="{% if 'mes-formations' in request.path %}active{% endif %}">
+          <i data-lucide="book-open"></i>
+          <span>Espace Formateur</span>
+        </a>
+
+        <a href="{% url 'training:formation_list' %}" class="{% if 'formations' in request.path and not 'mes-formations' in request.path %}active{% endif %}">
+          <i data-lucide="graduation-cap"></i>
+          <span>Catalogue Formations</span>
+        </a>
+
+        <a href="{% url 'market:rapport_list' %}" class="{% if 'marche' in request.path %}active{% endif %}">
+          <i data-lucide="line-chart"></i>
+          <span>Veille Marché</span>
+        </a>
+      {% elif is_candidat or current_role == 'Candidat' %}
+        <a href="{% url 'jobs:offre_list' %}" class="{% if 'offres' in request.path and not 'candidatures' in request.path %}active{% endif %}">
+          <i data-lucide="briefcase"></i>
+          <span>Offres d'emploi</span>
+        </a>
+
+        <a href="{% url 'jobs:candidature_list' %}" class="{% if 'candidatures' in request.path %}active{% endif %}">
+          <i data-lucide="clipboard-list"></i>
+          <span>Mes Candidatures</span>
+        </a>
+
+        <a href="{% url 'cv_studio:template_list' %}" class="{% if 'templates' in request.path %}active{% endif %}">
+          <i data-lucide="file-badge"></i>
+          <span>Générer CV</span>
+        </a>
+
+        <a href="{% url 'training:formation_list' %}" class="{% if 'formations' in request.path and not 'mes-formations' in request.path %}active{% endif %}">
+          <i data-lucide="graduation-cap"></i>
+          <span>Formations</span>
+        </a>
+
+        <a href="{% url 'training:formation_my' %}" class="{% if 'mes-formations' in request.path %}active{% endif %}">
+          <i data-lucide="book-open"></i>
+          <span>Mes Formations</span>
+        </a>
+
+        <a href="{% url 'market:rapport_list' %}" class="{% if 'marche' in request.path %}active{% endif %}">
+          <i data-lucide="line-chart"></i>
+          <span>Veille Marché</span>
+        </a>
+
+        <a href="{% url 'cv_studio:cv_list' %}" class="{% if 'cv-studio' in request.path and not 'templates' in request.path %}active{% endif %}">
+          <i data-lucide="file-text"></i>
+          <span>Mes CVs</span>
+        </a>
+      {% elif not is_authenticated %}
+        <a href="{% url 'jobs:offre_list' %}" class="{% if 'offres' in request.path %}active{% endif %}">
+          <i data-lucide="briefcase"></i>
+          <span>Offres d'emploi</span>
+        </a>
+        <a href="{% url 'training:formation_list' %}" class="{% if 'formations' in request.path %}active{% endif %}">
+          <i data-lucide="graduation-cap"></i>
+          <span>Formations</span>
+        </a>
+        <a href="{% url 'market:rapport_list' %}" class="{% if 'marche' in request.path %}active{% endif %}">
+          <i data-lucide="line-chart"></i>
+          <span>Veille Marché</span>
+        </a>
+      {% elif is_admin or current_role == 'Admin' %}
+        <!-- Admin has strictly NO front candidate links -->
+      {% endif %}
+    </div>
+
+    <!-- Actions: Theme Toggle, Backoffice Switcher, Connexion -->
+    <div class="landing-nav__actions" style="display: flex; align-items: center; gap: 0.85rem;">
+      <!-- Theme Toggle -->
+      <button class="theme-toggle" id="theme-toggle-btn" aria-label="Toggle theme">
+        <i data-lucide="sun" class="icon-sun" style="display:none;"></i>
+        <i data-lucide="moon" class="icon-moon"></i>
+      </button>
+
+      {% if is_authenticated %}
+      <!-- Notification Bell (Authentic Frontoffice Nav) -->
+      <button class="nav-icon-btn" aria-label="Notifications" title="Notifications" style="background:transparent; border:none; color:var(--text-secondary); cursor:pointer; padding:0.4rem; display:flex; align-items:center; justify-content:center; border-radius:10px; transition:all 0.2s;">
+        <i data-lucide="bell" style="width:20px;height:20px;"></i>
+      </button>
+      {% endif %}
+
+      <!-- SWITCH TO BACKOFFICE (ONLY FOR ADMIN IN FRONTOFFICE) -->
+      {% if is_admin or current_role == 'Admin' %}
+      <a href="{% url 'backoffice' %}" class="btn-backoffice-switch" title="Basculer vers le tableau de bord d'administration">
+        <i data-lucide="shield" style="width:14px;height:14px;"></i>
+        <span>Vue Backoffice</span>
+      </a>
+      {% endif %}
+
+      <!-- Connexion / Dropdown Profil & Paramètres / Déconnexion -->
+      {% if is_authenticated %}
+        <div class="dropdown">
+          <div class="dropdown-trigger d-flex align-items-center gap-2" role="button" id="userMenuDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="cursor:pointer; padding:0.25rem 0.5rem; border-radius:24px; transition:background 0.2s;">
+            <div class="d-none d-md-flex flex-column text-end" style="line-height:1.2;">
+              <span class="fw-bold" style="font-size:0.875rem; color:var(--text-primary);">{{ current_user_name }}</span>
+              <span class="text-secondary" style="font-size:0.75rem;">{{ current_role }}</span>
+            </div>
+            <div class="avatar avatar-initials" style="width:36px; height:36px; font-size:13px; border-radius:50%; background:linear-gradient(135deg, #a864e4, #4fb5ff); color:white; font-weight:700; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(168,100,228,0.25);">
+              {{ current_user_name|slice:":2"|upper }}
+            </div>
+            <i data-lucide="chevron-down" style="width:14px;height:14px;color:var(--text-secondary);margin-left:-2px;"></i>
+          </div>
+          <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 py-2" aria-labelledby="userMenuDropdown" style="min-width:210px;border-radius:16px;background:var(--bg-card);border:1px solid var(--border-color)!important;margin-top:8px;">
+            <li class="px-3 py-2 border-bottom mb-1" style="border-color:var(--border-color-light)!important;">
+              <div class="fw-bold text-xs" style="color:var(--text-primary);">{{ current_user_name }}</div>
+              <span class="badge" style="background:var(--accent-primary-light);color:var(--accent-primary);font-size:10px;padding:2px 8px;border-radius:12px;">{{ current_role }}</span>
+            </li>
+            {% if is_candidat or current_role == 'Candidat' %}
+            <li>
+              <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="{% url 'profile' %}" style="font-size:13px;color:var(--text-primary);border-radius:8px;margin:0 4px;">
+                <i data-lucide="user" style="width:16px;height:16px;color:var(--accent-primary);"></i>
+                <span>Mon Profil</span>
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="{% url 'account_settings' %}?tab=badges" style="font-size:13px;color:var(--text-primary);border-radius:8px;margin:0 4px;">
+                <i data-lucide="git-branch" style="width:16px;height:16px;color:var(--accent-primary);"></i>
+                <span>Arbre de Compétences</span>
+              </a>
+            </li>
+            {% elif is_entreprise or current_role == 'Entreprise' %}
+            <li>
+              <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="{% url 'profile' %}" style="font-size:13px;color:var(--text-primary);border-radius:8px;margin:0 4px;">
+                <i data-lucide="building" style="width:16px;height:16px;color:var(--accent-primary);"></i>
+                <span>Profil Entreprise</span>
+              </a>
+            </li>
+            {% elif is_tuteur or current_role == 'Tuteur' %}
+            <li>
+              <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="{% url 'profile' %}" style="font-size:13px;color:var(--text-primary);border-radius:8px;margin:0 4px;">
+                <i data-lucide="user" style="width:16px;height:16px;color:var(--accent-primary);"></i>
+                <span>Mon Profil</span>
+              </a>
+            </li>
+            {% endif %}
+            <li>
+              <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="{% url 'account_settings' %}" style="font-size:13px;color:var(--text-primary);border-radius:8px;margin:0 4px;">
+                <i data-lucide="settings" style="width:16px;height:16px;color:var(--accent-primary);"></i>
+                <span>Paramètres</span>
+              </a>
+            </li>
+            {% if is_admin or current_role == 'Admin' %}
+            <li>
+              <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="{% url 'backoffice' %}" style="font-size:13px;color:var(--accent-secondary);border-radius:8px;margin:0 4px;">
+                <i data-lucide="shield" style="width:16px;height:16px;"></i>
+                <span>⚙️ Vue Backoffice</span>
+              </a>
+            </li>
+            {% endif %}
+            <li><hr class="dropdown-divider my-1" style="border-color:var(--border-color-light);"></li>
+            <li>
+              <a class="dropdown-item py-2 d-flex align-items-center gap-2 text-danger" href="{% url 'logout' %}" style="font-size:13px;border-radius:8px;margin:0 4px;">
+                <i data-lucide="log-out" style="width:16px;height:16px;"></i>
+                <span>Déconnexion</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      {% else %}
+        <a href="{% url 'login' %}" class="btn btn-ghost nav-btn-login" style="font-weight:600; color:var(--text-primary); text-decoration:none; padding:0.45rem 1rem;">
+          Se connecter
+        </a>
+        <a href="{% url 'signup_candidat' %}" class="btn btn-primary glow-btn" style="border-radius:24px; font-weight:700; padding:0.45rem 1.25rem;">
+          S'inscrire
+        </a>
+      {% endif %}
+    </div>
+  </nav>
+
+  <!-- ═══════════════════════════════════════════
+       MAIN CONTENT (VUE FRONT)
+       ═══════════════════════════════════════════ -->
+  <main class="front-main">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- ═══════════════════════════════════════════
+       FOOTER (Authentique Aptus Frontoffice)
+       ═══════════════════════════════════════════ -->
+  <footer class="front-footer">
+    <div class="front-footer__grid">
+      <div class="front-footer__brand">
+        <a href="{% url 'landing' %}" class="d-flex align-items-center gap-2 text-decoration-none mb-2">
+          <img src="{% static 'img/logo.png' %}" alt="Aptus" style="width:30px;height:30px;object-fit:contain;">
+          <span style="font-size:1.4rem; font-weight:800; color:var(--accent-primary); letter-spacing:-0.5px;">Aptus</span>
+        </a>
+        <p style="color:var(--text-secondary); line-height:1.6; font-size:0.9rem; max-width:320px;">
+          Plateforme intelligente de recrutement et d'apprentissage propulsée par l'intelligence artificielle.
+        </p>
+      </div>
+      <div>
+        <h4 class="front-footer__heading">Plateforme</h4>
+        <div class="front-footer__links">
+          <a href="{% url 'jobs:offre_list' %}">Offres d'emploi</a>
+          <a href="{% url 'training:formation_list' %}">Formations &amp; Cours</a>
+          <a href="{% url 'cv_studio:template_list' %}">Générer un CV</a>
+          <a href="{% url 'market:rapport_list' %}">Veille Marché IA</a>
+        </div>
+      </div>
+      <div>
+        <h4 class="front-footer__heading">Ressources</h4>
+        <div class="front-footer__links">
+          <a href="#">Documentation</a>
+          <a href="#">Blog &amp; Actualités</a>
+          <a href="#">Support &amp; FAQ</a>
+          <a href="#">API &amp; Développeurs</a>
+        </div>
+      </div>
+      <div>
+        <h4 class="front-footer__heading">Légal</h4>
+        <div class="front-footer__links">
+          <a href="#">Conditions d'utilisation</a>
+          <a href="#">Politique de Confidentialité</a>
+          <a href="#">Gestion des Cookies</a>
+        </div>
+      </div>
+    </div>
+    <div class="front-footer__bottom">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 text-xs text-secondary">
+        <span>&copy; {% now "Y" %} Aptus Platform. Tous droits réservés.</span>
+        <span>Fait avec ❤️ en Tunisie</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- SweetAlert2 & Lucide Icons -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="{% static 'js/nav.js' %}"></script>
+  <script src="{% static 'js/landing-animations.js' %}"></script>
+  <script>
+    if (window.lucide) {
+      lucide.createIcons();
+    }
+
+    // SweetAlert2 Toast Global Configuration (Authentic Aptus Style)
+    window.Toast = Swal.mixin({
+      toast: true,
+      position: 'top-end',
+      showConfirmButton: false,
+      timer: 4000,
+      timerProgressBar: true,
+      didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer);
+        toast.addEventListener('mouseleave', Swal.resumeTimer);
+      }
+    });
+
+    // Global confirmation popup using SweetAlert2
+    window.aptusConfirm = function(title, text, confirmButtonText = 'Oui, continuer', icon = 'warning') {
+      return Swal.fire({
+        title: title,
+        text: text,
+        icon: icon,
+        iconColor: icon === 'warning' ? '#f59e0b' : '#ef4444',
+        showCancelButton: true,
+        confirmButtonText: confirmButtonText,
+        cancelButtonText: 'Annuler',
+        buttonsStyling: false,
+        customClass: {
+          popup: 'aptus-swal-popup',
+          confirmButton: 'btn btn-primary px-4 py-2 mx-1',
+          cancelButton: 'btn btn-secondary px-4 py-2 mx-1',
+          actions: 'd-flex gap-2 justify-content-center mt-3'
+        }
+      }).then(res => res.isConfirmed);
+    };
+
+    // Render flash messages globally as SweetAlert2 toasts
+    {% if messages %}
+      document.addEventListener('DOMContentLoaded', function() {
+        {% for message in messages %}
+          window.Toast.fire({
+            icon: '{% if message.tags == "error" %}error{% elif message.tags == "warning" %}warning{% elif message.tags == "info" %}info{% else %}success{% endif %}',
+            title: '{{ message|escapejs }}'
+          });
+        {% endfor %}
+      });
+    {% endif %}
+  </script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

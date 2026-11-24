@@ -1,0 +1,40 @@
+{% extends 'layout_front.html' %}
+{% load static %}
+
+{% block title %}Supprimer Candidature — Aptus Admin{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6 col-lg-5">
+    <div class="card-flat p-4 p-md-5 text-center" style="background:var(--bg-card); border:1px solid var(--accent-tertiary-light); border-radius:var(--radius-lg); box-shadow:var(--shadow-xl);">
+      <div style="width:64px; height:64px; background:var(--accent-tertiary-light); color:var(--accent-tertiary); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto var(--space-4) auto;">
+        <i data-lucide="alert-triangle" style="width:32px;height:32px;"></i>
+      </div>
+      
+      <h3 class="h4 fw-bold mb-2" style="color:var(--text-primary);">Confirmation de suppression</h3>
+      <p class="text-secondary mb-4">
+        Êtes-vous sûr de vouloir supprimer la candidature #{{ cand.id_candidature }} de 
+        <strong style="color:var(--text-primary);">{{ cand.candidat.utilisateur.prenom }} {{ cand.candidat.utilisateur.nom|default:'' }}</strong> ?
+        <br><span class="text-danger small mt-2 d-inline-block">Cette action est irréversible.</span>
+      </p>
+
+      <form method="POST" class="d-flex justify-content-center gap-3">
+        {% csrf_token %}
+        <a href="{% url 'jobs:candidature_list' %}" class="btn btn-secondary">Annuler</a>
+        <button type="submit" class="btn btn-danger">
+          <i data-lucide="trash-2" style="width:16px;height:16px;"></i>
+          <span>Supprimer définitivement</span>
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  if (window.lucide) {
+    lucide.createIcons();
+  }
+</script>
+{% endblock %}

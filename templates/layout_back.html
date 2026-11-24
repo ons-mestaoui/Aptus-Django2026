@@ -1,0 +1,460 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Aptus — Panneau d'administration et gestion intelligente de carrière.">
+  <title>{% block title %}Aptus Backoffice &bull; Administration{% endblock %}</title>
+
+  <!-- Google Fonts Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap 5 Grid & Utilities -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- FontAwesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Authentic Aptus Backoffice CSS -->
+  <link rel="stylesheet" href="{% static 'css/variables.css' %}">
+  <link rel="stylesheet" href="{% static 'css/global.css' %}">
+  <link rel="stylesheet" href="{% static 'css/layout_back.css' %}">
+
+  <!-- Early Theme Toggle -->
+  <script src="{% static 'js/theme-toggle.js' %}"></script>
+
+  <style>
+    :root {
+      --stat-green-bg: rgba(16, 185, 129, 0.15);
+      --stat-green: #10B981;
+      --stat-red-bg: rgba(239, 68, 68, 0.15);
+      --stat-red: #EF4444;
+    }
+    body {
+      font-family: var(--font-family) !important;
+      background-color: var(--bg-body) !important;
+      color: var(--text-primary) !important;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    .backoffice {
+      display: block;
+      min-height: 100vh;
+      background: var(--bg-body);
+      position: relative;
+    }
+    .sidebar {
+      z-index: 1040;
+    }
+    .back-topbar {
+      z-index: 1030;
+      position: fixed;
+      top: 0;
+      left: 260px;
+      right: 0;
+      transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .sidebar.collapsed ~ .back-topbar,
+    .sidebar.collapsed ~ .back-main .back-topbar {
+      left: var(--sidebar-collapsed, 80px);
+    }
+    .back-main {
+      margin-left: 260px;
+      padding-top: var(--topbar-height);
+      min-height: 100vh;
+      width: calc(100% - 260px);
+      box-sizing: border-box;
+      transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .sidebar.collapsed ~ .back-main {
+      margin-left: var(--sidebar-collapsed, 80px);
+      width: calc(100% - var(--sidebar-collapsed, 80px));
+    }
+    .back-content {
+      padding: 2rem 2.5rem 3rem 2.5rem;
+      width: 100%;
+      max-width: 1400px;
+      margin: 0 auto;
+      box-sizing: border-box;
+    }
+    .sidebar__header {
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      border-bottom: 1px solid var(--border-color);
+      min-height: var(--topbar-height);
+    }
+    .sidebar__logo-icon {
+      width: 44px;
+      height: 44px;
+      object-fit: contain;
+    }
+    .sidebar__logo-text {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--accent-primary);
+      letter-spacing: -0.5px;
+    }
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.65rem 1rem;
+      font-size: var(--fs-sm);
+      font-weight: 500;
+      color: var(--text-secondary);
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      transition: var(--transition-fast);
+      position: relative;
+    }
+    .sidebar-link:hover {
+      color: var(--accent-primary);
+      background: var(--accent-primary-light);
+    }
+    .sidebar-link.active {
+      color: var(--accent-primary);
+      background: var(--accent-primary-light);
+      font-weight: 700;
+    }
+    .sidebar-link.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 20%;
+      bottom: 20%;
+      width: 3px;
+      background: var(--accent-primary);
+      border-radius: 0 4px 4px 0;
+    }
+    .sidebar-link i, .sidebar-link svg {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+    .card, .card-custom {
+      background: var(--bg-card) !important;
+      border: 1px solid var(--border-color) !important;
+      border-radius: var(--radius-lg) !important;
+      box-shadow: var(--shadow-card) !important;
+      color: var(--text-primary) !important;
+    }
+    .table {
+      --bs-table-bg: transparent;
+      --bs-table-color: var(--text-primary);
+      --bs-table-border-color: var(--border-color-light);
+      color: var(--text-primary) !important;
+    }
+    .table thead th {
+      background-color: var(--bg-tertiary) !important;
+      color: var(--text-primary) !important;
+      font-size: var(--fs-xs) !important;
+      font-weight: 700 !important;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 2px solid var(--border-color) !important;
+      padding: 0.85rem 1rem;
+    }
+    .table tbody td {
+      padding: 0.85rem 1rem;
+      vertical-align: middle;
+      border-bottom: 1px solid var(--border-color-light) !important;
+    }
+    .form-control, .form-select, .input {
+      background-color: var(--bg-input) !important;
+      border: 1px solid var(--border-color) !important;
+      border-radius: var(--radius-sm) !important;
+      color: var(--text-primary) !important;
+      font-size: var(--fs-sm);
+      padding: 0.6rem 0.85rem;
+    }
+    .form-control:focus, .form-select:focus, .input:focus {
+      border-color: var(--accent-primary) !important;
+      background-color: var(--bg-input-focus) !important;
+      box-shadow: 0 0 0 3px var(--accent-primary-light) !important;
+    }
+    [data-theme="dark"] .bg-white,
+    [data-theme="dark"] .bg-light,
+    [data-theme="dark"] .modal-content {
+      background-color: var(--bg-card) !important;
+      color: var(--text-primary) !important;
+    }
+  </style>
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+  <div class="backoffice">
+
+    <!-- ═══════════════════════════════════════════
+         LEFT VERTICAL SIDEBAR (VUE BACK)
+         ═══════════════════════════════════════════ -->
+    <aside class="sidebar" id="sidebar">
+      <!-- Logo -->
+      <a href="{% url 'backoffice' %}" class="sidebar__header" style="text-decoration:none;">
+        <img src="{% static 'img/logo.png' %}" alt="Aptus Logo" class="sidebar__logo-icon">
+        <span class="sidebar__logo-text">Aptus</span>
+      </a>
+
+      <!-- Navigation -->
+      <nav class="sidebar__nav">
+        <div class="sidebar__section-label">Principal</div>
+
+        <a href="{% url 'backoffice' %}" class="sidebar-link {% if request.resolver_match.url_name == 'backoffice' or request.resolver_match.url_name == 'admin_dashboard' or request.resolver_match.url_name == 'home' %}active{% endif %}" id="sidebar-dashboard">
+          <i data-lucide="layout-dashboard"></i>
+          <span>Dashboard</span>
+        </a>
+
+        <a href="{% url 'backoffice_utilisateurs' %}" class="sidebar-link {% if 'utilisateurs' in request.path %}active{% endif %}" id="sidebar-users">
+          <i data-lucide="users"></i>
+          <span>Utilisateurs</span>
+        </a>
+
+        <a href="{% url 'backoffice_veille' %}" class="sidebar-link {% if 'marche' in request.path %}active{% endif %}" id="sidebar-veille">
+          <i data-lucide="line-chart"></i>
+          <span>Veille Marché</span>
+        </a>
+
+        <a href="{% url 'backoffice_cv_templates' %}" class="sidebar-link {% if 'templates' in request.path %}active{% endif %}" id="sidebar-templates">
+          <i data-lucide="file-badge"></i>
+          <span>Templates CV</span>
+        </a>
+
+        <a href="{% url 'backoffice_formations' %}" class="sidebar-link {% if 'formations' in request.path %}active{% endif %}" id="sidebar-formations">
+          <i data-lucide="graduation-cap"></i>
+          <span>Formations</span>
+        </a>
+
+        <a href="{% url 'backoffice_offres' %}" class="sidebar-link {% if 'offres' in request.path and not 'candidatures' in request.path %}active{% endif %}" id="sidebar-offres">
+          <i data-lucide="briefcase"></i>
+          <span>Offres Disponibles</span>
+        </a>
+      </nav>
+
+      <!-- Sidebar Footer -->
+      <div class="sidebar__footer">
+        <a href="{% url 'logout' %}" class="sidebar__logout" id="sidebar-logout">
+          <i data-lucide="log-out"></i>
+          <span>Déconnexion</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- ═══════════════════════════════════════════
+         TOPBAR (BACK-OFFICE)
+         ═══════════════════════════════════════════ -->
+    <header class="back-topbar" id="back-topbar">
+      <!-- Toggle Button -->
+      <button class="back-topbar__toggle" id="sidebar-toggle" aria-label="Toggle sidebar">
+        <i data-lucide="menu"></i>
+      </button>
+
+      <!-- Search Input -->
+      <div class="back-topbar__search">
+        <i data-lucide="search"></i>
+        <input type="text" class="input" id="admin-search" placeholder="Rechercher des candidats, entreprises, formations...">
+      </div>
+
+      <!-- Actions -->
+      <div class="back-topbar__actions">
+        <!-- Theme Toggle -->
+        <button class="theme-toggle" id="admin-theme-toggle" aria-label="Toggle theme">
+          <i data-lucide="sun" class="icon-sun" style="display:none;"></i>
+          <i data-lucide="moon" class="icon-moon"></i>
+        </button>
+
+        <!-- Notifications -->
+        <button class="btn-icon" style="position:relative;" aria-label="Notifications">
+          <i data-lucide="bell" style="width:20px;height:20px;color:var(--text-secondary);"></i>
+          <span style="position:absolute;top:6px;right:6px;width:8px;height:8px;background:var(--accent-tertiary);border-radius:50%;border:2px solid var(--bg-topbar);"></span>
+        </button>
+
+        <!-- Admin Profile Pill & Dropdown (Matching layout_back.php) -->
+        <div class="dropdown" id="admin-dropdown">
+          <div class="dropdown-trigger back-topbar__admin">
+            <div class="back-topbar__admin-info">
+              <span class="back-topbar__admin-name">{{ current_user_name|default:"Administrateur" }}</span>
+              <span class="back-topbar__admin-role">Super Admin</span>
+            </div>
+            <div class="avatar avatar-initials" style="width:36px;height:36px;font-size:13px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--accent-primary-light);color:var(--accent-primary);font-weight:700;">
+              {{ current_user_name|slice:":2"|upper|default:"AD" }}
+            </div>
+          </div>
+          <div class="dropdown-menu">
+            <a href="{% url 'backoffice' %}" class="dropdown-item">
+              <i data-lucide="layout-dashboard" style="width:16px;height:16px;"></i>
+              Tableau de Bord
+            </a>
+            <a href="{% url 'account_settings' %}" class="dropdown-item">
+              <i data-lucide="settings" style="width:16px;height:16px;"></i>
+              Paramètres
+            </a>
+            <a href="{% url 'jobs:offre_list' %}" class="dropdown-item">
+              <i data-lucide="globe" style="width:16px;height:16px;"></i>
+              Voir le site (Vue Front)
+            </a>
+            <div class="dropdown-divider"></div>
+            <a href="{% url 'logout' %}" class="dropdown-item" style="color:var(--accent-tertiary);">
+              <i data-lucide="log-out" style="width:16px;height:16px;"></i>
+              Déconnexion
+            </a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ═══════════════════════════════════════════
+         MAIN CONTENT AREA
+         ═══════════════════════════════════════════ -->
+    <main class="back-main" id="main-content">
+      <div class="back-content">
+        {% block content %}{% endblock %}
+
+        <footer class="mt-8 pt-4 pb-2 border-top text-center" style="border-color:var(--border-color-light) !important;">
+          <p class="text-xs text-secondary mb-0">
+            &copy; 2026 <strong>Aptus Platform</strong> &bull; Panneau d'Administration Backoffice &bull; Thème et Modèles Authentiques.
+          </p>
+        </footer>
+
+      </div>
+    </main>
+
+  </div><!-- /.backoffice -->
+
+  <!-- Modal Confirmation Suppression (Exact Design Aptus Image 10) -->
+  <div class="modal-overlay" id="modal-delete" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); backdrop-filter:blur(4px); z-index:10000; align-items:center; justify-content:center;">
+    <div class="modal-content" style="background:var(--bg-card); border-radius:24px; max-width:450px; text-align:center; padding: 40px 32px; position:relative; border:1px solid var(--border-color); box-shadow:var(--shadow-2xl);">
+      <button class="modal-close" onclick="closeModals()" style="position:absolute; top:20px; right:20px; color:var(--text-tertiary); background:none; border:none; cursor:pointer;" aria-label="Fermer">
+        <i data-lucide="x" style="width:24px;height:24px;"></i>
+      </button>
+
+      <div style="width:64px; height:64px; background: var(--accent-tertiary-light); color: var(--accent-tertiary); border-radius: 50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; border: 1px solid var(--accent-tertiary);">
+        <i data-lucide="alert-triangle" style="width:32px;height:32px;"></i>
+      </div>
+
+      <h3 style="margin-bottom:12px; color:var(--text-primary); font-size:1.4rem; font-weight:700;">Confirmation de suppression</h3>
+      <p id="delete-modal-msg" style="color:var(--text-secondary); margin-bottom:24px; line-height:1.6; font-size:0.95rem;">Êtes-vous sûr de vouloir supprimer cet élément ? Cette action est irréversible.</p>
+
+      <form action="" method="POST" id="form-delete">
+        {% csrf_token %}
+        <div style="display:flex; gap:12px; justify-content:center;">
+          <button type="button" class="btn btn-secondary" style="flex:1; border-radius:12px; padding:12px;" onclick="closeModals()">Annuler</button>
+          <button type="submit" class="btn btn-primary" style="flex:1; background: var(--accent-tertiary); border-color: var(--accent-tertiary); color:white; border-radius:12px; padding:12px; font-weight:600;">Oui, Supprimer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal d'Alerte Simple -->
+  <div class="modal-overlay" id="modal-alert" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); backdrop-filter:blur(4px); z-index:10000; align-items:center; justify-content:center;">
+    <div class="modal-content" style="background:var(--bg-card); border-radius:24px; max-width:400px; text-align:center; padding: 40px 32px; position:relative; border:1px solid var(--border-color); box-shadow:var(--shadow-2xl);">
+      <div id="alert-icon-box" style="width:56px; height:56px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px;">
+        <i id="alert-icon" data-lucide="info" style="width:28px;height:28px;"></i>
+      </div>
+      <h3 id="alert-title" style="margin-bottom:12px; color:var(--text-primary); font-size:1.3rem;">Notification</h3>
+      <p id="alert-msg" style="color:var(--text-secondary); margin-bottom:24px; line-height:1.6;"></p>
+      <button onclick="closeModals()" class="btn btn-primary" style="padding:10px 30px; width:100%; border-radius:12px;">Continuer</button>
+    </div>
+  </div>
+
+  <!-- SweetAlert2 & Lucide Icons -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="{% static 'js/nav.js' %}"></script>
+  <script src="{% static 'js/forms.js' %}"></script>
+  <script src="{% static 'js/charts.js' %}"></script>
+
+  <script>
+    if (window.lucide) {
+      lucide.createIcons();
+    }
+
+    // SweetAlert2 Toast Global Configuration (Authentic Aptus Backoffice)
+    window.Toast = Swal.mixin({
+      toast: true,
+      position: 'top-end',
+      showConfirmButton: false,
+      timer: 4000,
+      timerProgressBar: true,
+      didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer);
+        toast.addEventListener('mouseleave', Swal.resumeTimer);
+      }
+    });
+
+    // Global confirmation popup using SweetAlert2
+    window.aptusConfirm = function(title, text, confirmButtonText = 'Oui, continuer', icon = 'warning') {
+      return Swal.fire({
+        title: title,
+        text: text,
+        icon: icon,
+        iconColor: icon === 'warning' ? '#f59e0b' : '#ef4444',
+        showCancelButton: true,
+        confirmButtonText: confirmButtonText,
+        cancelButtonText: 'Annuler',
+        buttonsStyling: false,
+        customClass: {
+          popup: 'aptus-swal-popup',
+          confirmButton: 'btn btn-primary px-4 py-2 mx-1',
+          cancelButton: 'btn btn-secondary px-4 py-2 mx-1',
+          actions: 'd-flex gap-2 justify-content-center mt-3'
+        }
+      }).then(res => res.isConfirmed);
+    };
+
+    // Render flash messages globally as SweetAlert2 toasts
+    {% if messages %}
+      document.addEventListener('DOMContentLoaded', function() {
+        {% for message in messages %}
+          window.Toast.fire({
+            icon: '{% if message.tags == "error" %}error{% elif message.tags == "warning" %}warning{% elif message.tags == "info" %}info{% else %}success{% endif %}',
+            title: '{{ message|escapejs }}'
+          });
+        {% endfor %}
+      });
+    {% endif %}
+
+    window.closeModals = function() {
+      const overlays = document.querySelectorAll('.modal-overlay');
+      overlays.forEach(modal => {
+        modal.classList.remove('active', 'open');
+        setTimeout(() => {
+          if (!modal.classList.contains('active') && !modal.classList.contains('open')) {
+            modal.style.display = 'none';
+          }
+        }, 200);
+      });
+    };
+    window.closeModal = closeModals;
+
+    window.aptusConfirmDelete = function(actionUrl, message = null) {
+      const formDelete = document.getElementById('form-delete');
+      const modalDelete = document.getElementById('modal-delete');
+      if (!formDelete || !modalDelete) return;
+
+      if (actionUrl) { formDelete.action = actionUrl; }
+      if (message) { document.getElementById('delete-modal-msg').textContent = message; }
+
+      modalDelete.style.display = 'flex';
+      setTimeout(() => { modalDelete.classList.add('active'); }, 10);
+      if (window.lucide) lucide.createIcons();
+    };
+
+    window.aptusAlert = function(message, type = 'success') {
+      if (window.Toast) {
+        window.Toast.fire({
+          icon: type === 'error' ? 'error' : 'success',
+          title: message
+        });
+      }
+    };
+  </script>
+
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

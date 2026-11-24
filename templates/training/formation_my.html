@@ -1,0 +1,250 @@
+{% extends 'layout_front.html' %}
+{% load static %}
+
+{% block title %}{% if is_tuteur_view %}Espace Formateur — Aptus{% else %}Mes Formations — Aptus{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width: 1100px;">
+  {% if is_tuteur_view %}
+    <!-- ═══════════════════════════════════════════════════════
+         VUE FORMATEUR / TUTEUR (Enseignement & Mentorat)
+         ═══════════════════════════════════════════════════════ -->
+    <div class="card-flat p-4 p-md-5 mb-5" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 24px; position: relative; overflow: hidden; box-shadow: var(--shadow-sm);">
+      <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--gradient-primary);"></div>
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-4">
+        <div>
+          <span class="badge badge-primary mb-2">Espace Enseignant / Tuteur</span>
+          <h1 class="h2 fw-bold mb-1" style="color: var(--text-primary); letter-spacing: -0.5px;">Mes Formations &amp; Apprenants</h1>
+          <p class="text-secondary mb-0">Supervisez l'avancement des étudiants inscrits à vos modules et démarrez vos sessions visio.</p>
+        </div>
+        <div class="d-flex gap-3">
+          <div class="text-center p-3 rounded-4" style="background: var(--bg-secondary); border: 1px solid var(--border-color-light); min-width: 100px;">
+            <div class="h3 fw-bold mb-0 text-primary">{{ total_cours }}</div>
+            <small class="text-secondary">Modules</small>
+          </div>
+          <div class="text-center p-3 rounded-4" style="background: var(--bg-secondary); border: 1px solid var(--border-color-light); min-width: 100px;">
+            <div class="h3 fw-bold mb-0 text-success">{{ total_students }}</div>
+            <small class="text-secondary">Apprenants</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tuteur Formations List -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="h4 fw-bold mb-0" style="color: var(--text-primary);">Cours sous votre responsabilité</h2>
+      <a href="{% url 'training:formation_list' %}" class="btn btn-sm btn-secondary" style="border-radius: 10px;">
+        <i data-lucide="book-open" style="width: 14px; height: 14px;"></i>
+        <span>Voir tout le catalogue</span>
+      </a>
+    </div>
+
+    <div class="d-flex flex-column gap-4">
+      {% for f in formations_tuteur %}
+      <div class="card-flat p-4" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3 pb-3 border-bottom" style="border-color: var(--border-color-light)!important;">
+          <div class="d-flex align-items-center gap-3">
+            <div style="width: 52px; height: 52px; border-radius: 14px; background: var(--accent-primary-light); color: var(--accent-primary); display: flex; align-items: center; justify-content: center; flex-shrink:0;">
+              <i data-lucide="graduation-cap" style="width: 26px; height: 26px;"></i>
+            </div>
+            <div>
+              <h3 class="h5 fw-bold mb-1" style="color: var(--text-primary);">{{ f.titre }}</h3>
+              <div class="text-secondary small d-flex align-items-center gap-2 flex-wrap">
+                <span class="badge" style="background:var(--bg-secondary);color:var(--text-primary);border:1px solid var(--border-color-light);">{{ f.niveau }}</span>
+                <span>&bull;</span>
+                <span>{{ f.domaine|default:'Général' }}</span>
+                <span>&bull;</span>
+                <span class="text-primary fw-semibold">{{ f.inscriptions.count }} apprenant(s) inscrit(s)</span>
+              </div>
+            </div>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            {% if f.lien_api_room %}
+              <a href="{{ f.lien_api_room }}" target="_blank" class="btn btn-sm btn-primary d-inline-flex align-items-center gap-2" style="border-radius: 10px; font-weight:600;">
+                <i data-lucide="video" style="width: 15px; height: 15px;"></i>
+                <span>Rejoindre la Visio</span>
+              </a>
+            {% endif %}
+            <a href="{% url 'training:formation_detail' f.pk %}" class="btn btn-sm btn-secondary" style="border-radius: 10px;">
+              <span>Détails du module</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Apprenants inscrits à cette formation -->
+        <div>
+          <h6 class="small fw-bold text-secondary text-uppercase mb-2" style="letter-spacing: 0.5px;">Liste des apprenants inscrits :</h6>
+          {% if f.inscriptions.all %}
+            <div class="row g-2">
+              {% for insc in f.inscriptions.all %}
+              <div class="col-md-6 col-lg-4">
+                <div class="p-3 rounded-3 d-flex align-items-center justify-content-between" style="background: var(--bg-secondary); border: 1px solid var(--border-color-light);">
+                  <div class="d-flex align-items-center gap-2">
+                    <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--accent-primary-light); color: var(--accent-primary); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 11px;">
+                      {{ insc.candidat.utilisateur.prenom|slice:":1" }}{{ insc.candidat.utilisateur.nom|slice:":1" }}
+                    </div>
+                    <div>
+                      <div class="fw-semibold small" style="color: var(--text-primary);">{{ insc.candidat.utilisateur.prenom }} {{ insc.candidat.utilisateur.nom }}</div>
+                      <div class="text-secondary" style="font-size: 11px;">Inscrit le {{ insc.date_inscription|date:"d/m/Y" }}</div>
+                    </div>
+                  </div>
+                  <div class="text-end">
+                    <span class="badge" style="background: rgba(16, 185, 129, 0.1); color: #10B981; font-weight: 700; font-size: 11px;">{{ insc.progression }}%</span>
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p class="text-secondary small mb-0 fst-italic">Aucun apprenant n'est encore inscrit à ce module.</p>
+          {% endif %}
+        </div>
+      </div>
+      {% empty %}
+      <div class="card-flat p-5 text-center" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px;">
+        <i data-lucide="book-open" style="width: 48px; height: 48px; color: var(--text-tertiary); margin-bottom: 1rem;"></i>
+        <h3 class="h5 fw-bold mb-1">Aucune formation assignée</h3>
+        <p class="text-secondary small mb-0">Vous n'avez pas encore de sessions de formation sous votre responsabilité.</p>
+      </div>
+      {% endfor %}
+    </div>
+
+  {% else %}
+    <!-- ═══════════════════════════════════════════════════════
+         VUE ÉTUDIANT / CANDIDAT (Suivi de ses cours)
+         ═══════════════════════════════════════════════════════ -->
+    <div class="card-flat p-4 p-md-5 mb-5" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 24px; position: relative; overflow: hidden; box-shadow: var(--shadow-sm);">
+      <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--gradient-primary);"></div>
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-4">
+        <div>
+          <h1 class="h2 fw-bold mb-1" style="color: var(--text-primary); letter-spacing: -0.5px;">Bienvenue dans votre espace d'apprentissage</h1>
+          <p class="text-secondary mb-3">Suivez votre progression pédagogique et accédez à vos sessions de formation.</p>
+          
+          <!-- Global Progress Bar -->
+          <div style="max-width: 400px;">
+            <div class="d-flex justify-content-between small fw-bold mb-1">
+              <span>Progression globale</span>
+              <span class="text-primary">{{ global_progress }}%</span>
+            </div>
+            <div class="progress" style="height: 10px; border-radius: 20px; background: var(--bg-secondary);">
+              <div class="progress-bar" style="width: {{ global_progress }}%; background: var(--gradient-primary); border-radius: 20px;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mini Stats Row -->
+        <div class="d-flex gap-3">
+          <div class="text-center p-3 rounded-4" style="background: var(--bg-secondary); border: 1px solid var(--border-color-light); min-width: 90px;">
+            <div class="h3 fw-bold mb-0 text-primary">{{ total_cours }}</div>
+            <small class="text-secondary">Total</small>
+          </div>
+          <div class="text-center p-3 rounded-4" style="background: var(--bg-secondary); border: 1px solid var(--border-color-light); min-width: 90px;">
+            <div class="h3 fw-bold mb-0 text-success">{{ completed_cours }}</div>
+            <small class="text-secondary">Terminés</small>
+          </div>
+          <div class="text-center p-3 rounded-4" style="background: var(--bg-secondary); border: 1px solid var(--border-color-light); min-width: 90px;">
+            <div class="h3 fw-bold mb-0 text-warning">{{ en_cours_cours }}</div>
+            <small class="text-secondary">En cours</small>
+          </div>
+          {% if en_attente_cours > 0 %}
+          <div class="text-center p-3 rounded-4" style="background: var(--bg-secondary); border: 1px solid var(--border-color-light); min-width: 90px;">
+            <div class="h3 fw-bold mb-0" style="color: #F59E0B;">{{ en_attente_cours }}</div>
+            <small class="text-secondary">En attente</small>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Enrolled Courses List -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="h4 fw-bold mb-0" style="color: var(--text-primary);">Mes Cours Inscrits</h2>
+      <a href="{% url 'training:formation_list' %}" class="btn btn-sm btn-secondary" style="border-radius: 10px;">
+        <i data-lucide="plus" style="width: 14px; height: 14px;"></i>
+        <span>Explorer le catalogue</span>
+      </a>
+    </div>
+
+    <div class="d-flex flex-column gap-3">
+      {% for i in inscriptions %}
+      <div class="card-flat p-4" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+        <div class="row align-items-center g-3">
+          <div class="col-auto">
+            <div style="width: 52px; height: 52px; border-radius: 14px; background: var(--accent-primary-light); color: var(--accent-primary); display: flex; align-items: center; justify-content: center;">
+              <i data-lucide="graduation-cap" style="width: 26px; height: 26px;"></i>
+            </div>
+          </div>
+
+          <div class="col">
+            <h3 class="h5 fw-bold mb-1" style="color: var(--text-primary);">{{ i.formation.titre }}</h3>
+            <p class="text-secondary small mb-0 d-flex align-items-center gap-2 flex-wrap">
+              <span>Tuteur : {{ i.formation.tuteur.prenom|default:'Formateur Référent' }}</span>
+              <span>&bull;</span>
+              <span>Statut :</span>
+              {% if i.statut == 'Terminée' or i.progression >= 100 %}
+                <span class="badge" style="background: rgba(16, 185, 129, 0.12); color: #10B981; font-weight: 700; border: 1px solid rgba(16, 185, 129, 0.25);">
+                  <i data-lucide="check-circle" style="width: 12px; height: 12px; margin-right: 3px; vertical-align: -1px;"></i>Terminée
+                </span>
+              {% elif i.statut == 'En cours' or i.progression > 0 %}
+                <span class="badge" style="background: rgba(14, 165, 233, 0.12); color: #0EA5E9; font-weight: 700; border: 1px solid rgba(14, 165, 233, 0.25);">
+                  <i data-lucide="play-circle" style="width: 12px; height: 12px; margin-right: 3px; vertical-align: -1px;"></i>En cours
+                </span>
+              {% else %}
+                <span class="badge" style="background: rgba(245, 158, 11, 0.12); color: #F59E0B; font-weight: 700; border: 1px solid rgba(245, 158, 11, 0.25);">
+                  <i data-lucide="clock" style="width: 12px; height: 12px; margin-right: 3px; vertical-align: -1px;"></i>En attente
+                </span>
+              {% endif %}
+            </p>
+          </div>
+
+          <div class="col-md-3">
+            <div class="d-flex justify-content-between small fw-bold mb-1">
+              <span>Avancement</span>
+              <span class="{% if i.progression == 100 %}text-success{% elif i.progression > 0 %}text-info{% else %}text-secondary{% endif %}">{{ i.progression }}%</span>
+            </div>
+            <div class="progress" style="height: 8px; border-radius: 20px; background: var(--bg-secondary);">
+              <div class="progress-bar" style="width: {{ i.progression }}%; {% if i.progression == 100 %}background: linear-gradient(90deg, #10B981, #00A3DA);{% elif i.progression > 0 %}background: #00A3DA;{% endif %} border-radius: 20px; transition: width 0.4s ease;"></div>
+            </div>
+          </div>
+
+          <div class="col-auto d-flex align-items-center gap-2">
+            <a href="{% url 'training:formation_viewer' i.formation.pk %}" class="btn btn-sm btn-primary" style="border-radius: 10px; font-weight:600;">
+              <i data-lucide="play" style="width: 14px; height: 14px;"></i>
+              <span>Accéder au cours</span>
+            </a>
+            {% if i.formation.lien_api_room %}
+              <a href="{{ i.formation.lien_api_room }}" target="_blank" class="btn btn-sm btn-secondary" style="border-radius: 10px;" title="Visio Room">
+                <i data-lucide="video" style="width: 14px; height: 14px;"></i>
+                <span>Visio</span>
+              </a>
+            {% endif %}
+            {% if i.statut != 'Terminée' and i.progression < 100 %}
+              <a href="{% url 'training:formation_desinscrire' i.pk %}" onclick="event.preventDefault(); const url = this.href; aptusConfirm('Se désinscrire ?', 'Êtes-vous sûr de vouloir vous désinscrire de cette formation ?', 'Oui, me désinscrire').then(ok => { if (ok) window.location.href = url; });" class="btn btn-sm btn-ghost text-danger" style="border-radius: 10px; border: 1px solid var(--border-color);" title="Se désinscrire">
+                <i data-lucide="x" style="width: 15px; height: 15px;"></i>
+              </a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <div class="card-flat p-5 text-center" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px;">
+        <i data-lucide="book-open" style="width: 48px; height: 48px; color: var(--text-tertiary); margin-bottom: 1rem;"></i>
+        <h3 class="h5 fw-bold mb-1">Aucune inscription active</h3>
+        <p class="text-secondary small mb-3">Explorez notre catalogue de formations certifiantes et développez vos compétences.</p>
+        <a href="{% url 'training:formation_list' %}" class="btn btn-primary" style="border-radius: 12px;">
+          <span>Découvrir les formations</span>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  if (window.lucide) {
+    lucide.createIcons();
+  }
+</script>
+{% endblock %}

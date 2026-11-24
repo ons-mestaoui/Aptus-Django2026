@@ -1,0 +1,372 @@
+{% extends 'layout_back.html' %}
+{% load static %}
+
+{% block title %}{{ title|default:'Créer un Template' }} — Aptus Backoffice{% endblock %}
+
+{% block extra_css %}
+<style>
+.page-tag-wrapper {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  margin: 0;
+}
+.page-tag-wrapper input[type="checkbox"] {
+  display: none;
+}
+.page-tag-wrapper span {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 8px 18px;
+  border-radius: 99px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.25s ease;
+  user-select: none;
+}
+.page-tag-wrapper input[type="checkbox"]:checked + span {
+  background: rgba(56, 189, 248, 0.12);
+  color: #0284c7;
+  border-color: #0284c7;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.2);
+  font-weight: 600;
+}
+.page-tag-wrapper span:hover {
+  background: var(--bg-card);
+  border-color: var(--accent-primary);
+  color: var(--text-primary);
+}
+
+.premium-card-wrapper {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.06), rgba(217, 70, 239, 0.06));
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-radius: 16px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+.premium-card-wrapper:hover {
+  border-color: rgba(245, 158, 11, 0.45);
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.12);
+}
+
+/* Custom switch toggle */
+.switch-label {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 28px;
+  margin: 0;
+  cursor: pointer;
+}
+.switch-label input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.switch-slider {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 34px;
+  transition: .3s;
+}
+.switch-slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  border-radius: 50%;
+  transition: .3s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+.switch-label input:checked + .switch-slider {
+  background: linear-gradient(135deg, #f59e0b, #d946ef);
+  border-color: transparent;
+}
+.switch-label input:checked + .switch-slider:before {
+  transform: translateX(22px);
+}
+
+/* Modal Preview */
+#preview-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(8px);
+  z-index: 99999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+#preview-modal.active {
+  display: flex;
+}
+.preview-modal-content {
+  background: white;
+  width: 100%;
+  max-width: 900px;
+  height: 85vh;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="back-page-header">
+  <div class="back-page-header__row">
+    <div>
+      <a href="{% url 'backoffice_cv_templates' %}" class="btn btn-ghost btn-sm mb-2" style="padding-left:0; color:var(--text-tertiary);">
+        <i data-lucide="arrow-left" style="width:16px;height:16px;"></i>
+        <span>Retour aux templates</span>
+      </a>
+      <h1 class="h2 fw-bold mb-1">{{ title|default:'Créer un Template' }}</h1>
+      <p class="text-secondary mb-0">Configurez le code et l'apparence de votre modèle CV.</p>
+    </div>
+  </div>
+</div>
+
+{% if form.errors %}
+<div class="alert alert-danger mb-4" style="border-radius: 12px; border: 1px solid #ef4444; background: rgba(239,68,68,0.1); color: #ef4444;">
+  <div class="d-flex align-items-center gap-2 mb-1 fw-bold">
+    <i data-lucide="alert-circle" style="width:18px;height:18px;"></i>
+    <span>Erreurs de validation :</span>
+  </div>
+  <ul class="mb-0 ps-3">
+    {% for field, errors in form.errors.items %}
+      {% for error in errors %}
+        <li><strong>{{ field }}</strong>: {{ error }}</li>
+      {% endfor %}
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}
+
+<form method="POST" id="full-template-form" class="mt-4">
+  {% csrf_token %}
+  
+  <div class="row g-4 align-items-start">
+    <!-- Left Column: Template Config Form -->
+    <div class="col-lg-8">
+      <div class="card-flat p-4 p-md-5 d-flex flex-column gap-4" style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:24px; box-shadow:var(--shadow-card);">
+        
+        <!-- Nom du Template -->
+        <div class="form-group">
+          <label class="form-label fw-semibold mb-2" style="font-size:15px; color:var(--text-primary);">
+            Nom du template <span class="text-danger">*</span>
+          </label>
+          <input type="text" class="input w-100" name="nom" id="tpl-name" 
+                 placeholder="Ex: Élégance Corporative" 
+                 value="{{ form.nom.value|default:'' }}" 
+                 style="padding:14px; font-size:16px; border-radius:12px;" required>
+          <small class="text-secondary mt-1 d-block">Longueur comprise entre 3 et 150 caractères.</small>
+        </div>
+
+        <!-- Catégories (Tags) -->
+        <div class="form-group">
+          <label class="form-label fw-semibold mb-2" style="font-size:15px; color:var(--text-primary);">
+            Catégories (Tags)
+          </label>
+          <div class="d-flex flex-wrap gap-2 mt-1" id="tags-wrapper">
+            <label class="page-tag-wrapper">
+              <input type="checkbox" name="description[]" value="Classique" {% if "Classique" in form.description.value %}checked{% endif %}>
+              <span>Classique</span>
+            </label>
+            <label class="page-tag-wrapper">
+              <input type="checkbox" name="description[]" value="Moderne" {% if "Moderne" in form.description.value %}checked{% endif %}>
+              <span>Moderne</span>
+            </label>
+            <label class="page-tag-wrapper">
+              <input type="checkbox" name="description[]" value="Minimaliste" {% if "Minimaliste" in form.description.value %}checked{% endif %}>
+              <span>Minimaliste</span>
+            </label>
+            <label class="page-tag-wrapper">
+              <input type="checkbox" name="description[]" value="Créatif" {% if "Créatif" in form.description.value %}checked{% endif %}>
+              <span>Créatif</span>
+            </label>
+            <label class="page-tag-wrapper">
+              <input type="checkbox" name="description[]" value="Professionnel" {% if "Professionnel" in form.description.value %}checked{% endif %}>
+              <span>Professionnel</span>
+            </label>
+            <label class="page-tag-wrapper">
+              <input type="checkbox" name="description[]" value="Technologie" {% if "Technologie" in form.description.value %}checked{% endif %}>
+              <span>Technologie</span>
+            </label>
+            <label class="page-tag-wrapper">
+              <input type="checkbox" name="description[]" value="Marketing" {% if "Marketing" in form.description.value %}checked{% endif %}>
+              <span>Marketing</span>
+            </label>
+            <label class="page-tag-wrapper">
+              <input type="checkbox" name="description[]" value="Épuré" {% if "Épuré" in form.description.value %}checked{% endif %}>
+              <span>Épuré</span>
+            </label>
+            <label class="page-tag-wrapper">
+              <input type="checkbox" name="description[]" value="ATS-Friendly" {% if "ATS-Friendly" in form.description.value %}checked{% endif %}>
+              <span>ATS-Friendly</span>
+            </label>
+            <label class="page-tag-wrapper">
+              <input type="checkbox" name="description[]" value="Coloré" {% if "Coloré" in form.description.value %}checked{% endif %}>
+              <span>Coloré</span>
+            </label>
+
+            <!-- Add custom tag input -->
+            <div style="display:flex; align-items:center; background: var(--bg-secondary); border: 1px dashed var(--border-color); border-radius: 99px; padding: 2px 14px;" id="add-tag-box">
+              <i data-lucide="plus" style="width:14px;height:14px; color:var(--text-tertiary); margin-right:4px;"></i>
+              <input type="text" id="custom-tag-input" placeholder="Nouveau tag (Entrée)" 
+                     style="background:transparent; border:none; outline:none; color:var(--text-secondary); font-size:13px; width:140px; box-shadow:none;">
+            </div>
+          </div>
+          <small class="text-secondary mt-2 d-block">Sélectionnez les tags pour faciliter la découverte par les candidats.</small>
+        </div>
+
+        <!-- Statut Premium VIP -->
+        <div class="premium-card-wrapper">
+          <div class="d-flex align-items-center gap-3">
+            <div style="background: linear-gradient(135deg, #f59e0b, #d946ef); width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 15px rgba(245,158,11,0.3);">
+              <i data-lucide="crown" style="color:white; width:22px; height:22px;"></i>
+            </div>
+            <div>
+              <h5 class="fw-bold mb-0" style="color:#f59e0b; font-size:1rem; letter-spacing:0.3px;">Statut Premium VIP</h5>
+              <p class="text-secondary small mb-0 mt-1">Réservé aux abonnements avancés</p>
+            </div>
+          </div>
+
+          <label class="switch-label">
+            <input type="checkbox" name="est_premium" value="1" id="tpl-premium" 
+                   {% if form.est_premium.value %}checked{% endif %}>
+            <span class="switch-slider"></span>
+          </label>
+        </div>
+
+        <!-- Code Structure (HTML/CSS) -->
+        <div class="form-group d-flex flex-column">
+          <div class="d-flex justify-content-between align-items-end mb-2">
+            <label class="form-label fw-semibold mb-0" style="font-size:15px; color:var(--text-primary);">
+              Code Structure (HTML/CSS) <span class="text-danger">*</span>
+            </label>
+            <span class="text-secondary small">Rendu en temps réel possible via le bouton à droite</span>
+          </div>
+          <textarea class="textarea font-monospace" name="structure_html" id="tpl-html" 
+                    placeholder="Écrivez le code source HTML/CSS du CV ici..." 
+                    style="font-family: Consolas, 'Fira Code', monospace; line-height: 1.5; background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary); min-height: 420px; padding:16px; font-size:13px; resize:vertical; border-radius:14px;" required>{{ form.structure_html.value|default:'' }}</textarea>
+          <small class="text-secondary mt-1">Doit contenir des balises HTML valides (ex: &lt;div&gt;, &lt;span&gt;, &lt;style&gt;).</small>
+        </div>
+
+        <input type="hidden" name="url_miniature" id="page-url-hidden" value="{{ form.url_miniature.value|default:'' }}">
+      </div>
+    </div>
+
+    <!-- Right Column: Sticky Generator & Save Actions -->
+    <div class="col-lg-4" style="position: sticky; top: 24px;">
+      <div class="card-flat p-4 text-center mb-4" style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:24px; box-shadow:var(--shadow-card);">
+        <div style="width:52px; height:52px; border-radius:14px; background:rgba(56, 189, 248, 0.1); color:#0284c7; display:flex; align-items:center; justify-content:center; margin:0 auto 1rem;">
+          <i data-lucide="scan-line" style="width:26px;height:26px;"></i>
+        </div>
+        <h4 class="fw-bold mb-1" style="font-size:1.15rem; color:var(--text-primary);">Générateur Automatique</h4>
+        <p class="text-secondary small mb-4">Générez visuellement le rendu HTML. La miniature s'ouvrira directement dans un Popup.</p>
+        
+        <button type="button" class="btn btn-secondary w-100 py-3" id="btn-page-generate" style="font-weight:600; border-radius:12px; display:flex; align-items:center; justify-content:center; gap:0.5rem; border: 1px solid rgba(56, 189, 248, 0.3); background:rgba(56, 189, 248, 0.05); color:#0284c7;">
+          <i data-lucide="scan-line" style="width:18px;height:18px;"></i>
+          <span>Scanner &amp; Afficher</span>
+        </button>
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100 py-3" style="padding: 16px; font-size:16px; font-weight:700; border-radius:14px; display:flex; align-items:center; justify-content:center; gap:0.6rem; box-shadow: 0 4px 20px rgba(107, 52, 163, 0.35);">
+        <i data-lucide="save" style="width:20px;height:20px;"></i>
+        <span>Sauvegarder le Template</span>
+      </button>
+    </div>
+  </div>
+</form>
+
+<!-- Modal Preview Lightbox -->
+<div id="preview-modal">
+  <div class="preview-modal-content">
+    <div class="p-3 d-flex align-items-center justify-content-between border-bottom" style="background:var(--bg-card);">
+      <h5 class="fw-bold mb-0 d-flex align-items-center gap-2">
+        <i data-lucide="eye" style="width:18px;height:18px;color:var(--accent-primary);"></i>
+        <span>Aperçu en Direct du Modèle CV</span>
+      </h5>
+      <button type="button" class="btn btn-ghost btn-sm" id="btn-close-modal" style="font-size:24px; line-height:1;">&times;</button>
+    </div>
+    <div style="flex:1; background:#f8fafc; overflow:auto;">
+      <iframe id="preview-frame" style="width:100%; height:100%; border:none;"></iframe>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  if (window.lucide) lucide.createIcons();
+
+  // Dynamic Tag Input
+  const customTagInput = document.getElementById('custom-tag-input');
+  const tagsWrapper = document.getElementById('tags-wrapper');
+  const addTagBox = document.getElementById('add-tag-box');
+
+  if (customTagInput && tagsWrapper) {
+    customTagInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const tagText = this.value.trim();
+        if (tagText) {
+          const label = document.createElement('label');
+          label.className = 'page-tag-wrapper';
+          label.innerHTML = `<input type="checkbox" name="description[]" value="${tagText}" checked><span>${tagText}</span>`;
+          tagsWrapper.insertBefore(label, addTagBox);
+          this.value = '';
+        }
+      }
+    });
+  }
+
+  // Live Modal Preview
+  const btnGenerate = document.getElementById('btn-page-generate');
+  const modal = document.getElementById('preview-modal');
+  const closeModal = document.getElementById('btn-close-modal');
+  const previewFrame = document.getElementById('preview-frame');
+  const htmlInput = document.getElementById('tpl-html');
+
+  if (btnGenerate && modal && previewFrame && htmlInput) {
+    btnGenerate.addEventListener('click', function() {
+      const code = htmlInput.value.trim();
+      if (!code) {
+        alert("Veuillez saisir du code HTML dans la zone Code Structure avant de scanner.");
+        return;
+      }
+      modal.classList.add('active');
+      const doc = previewFrame.contentDocument || previewFrame.contentWindow.document;
+      doc.open();
+      doc.write(code);
+      doc.close();
+    });
+
+    closeModal.addEventListener('click', function() {
+      modal.classList.remove('active');
+    });
+
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) {
+        modal.classList.remove('active');
+      }
+    });
+  }
+});
+</script>
+{% endblock %}

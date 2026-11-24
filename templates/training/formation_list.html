@@ -1,0 +1,137 @@
+{% extends 'layout_front.html' %}
+{% load static %}
+
+{% block title %}Catalogue des Formations &mdash; Aptus Learning{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <!-- Hero Banner -->
+  <div class="card-flat p-4 p-md-5 mb-5 text-center text-md-start" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 24px; box-shadow: var(--shadow-sm); position: relative; overflow: hidden;">
+    <div style="position: absolute; right: -30px; bottom: -30px; width: 200px; height: 200px; background: var(--accent-secondary-light); border-radius: 50%; filter: blur(50px); pointer-events: none;"></div>
+    
+    <div class="row align-items-center">
+      <div class="col-lg-8">
+        <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill mb-3" style="background: var(--accent-secondary-light); color: var(--accent-secondary); font-size: 0.8rem; font-weight: 700;">
+          <i data-lucide="award" style="width: 14px; height: 14px;"></i>
+          <span>APTUS ACADEMY &bull; MONTEZ EN COMPÉTENCES</span>
+        </div>
+        <h1 class="h2 fw-bold mb-2" style="color: var(--text-primary); letter-spacing: -0.5px;">Accélérez votre carrière avec nos formations</h1>
+        <p class="text-secondary mb-4" style="max-width: 600px;">Des parcours certifiants animés par des tuteurs experts en Intelligence Artificielle, Cloud, Cybersécurité et Data.</p>
+        
+        <!-- Search & Filter form -->
+        <form method="GET" class="d-flex flex-column flex-sm-row gap-2">
+          <div class="input-group flex-grow-1" style="background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden;">
+            <span class="input-group-text bg-transparent border-0 text-secondary">
+              <i data-lucide="search" style="width: 18px; height: 18px;"></i>
+            </span>
+            <input type="text" name="q" value="{{ query|default:'' }}" class="form-control border-0 bg-transparent" placeholder="Rechercher une compétence, un titre..." style="font-size: 0.95rem; box-shadow: none;">
+          </div>
+          <button type="submit" class="btn btn-secondary" style="border-radius: 12px; padding: 0.7rem 1.8rem;">Filtrer</button>
+        </form>
+      </div>
+
+      <div class="col-lg-4 text-center text-lg-end mt-4 mt-lg-0">
+        <a href="{% url 'training:formation_my' %}" class="btn btn-primary" style="border-radius: 14px; padding: 0.85rem 1.6rem; font-weight: 600;">
+          <i data-lucide="book-open" style="width: 18px; height: 18px;"></i>
+          <span>Mon Espace Apprentissage</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Messages Alert -->
+
+
+  <!-- Domaine Filter Tabs -->
+  <div class="d-flex flex-wrap gap-2 mb-4 pb-2 border-bottom" style="border-color: var(--border-color-light) !important;">
+    <a href="{% url 'training:formation_list' %}" class="btn btn-sm {% if not selected_domaine %}btn-primary{% else %}btn-ghost text-secondary{% endif %}" style="border-radius: 20px; font-weight: 600;">
+      Tous les domaines
+    </a>
+    {% for dom in domaines %}
+      <a href="?domaine={{ dom }}" class="btn btn-sm {% if selected_domaine == dom %}btn-primary{% else %}btn-ghost text-secondary{% endif %}" style="border-radius: 20px; font-weight: 600;">
+        {{ dom }}
+      </a>
+    {% endfor %}
+  </div>
+
+  <!-- Formations Grid -->
+  <div class="row g-4">
+    {% for f in formations %}
+    <div class="col-md-6 col-lg-4">
+      <div class="card-flat h-100 d-flex flex-column" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; overflow: hidden; box-shadow: var(--shadow-sm); transition: transform 0.2s ease;">
+        <!-- Banner or Base64 Image -->
+        <div style="height: 140px; background: var(--gradient-primary); position: relative; display: flex; align-items: center; justify-content: center; color: #fff;">
+          {% if f.image_base64 %}
+            <img src="{{ f.image_base64 }}" alt="{{ f.titre }}" style="width: 100%; height: 100%; object-fit: cover;">
+          {% else %}
+            <i data-lucide="graduation-cap" style="width: 48px; height: 48px; opacity: 0.85;"></i>
+          {% endif %}
+          <div style="position: absolute; top: 12px; left: 12px;">
+            <span class="badge" style="background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); color: #fff; font-size: 0.72rem;">
+              {{ f.domaine|default:'Général' }}
+            </span>
+          </div>
+          <div style="position: absolute; top: 12px; right: 12px;">
+            <span class="badge badge-success" style="font-size: 0.72rem;">{{ f.niveau }}</span>
+          </div>
+        </div>
+
+        <div class="p-4 d-flex flex-column flex-grow-1">
+          <h3 class="h5 fw-bold mb-2" style="color: var(--text-primary); line-height: 1.35;">
+            <a href="{% url 'training:formation_detail' f.pk %}" style="color: inherit; text-decoration: none;">{{ f.titre }}</a>
+          </h3>
+          <p class="text-secondary small flex-grow-1 mb-3" style="line-height: 1.6;">
+            {{ f.description|truncatewords:16|default:'Aucune description renseignée pour cette formation.' }}
+          </p>
+
+          <!-- Tuteur & Online indicator -->
+          <div class="d-flex align-items-center justify-content-between pt-3 border-top mb-3" style="border-color: var(--border-color-light) !important; font-size: 0.82rem;">
+            <div class="text-secondary d-flex align-items-center gap-1">
+              <i data-lucide="user" style="width: 14px; height: 14px;"></i>
+              <span>{{ f.tuteur.prenom|default:'Formateur Aptus' }}</span>
+            </div>
+            {% if f.is_online %}
+              <span class="text-success d-flex align-items-center gap-1 fw-semibold">
+                <span style="width: 8px; height: 8px; border-radius: 50%; background: #22c55e;"></span> En ligne
+              </span>
+            {% else %}
+              <span class="text-secondary">Présentiel</span>
+            {% endif %}
+          </div>
+
+          <!-- Buttons: S'inscrire & Consulter -->
+          <div class="d-flex gap-2">
+            <a href="{% url 'training:formation_detail' f.pk %}" class="btn btn-secondary btn-sm flex-grow-1" style="border-radius: 10px;">
+              <span>Détails</span>
+            </a>
+            {% if f.pk in enrolled_ids %}
+              <a href="{% url 'training:formation_viewer' f.pk %}" class="btn btn-primary btn-sm flex-grow-1" style="border-radius: 10px;">
+                <i data-lucide="play" style="width: 14px; height: 14px;"></i>
+                <span>Accéder au cours</span>
+              </a>
+            {% else %}
+              <a href="{% url 'training:formation_sinscrire' f.pk %}" class="btn btn-primary btn-sm flex-grow-1" style="border-radius: 10px;">
+                <i data-lucide="graduation-cap" style="width: 14px; height: 14px;"></i>
+                <span>S'inscrire</span>
+              </a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="col-12 py-5 text-center text-secondary">
+      <i data-lucide="book-open" style="width: 48px; height: 48px; color: var(--text-tertiary); margin-bottom: 12px;"></i>
+      <h4 class="h5 fw-bold mb-1">Aucune formation disponible</h4>
+      <p class="text-tertiary small">Veuillez ajuster vos critères de recherche.</p>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  if (window.lucide) lucide.createIcons();
+</script>
+{% endblock %}

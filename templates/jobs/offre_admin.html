@@ -1,0 +1,127 @@
+{% extends 'layout_back.html' %}
+{% load static %}
+
+{% block title %}Gestion Offres Disponibles &mdash; Aptus Backoffice{% endblock %}
+
+{% block content %}
+<div class="back-page-header">
+  <div class="back-page-header__row">
+    <div>
+      <h1 class="h2 fw-bold mb-1 d-flex align-items-center gap-2">
+        <i data-lucide="briefcase" style="width: 28px; height: 28px; color: var(--accent-primary);"></i>
+        <span>Offres Disponibles</span>
+      </h1>
+      <p class="text-secondary mb-0">Gestion centralisée des annonces d'emploi et des candidatures</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{% url 'jobs:offre_create' %}" class="btn btn-primary">
+        <i data-lucide="plus-circle" style="width: 18px; height: 18px;"></i>
+        <span>Publier une Offre</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- 4 Stat Metric Cards -->
+<div class="row g-4 mb-4">
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card h-100">
+      <div>
+        <div class="stat-card__label">Total Offres</div>
+        <div class="stat-card__value">{{ stats.total|default:offres.count }}</div>
+        <div class="stat-card__trend up"><i data-lucide="trending-up" style="width: 14px; height: 14px;"></i> En ligne</div>
+      </div>
+      <div class="stat-card__icon purple"><i data-lucide="briefcase" style="width: 22px; height: 22px;"></i></div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card h-100">
+      <div>
+        <div class="stat-card__label">Candidatures Reçues</div>
+        <div class="stat-card__value">{{ stats.candidatures|default:'64' }}</div>
+        <div class="stat-card__trend up"><i data-lucide="users" style="width: 14px; height: 14px;"></i> Total</div>
+      </div>
+      <div class="stat-card__icon orange"><i data-lucide="clipboard-check" style="width: 22px; height: 22px;"></i></div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card h-100">
+      <div>
+        <div class="stat-card__label">Vues Estimées</div>
+        <div class="stat-card__value">{{ stats.vues|default:'3,450' }}</div>
+        <div class="stat-card__trend up"><i data-lucide="eye" style="width: 14px; height: 14px;"></i> Intérêt élevé</div>
+      </div>
+      <div class="stat-card__icon blue"><i data-lucide="eye" style="width: 22px; height: 22px;"></i></div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card h-100">
+      <div>
+        <div class="stat-card__label">Postes Actifs</div>
+        <div class="stat-card__value">{{ stats.actives|default:offres.count }}</div>
+        <div class="stat-card__trend up"><i data-lucide="check-circle" style="width: 14px; height: 14px;"></i> Ouverts</div>
+      </div>
+      <div class="stat-card__icon teal"><i data-lucide="check-circle" style="width: 22px; height: 22px;"></i></div>
+    </div>
+  </div>
+</div>
+
+<!-- Table -->
+<div class="card-flat" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-card);">
+  <div class="table-responsive">
+    <table class="data-table mb-0">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Entreprise</th>
+          <th>Offre</th>
+          <th>Domaine</th>
+          <th>Salaire</th>
+          <th>Statut</th>
+          <th>Date Expir.</th>
+          <th class="text-end" style="width: 140px;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for o in offres %}
+        <tr>
+          <td class="text-secondary fw-semibold">#{{ o.id_offre }}</td>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              <div class="avatar avatar-sm avatar-initials" style="width: 32px; height: 32px; border-radius: 8px;">
+                {{ o.entreprise.raison_sociale|default:'A'|slice:":2"|upper }}
+              </div>
+              <span class="fw-semibold">{{ o.entreprise.raison_sociale|default:'Aptus' }}</span>
+            </div>
+          </td>
+          <td><a href="{% url 'jobs:offre_detail' o.pk %}" class="fw-bold text-primary">{{ o.titre }}</a></td>
+          <td><span class="badge badge-primary">{{ o.domaine|default:'IT' }}</span></td>
+          <td class="fw-medium text-success">{{ o.salaire|default:'N/C' }} €</td>
+          <td><span class="badge badge-success">Actif</span></td>
+          <td class="text-secondary small">{{ o.date_expir|date:"d/m/Y"|default:'-' }}</td>
+          <td class="text-end">
+            <div class="d-flex justify-content-end gap-1">
+              <a href="{% url 'jobs:offre_update' o.pk %}" class="btn btn-sm btn-ghost text-warning" title="Modifier"><i data-lucide="pencil" style="width: 16px; height: 16px;"></i></a>
+              <a href="{% url 'jobs:offre_delete' o.pk %}" class="btn btn-sm btn-ghost text-danger" title="Supprimer définitivement"><i data-lucide="trash-2" style="width: 16px; height: 16px;"></i></a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="8" class="text-center py-5 text-secondary">Aucune offre publiée.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  if (window.lucide) lucide.createIcons();
+</script>
+{% endblock %}

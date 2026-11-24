@@ -1,0 +1,172 @@
+{% extends 'layout_back.html' %}
+{% load static %}
+
+{% block title %}Utilisateurs — Aptus Admin{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="back-page-header">
+  <div class="back-page-header__row">
+    <div>
+      <h1 class="h2 fw-bold mb-1 d-flex align-items-center gap-2">
+        <i data-lucide="users" style="width:28px;height:28px;color:var(--accent-primary);"></i>
+        <span>Utilisateurs</span>
+      </h1>
+      <p class="text-secondary mb-0">Gérez les comptes candidats, entreprises, tuteurs et administrateurs</p>
+    </div>
+    <div class="d-flex gap-2 align-items-center">
+      <a href="{% url 'accounts:utilisateur_create' %}" class="btn btn-primary" id="add-user-btn">
+        <i data-lucide="user-plus" style="width:18px;height:18px;"></i>
+        <span>Ajouter un Utilisateur</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Filters & Search Toolbar -->
+<div class="card-flat mb-4 p-3" style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-md);">
+  <form method="GET" class="row g-2 align-items-center">
+    <div class="col-md-5">
+      <div class="input-group">
+        <span class="input-group-text bg-transparent border-end-0 text-secondary" style="border-color:var(--border-color);">
+          <i data-lucide="search" style="width:18px;height:18px;"></i>
+        </span>
+        <input type="text" name="q" value="{{ query }}" class="input form-control border-start-0" placeholder="Rechercher par nom, prénom ou email..." autocomplete="off">
+      </div>
+    </div>
+    <div class="col-md-3">
+      <select name="role" class="select form-select" onchange="this.form.submit()">
+        <option value="">Tous les rôles</option>
+        <option value="Candidat" {% if role_filter == 'Candidat' %}selected{% endif %}>Candidat</option>
+        <option value="Entreprise" {% if role_filter == 'Entreprise' %}selected{% endif %}>Entreprise</option>
+        <option value="Admin" {% if role_filter == 'Admin' %}selected{% endif %}>Admin</option>
+        <option value="Tuteur" {% if role_filter == 'Tuteur' %}selected{% endif %}>Tuteur</option>
+      </select>
+    </div>
+    <div class="col-md-3">
+      <select name="sort_order" class="select form-select" onchange="const [s, o] = this.value.split(':'); const url = new URL(window.location.href); if(s) { url.searchParams.set('sort', s); url.searchParams.set('order', o || 'asc'); } else { url.searchParams.delete('sort'); url.searchParams.delete('order'); } window.location.href = url.toString();">
+        <option value="">Trier par défaut</option>
+        <optgroup label="Par date / ID">
+          <option value="id:desc" {% if sort == 'id' and order == 'desc' %}selected{% endif %}>Plus récents</option>
+          <option value="id:asc" {% if sort == 'id' and order == 'asc' %}selected{% endif %}>Plus anciens</option>
+        </optgroup>
+        <optgroup label="Par nom">
+          <option value="nom:asc" {% if sort == 'nom' and order == 'asc' %}selected{% endif %}>Nom (A-Z)</option>
+          <option value="nom:desc" {% if sort == 'nom' and order == 'desc' %}selected{% endif %}>Nom (Z-A)</option>
+        </optgroup>
+        <optgroup label="Par email">
+          <option value="email:asc" {% if sort == 'email' and order == 'asc' %}selected{% endif %}>Email (A-Z)</option>
+          <option value="email:desc" {% if sort == 'email' and order == 'desc' %}selected{% endif %}>Email (Z-A)</option>
+        </optgroup>
+        <optgroup label="Par rôle">
+          <option value="role:asc" {% if sort == 'role' and order == 'asc' %}selected{% endif %}>Rôle (A-Z)</option>
+          <option value="role:desc" {% if sort == 'role' and order == 'desc' %}selected{% endif %}>Rôle (Z-A)</option>
+        </optgroup>
+      </select>
+    </div>
+    <div class="col-md-1 d-flex gap-1">
+      <button type="submit" class="btn btn-secondary w-100" title="Appliquer les filtres">
+        <i data-lucide="filter" style="width:16px;height:16px;"></i>
+      </button>
+      {% if query or role_filter or sort %}
+        <a href="{% url 'backoffice_utilisateurs' %}" class="btn btn-ghost" title="Réinitialiser les filtres">
+          <i data-lucide="rotate-ccw" style="width:16px;height:16px;"></i>
+        </a>
+      {% endif %}
+    </div>
+  </form>
+</div>
+
+<!-- Users Table Container -->
+<div class="card-flat" style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-lg); overflow:hidden; box-shadow:var(--shadow-card);">
+  <div class="table-responsive">
+    <table class="data-table mb-0">
+      <thead>
+        <tr>
+          <th style="width: 80px;">ID</th>
+          <th>Utilisateur</th>
+          <th>Email</th>
+          <th>Rôle</th>
+          <th>Téléphone</th>
+          <th class="text-end" style="width: 160px;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+        <tr>
+          <td class="text-secondary fw-semibold">#{{ u.id_utilisateur }}</td>
+          <td>
+            <div class="d-flex align-items-center gap-3">
+              <div class="avatar avatar-sm avatar-initials" style="width:36px;height:36px;font-size:12px;border-radius:var(--radius-full);">
+                {{ u.prenom|slice:":1" }}{{ u.nom|slice:":1" }}
+              </div>
+              <div>
+                <a href="{% url 'accounts:utilisateur_detail' u.pk %}" class="fw-semibold text-primary" style="text-decoration:none;">
+                  {{ u.prenom }} {{ u.nom|default:'' }}
+                </a>
+              </div>
+            </div>
+          </td>
+          <td class="text-secondary small">
+            <a href="mailto:{{ u.email }}" class="text-secondary text-decoration-none">
+              <i data-lucide="mail" style="width:14px;height:14px;margin-right:4px;vertical-align:middle;"></i>{{ u.email }}
+            </a>
+          </td>
+          <td>
+            {% if u.role == 'Admin' %}
+              <span class="badge badge-danger"><i data-lucide="shield-check" style="width:12px;height:12px;"></i> Admin</span>
+            {% elif u.role == 'Entreprise' %}
+              <span class="badge badge-info"><i data-lucide="building" style="width:12px;height:12px;"></i> Entreprise</span>
+            {% elif u.role == 'Tuteur' %}
+              <span class="badge badge-warning"><i data-lucide="graduation-cap" style="width:12px;height:12px;"></i> Tuteur</span>
+            {% else %}
+              <span class="badge badge-primary"><i data-lucide="user" style="width:12px;height:12px;"></i> Candidat</span>
+            {% endif %}
+          </td>
+          <td class="text-secondary small">
+            {% if u.telephone %}
+              <i data-lucide="phone" style="width:14px;height:14px;margin-right:4px;vertical-align:middle;"></i>{{ u.telephone }}
+            {% else %}
+              <span class="text-tertiary">-</span>
+            {% endif %}
+          </td>
+          <td class="text-end">
+            <div class="d-flex justify-content-end gap-1">
+              <a href="{% url 'accounts:utilisateur_detail' u.pk %}" class="btn btn-sm btn-ghost" title="Voir détails">
+                <i data-lucide="eye" style="width:16px;height:16px;"></i>
+              </a>
+              <a href="{% url 'accounts:utilisateur_update' u.pk %}" class="btn btn-sm btn-ghost" style="color:var(--accent-warning);" title="Modifier">
+                <i data-lucide="pencil" style="width:16px;height:16px;"></i>
+              </a>
+              <a href="{% url 'accounts:utilisateur_delete' u.pk %}" class="btn btn-sm btn-ghost" style="color:var(--accent-tertiary);" title="Supprimer définitivement de la base">
+                <i data-lucide="trash-2" style="width:16px;height:16px;"></i>
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" class="text-center py-5 text-secondary">
+            <div class="d-flex flex-column align-items-center">
+              <i data-lucide="user-x" style="width:40px;height:40px;color:var(--text-tertiary);margin-bottom:8px;"></i>
+              <p class="mb-0 fw-medium">Aucun utilisateur trouvé.</p>
+              {% if query or role_filter %}
+                <small class="text-tertiary">Essayez d'ajuster ou d'effacer vos critères de recherche.</small>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  if (window.lucide) {
+    lucide.createIcons();
+  }
+</script>
+{% endblock %}

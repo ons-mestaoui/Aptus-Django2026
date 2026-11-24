@@ -1,0 +1,128 @@
+{% extends 'layout_front.html' %}
+{% load static %}
+
+{% block title %}CV Builder &mdash; Aptus AI Studio{% endblock %}
+
+{% block content %}
+<!-- Gradient Hero Banner (Révolution IA Intégrée) -->
+<div class="py-5 px-3 mb-5 text-white" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #db2777 100%); border-radius: 0 0 40px 40px; box-shadow: 0 10px 30px rgba(124, 58, 237, 0.2);">
+  <div class="container py-3" style="max-width: 1200px;">
+    <div class="row align-items-center g-4">
+      <div class="col-lg-8">
+        <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill mb-3" style="background: linear-gradient(90deg, #fbbf24, #f59e0b); color: #000; font-size: 0.75rem; font-weight: 800; letter-spacing: 1px;">
+          <span>🚀 RÉVOLUTION IA INTÉGRÉE</span>
+        </div>
+        <h1 class="display-5 fw-bold mb-3" style="letter-spacing: -1px; line-height: 1.15;">
+          Ne choisissez pas un design,<br><span style="color: #fbbf24;">choisissez la victoire.</span>
+        </h1>
+        <p class="lead mb-4 text-white-50" style="font-size: 1.1rem; max-width: 600px;">
+          Propulsez votre carrière avec notre suite d'outils de recrutement de nouvelle génération intégrée à chaque template.
+        </p>
+
+        <!-- 4 Feature Bullets -->
+        <div class="row g-3 mb-4">
+          <div class="col-sm-6 d-flex align-items-start gap-2">
+            <div class="p-2 rounded-3" style="background: rgba(255,255,255,0.15);"><i data-lucide="target" style="width: 18px; height: 18px;"></i></div>
+            <div>
+              <strong class="d-block small">CV Sur Mesure</strong>
+              <small class="text-white-50">Réécriture automatique selon l'offre.</small>
+            </div>
+          </div>
+          <div class="col-sm-6 d-flex align-items-start gap-2">
+            <div class="p-2 rounded-3" style="background: rgba(255,255,255,0.15);"><i data-lucide="shield-check" style="width: 18px; height: 18px;"></i></div>
+            <div>
+              <strong class="d-block small">Audit ATS High-Tech</strong>
+              <small class="text-white-50">Optimisation pour les algorithmes.</small>
+            </div>
+          </div>
+          <div class="col-sm-6 d-flex align-items-start gap-2">
+            <div class="p-2 rounded-3" style="background: rgba(255,255,255,0.15);"><i data-lucide="trending-up" style="width: 18px; height: 18px;"></i></div>
+            <div>
+              <strong class="d-block small">Stratégie Salariale</strong>
+              <small class="text-white-50">Maximisez votre rémunération.</small>
+            </div>
+          </div>
+          <div class="col-sm-6 d-flex align-items-start gap-2">
+            <div class="p-2 rounded-3" style="background: rgba(255,255,255,0.15);"><i data-lucide="brain" style="width: 18px; height: 18px;"></i></div>
+            <div>
+              <strong class="d-block small">Psychologie d'Entretien</strong>
+              <small class="text-white-50">Convainquez chaque recruteur.</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="d-flex gap-3">
+          <a href="{% url 'cv_studio:template_list' %}" class="btn btn-light fw-bold px-4 py-2" style="border-radius: 12px; color: #4f46e5;">
+            <i data-lucide="zap" style="width: 18px; height: 18px; margin-right: 4px;"></i>
+            <span>Choisir un Template IA</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="col-lg-4 text-center d-none d-lg-block">
+        <div class="p-4 rounded-4" style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2);">
+          <i data-lucide="file-check-2" style="width: 80px; height: 80px; color: #fbbf24; margin-bottom: 1rem;"></i>
+          <h4 class="h5 fw-bold mb-1">Templates Certifiés ATS</h4>
+          <p class="small text-white-50 mb-0">Testés auprès de +500 recruteurs partenaires.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Mes CVs / Templates Showcase -->
+<div class="container py-2 mb-5" style="max-width: 1200px;">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="h4 fw-bold mb-1" style="color: var(--text-primary);">Mes Curriculums Vitae ({{ cvs.count }})</h2>
+      <p class="text-secondary small mb-0">Documents générés et optimisés pour vos candidatures.</p>
+    </div>
+    <a href="{% url 'cv_studio:template_list' %}" class="btn btn-primary" style="border-radius: 10px;">
+      <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
+      <span>Nouveau CV</span>
+    </a>
+  </div>
+
+  <div class="row g-4">
+    {% for cv in cvs %}
+    <div class="col-md-6 col-lg-4">
+      <div class="card-flat p-4 h-100 d-flex flex-column" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; box-shadow: var(--shadow-sm);">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span class="badge badge-info">{{ cv.statut|default:'Actif' }}</span>
+          <span class="text-tertiary small">{{ cv.date_mise_a_jour|date:"d/m/Y" }}</span>
+        </div>
+        <h3 class="h5 fw-bold mb-1" style="color: var(--text-primary);">{{ cv.nom_document }}</h3>
+        <p class="text-primary fw-semibold small mb-1">{{ cv.nom_complet }}</p>
+        <p class="text-secondary small mb-3"><i data-lucide="briefcase" style="width: 14px; height: 14px; margin-right: 4px;"></i> {{ cv.titre_poste|default:'Poste non spécifié' }}</p>
+        <p class="text-secondary small flex-grow-1">{{ cv.resume|truncatewords:16|default:'Aucun résumé renseigné.' }}</p>
+        
+        <div class="d-flex justify-content-between align-items-center pt-3 border-top" style="border-color: var(--border-color-light) !important;">
+          <a href="{% url 'cv_studio:cv_detail' cv.pk %}" class="btn btn-sm btn-secondary" style="border-radius: 8px;">
+            <i data-lucide="eye" style="width: 14px; height: 14px;"></i> Voir
+          </a>
+          <div class="d-flex gap-1">
+            <a href="{% url 'cv_studio:cv_print' cv.pk %}" target="_blank" class="btn btn-sm btn-ghost text-primary" title="Imprimer / Exporter"><i data-lucide="printer" style="width: 15px; height: 15px;"></i></a>
+            <a href="{% url 'cv_studio:cv_update' cv.pk %}" class="btn btn-sm btn-ghost text-warning" title="Modifier"><i data-lucide="pencil" style="width: 15px; height: 15px;"></i></a>
+            <a href="{% url 'cv_studio:cv_delete' cv.pk %}" class="btn btn-sm btn-ghost text-danger" title="Supprimer"><i data-lucide="trash-2" style="width: 15px; height: 15px;"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="col-12 text-center py-5 text-secondary">
+      <i data-lucide="file-x" style="width: 48px; height: 48px; color: var(--text-tertiary); margin-bottom: 12px;"></i>
+      <h4 class="h5 fw-bold mb-1">Aucun CV créé pour le moment</h4>
+      <p class="text-secondary small mb-4">Créez votre premier CV optimisé par IA en quelques minutes.</p>
+      <a href="{% url 'cv_studio:cv_create' %}" class="btn btn-primary" style="border-radius: 12px; padding: 0.75rem 2rem;">Créer mon premier CV</a>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  if (window.lucide) lucide.createIcons();
+</script>
+{% endblock %}

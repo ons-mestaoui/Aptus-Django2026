@@ -1,0 +1,188 @@
+{% extends 'layout_front.html' %}
+{% load static %}
+
+{% block title %}{{ title }} — Aptus Admin{% endblock %}
+
+{% block content %}
+<div class="mb-3" style="max-width: 1100px; margin: 0 auto 1rem auto;">
+  <a href="{% url 'cv_studio:cv_list' %}" class="text-secondary small d-inline-flex align-items-center gap-1" style="text-decoration:none;">
+    <i data-lucide="arrow-left" style="width:16px;height:16px;"></i>
+    <span>Retour aux CVs</span>
+  </a>
+</div>
+
+<div class="card-flat" style="max-width: 1100px; margin: 0 auto; background: var(--bg-card); border-radius: 24px; border: 1px solid var(--border-color); box-shadow: 0 10px 40px rgba(0,0,0,0.06); padding: 2.5rem;">
+  <!-- Header with title & close button -->
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1.5rem;">
+    <div>
+      <h2 style="font-size: 1.75rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.75rem;">
+        <i data-lucide="file-badge" style="width:30px;height:30px;color:var(--accent-primary);"></i>
+        <span>{{ title }}</span>
+      </h2>
+      <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 0;">Composez ou mettez à jour les rubriques du curriculum vitae professionnel.</p>
+    </div>
+    <a href="{% url 'cv_studio:cv_list' %}" style="width: 44px; height: 44px; border-radius: 12px; background: var(--bg-secondary); display: flex; align-items: center; justify-content: center; color: var(--text-secondary); transition: all 0.2s; text-decoration:none;" title="Fermer">
+      <i data-lucide="x" style="width: 22px; height: 22px;"></i>
+    </a>
+  </div>
+
+  {% if selected_template %}
+  <div class="d-inline-flex align-items-center gap-2 mb-4 px-3 py-2 rounded-pill" style="background: var(--accent-primary-light); color: var(--accent-primary); font-weight: 700; font-size: 0.85rem; border: 1px solid var(--accent-primary);">
+    <i data-lucide="layout-template" style="width: 16px; height: 16px;"></i>
+    <span>Modèle graphique sélectionné : <strong>{{ selected_template.nom }}</strong></span>
+  </div>
+  {% endif %}
+
+  {% if form.errors %}
+  <div style="background: var(--accent-tertiary-light); border: 1px solid var(--accent-tertiary); color: var(--accent-tertiary); padding: 1.25rem; border-radius: 16px; margin-bottom: 2rem; display: flex; align-items: flex-start; gap: 1rem;">
+    <i data-lucide="alert-circle" style="width: 24px; height: 24px; flex-shrink: 0; margin-top: 2px;"></i>
+    <div>
+      <strong style="display: block; margin-bottom: 0.25rem; font-size: 1rem;">Attention</strong>
+      <p style="font-size: 0.9rem; line-height: 1.5; margin: 0;">Veuillez renseigner tous les champs obligatoires sans erreurs.</p>
+    </div>
+  </div>
+  {% endif %}
+
+  <form method="POST">
+    {% csrf_token %}
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(440px, 1fr)); gap: 2.5rem;">
+      <!-- ═══ COLONNE GAUCHE ═══ -->
+      <div style="display: flex; flex-direction: column; gap: 2rem;">
+        <section>
+          <h3 style="font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent-primary); font-weight: 700; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+            <i data-lucide="user" style="width: 16px; height: 16px;"></i> Identité &amp; Titre
+          </h3>
+          <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+            <div class="form-group">
+              <label class="form-label" style="font-weight: 600; margin-bottom: 0.4rem;" for="{{ form.candidat.id_for_label }}">
+                Candidat Associé <span style="color: var(--accent-tertiary);">*</span>
+              </label>
+              {{ form.candidat }}
+              {% if form.candidat.errors %}<div class="text-danger small mt-1">{{ form.candidat.errors }}</div>{% endif %}
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" style="font-weight: 600; margin-bottom: 0.4rem;" for="{{ form.nom_document.id_for_label }}">
+                Nom du Document <span style="color: var(--accent-tertiary);">*</span>
+              </label>
+              {{ form.nom_document }}
+              {% if form.nom_document.errors %}<div class="text-danger small mt-1">{{ form.nom_document.errors }}</div>{% endif %}
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
+              <div class="form-group">
+                <label class="form-label" style="font-weight: 600; margin-bottom: 0.4rem;" for="{{ form.nom_complet.id_for_label }}">
+                  Nom Complet Affiché <span style="color: var(--accent-tertiary);">*</span>
+                </label>
+                {{ form.nom_complet }}
+                {% if form.nom_complet.errors %}<div class="text-danger small mt-1">{{ form.nom_complet.errors }}</div>{% endif %}
+              </div>
+              <div class="form-group">
+                <label class="form-label" style="font-weight: 600; margin-bottom: 0.4rem;" for="{{ form.titre_poste.id_for_label }}">
+                  Titre du Poste Visé
+                </label>
+                {{ form.titre_poste }}
+                {% if form.titre_poste.errors %}<div class="text-danger small mt-1">{{ form.titre_poste.errors }}</div>{% endif %}
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
+              <div class="form-group">
+                <label class="form-label" style="font-weight: 600; margin-bottom: 0.4rem;" for="{{ form.template.id_for_label }}">
+                  Modèle Graphique
+                </label>
+                {{ form.template }}
+                {% if form.template.errors %}<div class="text-danger small mt-1">{{ form.template.errors }}</div>{% endif %}
+              </div>
+              <div class="form-group">
+                <label class="form-label" style="font-weight: 600; margin-bottom: 0.4rem;" for="{{ form.statut.id_for_label }}">
+                  Statut
+                </label>
+                {{ form.statut }}
+                {% if form.statut.errors %}<div class="text-danger small mt-1">{{ form.statut.errors }}</div>{% endif %}
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" style="font-weight: 600; margin-bottom: 0.4rem;" for="{{ form.info_contact.id_for_label }}">
+                Coordonnées de Contact
+              </label>
+              {{ form.info_contact }}
+              {% if form.info_contact.errors %}<div class="text-danger small mt-1">{{ form.info_contact.errors }}</div>{% endif %}
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ═══ COLONNE DROITE ═══ -->
+      <div style="display: flex; flex-direction: column; gap: 2rem;">
+        <section>
+          <h3 style="font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent-primary); font-weight: 700; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+            <i data-lucide="file-text" style="width: 16px; height: 16px;"></i> Rubriques Professionnelles
+          </h3>
+          <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+            <div class="form-group">
+              <label class="form-label" style="font-weight: 600; margin-bottom: 0.4rem;" for="{{ form.resume.id_for_label }}">
+                Résumé Professionnel
+              </label>
+              {{ form.resume }}
+              {% if form.resume.errors %}<div class="text-danger small mt-1">{{ form.resume.errors }}</div>{% endif %}
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" style="font-weight: 600; margin-bottom: 0.4rem;" for="{{ form.experience.id_for_label }}">
+                Expérience Professionnelle
+              </label>
+              {{ form.experience }}
+              {% if form.experience.errors %}<div class="text-danger small mt-1">{{ form.experience.errors }}</div>{% endif %}
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" style="font-weight: 600; margin-bottom: 0.4rem;" for="{{ form.formation.id_for_label }}">
+                Formation &amp; Diplômes
+              </label>
+              {{ form.formation }}
+              {% if form.formation.errors %}<div class="text-danger small mt-1">{{ form.formation.errors }}</div>{% endif %}
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
+              <div class="form-group">
+                <label class="form-label" style="font-weight: 600; margin-bottom: 0.4rem;" for="{{ form.competences.id_for_label }}">
+                  Compétences Clés
+                </label>
+                {{ form.competences }}
+                {% if form.competences.errors %}<div class="text-danger small mt-1">{{ form.competences.errors }}</div>{% endif %}
+              </div>
+              <div class="form-group">
+                <label class="form-label" style="font-weight: 600; margin-bottom: 0.4rem;" for="{{ form.langues.id_for_label }}">
+                  Langues
+                </label>
+                {{ form.langues }}
+                {% if form.langues.errors %}<div class="text-danger small mt-1">{{ form.langues.errors }}</div>{% endif %}
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- Form Footer Actions -->
+    <div style="margin-top: 3rem; padding-top: 1.75rem; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 1.25rem; align-items: center;">
+      <a href="{% url 'cv_studio:cv_list' %}" class="btn btn-secondary" style="padding: 0.75rem 2rem; border-radius: 12px; font-weight: 600;">Annuler</a>
+      <button type="submit" class="btn btn-primary" style="padding: 0.75rem 2.5rem; border-radius: 12px; font-weight: 700;">
+        <i data-lucide="check" style="width: 18px; height: 18px;"></i>
+        <span>Enregistrer le CV</span>
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  if (window.lucide) {
+    lucide.createIcons();
+  }
+</script>
+{% endblock %}\n

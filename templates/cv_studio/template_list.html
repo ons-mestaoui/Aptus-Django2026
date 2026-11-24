@@ -1,0 +1,237 @@
+{% extends 'layout_front.html' %}
+{% load static %}
+
+{% block title %}Générer CV — Templates IA — Aptus{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/cv.css' %}">
+<style>
+  .cv-gallery-layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 2rem;
+    margin-top: 2rem;
+  }
+  @media (max-width: 991px) {
+    .cv-gallery-layout {
+      grid-template-columns: 1fr;
+    }
+    .cv-sidebar {
+      display: none;
+    }
+  }
+  .cv-templates-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+  .cv-hero {
+    position: relative;
+    background: linear-gradient(135deg, #00A3DA 0%, #6B34A3 50%, #8D2587 100%);
+    border-radius: var(--radius-2xl, 24px);
+    padding: 3.5rem 3rem;
+    margin-bottom: 2.5rem;
+    color: #fff;
+    box-shadow: 0 15px 40px rgba(107, 52, 163, 0.25);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width: 1250px;">
+
+  <!-- ═══════════════════════════════════════════
+       HERO BANNER (Authentique Aptus cv_templates.php)
+       ═══════════════════════════════════════════ -->
+  <section class="cv-hero" id="cv-hero">
+    <div class="row align-items-center g-4">
+      <div class="col-lg-8">
+        <span class="badge mb-3 px-3 py-1" style="background: rgba(255,255,255,0.2); color:#fff; font-size:11px; letter-spacing:0.06em; text-transform:uppercase; font-weight:700;">
+          <i data-lucide="sparkles" style="width:14px;height:14px;margin-right:4px;"></i>
+          Aptus Intelligence Évolution
+        </span>
+        <h1 class="display-6 fw-bold mb-3" style="color:#fff; letter-spacing:-0.5px;">
+          Propulsez votre Carrière avec l'IA Haute Précision
+        </h1>
+        <p class="lead mb-4 text-white opacity-90" style="font-size:1.05rem; line-height:1.6; max-width:620px;">
+          Choisissez un modèle de CV certifié, optimisez chaque mot avec notre assistant IA et garantissez votre succès avec l'audit ATS en temps réel.
+        </p>
+        <div class="d-flex gap-3 flex-wrap">
+          <a href="#templates-section" class="btn btn-light fw-bold px-4 py-2" style="border-radius:12px; color:var(--accent-primary); box-shadow:0 4px 15px rgba(0,0,0,0.15);">
+            <i data-lucide="rocket" style="width:16px;height:16px;margin-right:6px;"></i>
+            <span>Choisir un Template</span>
+          </a>
+          <a href="{% url 'cv_studio:cv_list' %}" class="btn btn-outline-light fw-semibold px-4 py-2" style="border-radius:12px; background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.3);">
+            <i data-lucide="folder-open" style="width:16px;height:16px;margin-right:6px;"></i>
+            <span>Consulter mes CVs</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="col-lg-4 text-center d-none d-lg-block">
+        <div class="p-4 rounded-4" style="background:rgba(255,255,255,0.12); backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,0.25);">
+          <i data-lucide="shield-check" style="width:64px;height:64px;color:#fbbf24;margin-bottom:1rem;"></i>
+          <h4 class="h5 fw-bold text-white mb-1">Templates Certifiés ATS</h4>
+          <p class="small text-white opacity-75 mb-0">Reconnus par plus de 500 entreprises partenaires.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       TEMPLATES GALLERY SECTION
+       ═══════════════════════════════════════════ -->
+  <div id="templates-section">
+    <div class="cv-gallery-layout">
+
+      <!-- ═══ SIDEBAR FILTERS ═══ -->
+      <aside class="cv-sidebar" style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:20px; padding:1.5rem; height:fit-content;">
+        <div class="mb-4">
+          <div class="d-flex align-items-center gap-2 mb-3 fw-bold small text-uppercase" style="color:var(--text-secondary); letter-spacing:0.05em;">
+            <i data-lucide="filter" style="width:16px;height:16px;color:var(--accent-primary);"></i>
+            <span>Catégories</span>
+          </div>
+          <div class="d-flex flex-column gap-2 text-sm">
+            <label class="d-flex align-items-center gap-2" style="cursor:pointer;">
+              <input type="radio" name="cat-filter" value="" checked onchange="filterTemplates()">
+              <span>Tous les domaines</span>
+            </label>
+            <label class="d-flex align-items-center gap-2" style="cursor:pointer;">
+              <input type="radio" name="cat-filter" value="tech" onchange="filterTemplates()">
+              <span>Technologie &amp; IT</span>
+            </label>
+            <label class="d-flex align-items-center gap-2" style="cursor:pointer;">
+              <input type="radio" name="cat-filter" value="design" onchange="filterTemplates()">
+              <span>Design &amp; Création</span>
+            </label>
+            <label class="d-flex align-items-center gap-2" style="cursor:pointer;">
+              <input type="radio" name="cat-filter" value="business" onchange="filterTemplates()">
+              <span>Business &amp; Finance</span>
+            </label>
+            <label class="d-flex align-items-center gap-2" style="cursor:pointer;">
+              <input type="radio" name="cat-filter" value="ats" onchange="filterTemplates()">
+              <span>ATS-Friendly</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="pt-3 border-top" style="border-color:var(--border-color-light)!important;">
+          <div class="d-flex align-items-center gap-2 mb-3 fw-bold small text-uppercase" style="color:var(--text-secondary); letter-spacing:0.05em;">
+            <i data-lucide="sparkles" style="width:16px;height:16px;color:var(--accent-secondary);"></i>
+            <span>Type d'accès</span>
+          </div>
+          <div class="d-flex flex-column gap-2 text-sm">
+            <label class="d-flex align-items-center gap-2" style="cursor:pointer;">
+              <input type="radio" name="premium-filter" value="" checked onchange="filterTemplates()">
+              <span>Tous les modèles</span>
+            </label>
+            <label class="d-flex align-items-center gap-2" style="cursor:pointer;">
+              <input type="radio" name="premium-filter" value="free" onchange="filterTemplates()">
+              <span>Gratuits</span>
+            </label>
+            <label class="d-flex align-items-center gap-2" style="cursor:pointer;">
+              <input type="radio" name="premium-filter" value="premium" onchange="filterTemplates()">
+              <span>Premium ⭐</span>
+            </label>
+          </div>
+        </div>
+      </aside>
+
+      <!-- ═══ MAIN TEMPLATES GRID ═══ -->
+      <div>
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+          <div>
+            <h2 class="h4 fw-bold mb-1" style="color:var(--text-primary);">Catalogue des Templates CV</h2>
+            <span class="text-secondary small">{{ templates.count }} modèle(s) configuré(s) en base de données</span>
+          </div>
+          <div class="position-relative" style="width:260px;">
+            <i data-lucide="search" style="width:16px;height:16px;position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-tertiary);"></i>
+            <input type="text" class="form-control ps-5" placeholder="Rechercher un modèle..." id="template-search" oninput="filterTemplates()" style="border-radius:12px;">
+          </div>
+        </div>
+
+        <div class="cv-templates-grid" id="templates-container">
+          {% for t in templates %}
+          <div class="template-card" data-name="{{ t.nom|lower }}" data-desc="{{ t.description|default:''|lower }}" data-premium="{{ t.est_premium|yesno:'true,false' }}">
+            <div class="template-card__preview">
+              {% if t.url_miniature %}
+                <img src="{{ t.url_miniature }}" alt="{{ t.nom }}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;">
+              {% else %}
+                <div class="template-card__preview-inner">
+                  <div class="template-card__preview-line accent"></div>
+                  <div class="template-card__preview-line medium"></div>
+                  <div class="template-card__preview-line short"></div>
+                  <div class="template-card__preview-block"></div>
+                  <div class="template-card__preview-line" style="margin-top:auto;"></div>
+                  <div class="template-card__preview-line medium"></div>
+                  <div class="template-card__preview-block"></div>
+                  <div class="template-card__preview-line short"></div>
+                </div>
+              {% endif %}
+              <div class="template-card__overlay">
+                <a href="{% url 'cv_studio:cv_create' %}?template_id={{ t.id_template }}" class="btn">
+                  <i data-lucide="eye" style="width:14px;height:14px;margin-right:4px;"></i>
+                  <span>Utiliser ce Template</span>
+                </a>
+              </div>
+            </div>
+            <div class="template-card__info">
+              <div>
+                <div class="template-card__name text-truncate" style="max-width:180px;">{{ t.nom }}</div>
+                <div class="template-card__category">{{ t.description|truncatewords:4|default:'Général' }}</div>
+              </div>
+              <div>
+                {% if t.est_premium %}
+                  <span class="badge" style="background:linear-gradient(135deg, #f59e0b, #d946ef); color:#fff; border:none; font-size:10px; padding:3px 8px; border-radius:12px;">Premium</span>
+                {% else %}
+                  <span class="badge badge-neutral" style="background:var(--bg-secondary); color:var(--text-secondary); font-size:10px; padding:3px 8px; border-radius:12px; border:1px solid var(--border-color-light);">Gratuit</span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {% empty %}
+          <div class="p-5 text-center w-100" style="grid-column: 1 / -1; background:var(--bg-card); border-radius:20px; border:1px solid var(--border-color);">
+            <i data-lucide="layout-template" style="width:48px;height:48px;color:var(--text-tertiary);margin-bottom:1rem;"></i>
+            <h4 class="h5 fw-bold mb-1">Aucun template disponible</h4>
+            <p class="text-secondary small mb-0">Les modèles configurés depuis le Backoffice apparaîtront directement ici.</p>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  if (window.lucide) {
+    lucide.createIcons();
+  }
+
+  function filterTemplates() {
+    const searchVal = (document.getElementById('template-search')?.value || '').toLowerCase().trim();
+    const catChecked = document.querySelector('input[name="cat-filter"]:checked')?.value || '';
+    const premChecked = document.querySelector('input[name="premium-filter"]:checked')?.value || '';
+    const cards = document.querySelectorAll('.template-card');
+
+    cards.forEach(card => {
+      const name = card.getAttribute('data-name') || '';
+      const desc = card.getAttribute('data-desc') || '';
+      const isPrem = card.getAttribute('data-premium') === 'true';
+
+      const matchSearch = !searchVal || name.includes(searchVal) || desc.includes(searchVal);
+      const matchCat = !catChecked || desc.includes(catChecked) || name.includes(catChecked);
+      const matchPrem = !premChecked || (premChecked === 'premium' && isPrem) || (premChecked === 'free' && !isPrem);
+
+      if (matchSearch && matchCat && matchPrem) {
+        card.style.display = 'block';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+  }
+</script>
+{% endblock %}

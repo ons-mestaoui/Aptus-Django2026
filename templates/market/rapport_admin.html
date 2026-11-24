@@ -1,0 +1,112 @@
+{% extends 'layout_back.html' %}
+{% load static %}
+
+{% block title %}Administration Veille Marché &mdash; Aptus Backoffice{% endblock %}
+
+{% block content %}
+<div class="back-page-header">
+  <div class="back-page-header__row">
+    <div>
+      <h1 class="h2 fw-bold mb-1 d-flex align-items-center gap-2">
+        <i data-lucide="line-chart" style="width: 28px; height: 28px; color: var(--accent-primary);"></i>
+        <span>Veille du Marché</span>
+      </h1>
+      <p class="text-secondary mb-0">Gestion des rapports d'analyses et des indicateurs sectoriels</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{% url 'market:rapport_create' %}" class="btn btn-primary">
+        <i data-lucide="plus-circle" style="width: 18px; height: 18px;"></i>
+        <span>Nouveau Rapport</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card h-100">
+      <div>
+        <div class="stat-card__label">Total Rapports</div>
+        <div class="stat-card__value">{{ stats.total_rapports|default:rapports.count }}</div>
+        <div class="stat-card__trend up"><i data-lucide="trending-up" style="width: 14px; height: 14px;"></i> Sectoriels</div>
+      </div>
+      <div class="stat-card__icon purple"><i data-lucide="file-text" style="width: 22px; height: 22px;"></i></div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card h-100">
+      <div>
+        <div class="stat-card__label">Points de Données</div>
+        <div class="stat-card__value">{{ stats.total_donnees|default:donnees.count }}</div>
+        <div class="stat-card__trend up"><i data-lucide="database" style="width: 14px; height: 14px;"></i> Indexés</div>
+      </div>
+      <div class="stat-card__icon teal"><i data-lucide="database" style="width: 22px; height: 22px;"></i></div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card h-100">
+      <div>
+        <div class="stat-card__label">Salaire Moyen Marché</div>
+        <div class="stat-card__value">{{ stats.salaire_moyen|default:'42,500 €' }}</div>
+        <div class="stat-card__trend up"><i data-lucide="wallet" style="width: 14px; height: 14px;"></i> Annuel</div>
+      </div>
+      <div class="stat-card__icon blue"><i data-lucide="wallet" style="width: 22px; height: 22px;"></i></div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card h-100">
+      <div>
+        <div class="stat-card__label">Secteurs Actifs</div>
+        <div class="stat-card__value">{{ stats.secteurs|default:'8' }}</div>
+        <div class="stat-card__trend up"><i data-lucide="check" style="width: 14px; height: 14px;"></i> Suivis</div>
+      </div>
+      <div class="stat-card__icon orange"><i data-lucide="pie-chart" style="width: 22px; height: 22px;"></i></div>
+    </div>
+  </div>
+</div>
+
+<div class="card-flat" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-card);">
+  <div class="table-responsive">
+    <table class="data-table mb-0">
+      <thead>
+        <tr>
+          <th>Titre du Rapport</th>
+          <th>Secteur</th>
+          <th>Région</th>
+          <th>Salaire Moyen</th>
+          <th>Tendance</th>
+          <th class="text-end">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in rapports %}
+        <tr>
+          <td class="fw-bold"><a href="{% url 'market:rapport_detail' r.pk %}" class="text-primary">{{ r.titre }}</a></td>
+          <td><span class="badge badge-primary">{{ r.secteur_principal|default:'Tech' }}</span></td>
+          <td>{{ r.region|default:'Global' }}</td>
+          <td class="text-success fw-bold">{{ r.salaire_moyen_global|default:'N/C' }} €</td>
+          <td><span class="badge badge-success">{{ r.tendance_generale|default:'Stable' }}</span></td>
+          <td class="text-end">
+            <a href="{% url 'market:rapport_update' r.pk %}" class="btn btn-sm btn-ghost text-warning"><i data-lucide="pencil" style="width: 16px; height: 16px;"></i></a>
+            <a href="{% url 'market:rapport_delete' r.pk %}" class="btn btn-sm btn-ghost text-danger" title="Supprimer définitivement"><i data-lucide="trash-2" style="width: 16px; height: 16px;"></i></a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" class="text-center py-4 text-secondary">Aucun rapport publié.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  if (window.lucide) lucide.createIcons();
+</script>
+{% endblock %}

@@ -1,0 +1,148 @@
+{% extends 'layout_front.html' %}
+{% load static %}
+
+{% block title %}Mes Postes — Espace Entreprise Aptus{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+    <div>
+      <h1 class="h2 fw-bold mb-1 d-flex align-items-center gap-2" style="color:var(--text-primary);">
+        <i data-lucide="briefcase" style="width:28px;height:28px;color:var(--accent-primary);"></i>
+        <span>Mes Postes Publiés</span>
+      </h1>
+      <p class="text-secondary mb-0">Pilotez vos offres d'emploi et suivez l'afflux des candidatures</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{% url 'jobs:entreprise_candidatures' %}" class="btn btn-secondary" style="border-radius:12px; font-weight:600;">
+        <i data-lucide="users" style="width:16px;height:16px;"></i>
+        <span>Candidatures Reçues</span>
+      </a>
+      <a href="{% url 'jobs:offre_create' %}" class="btn btn-primary" style="border-radius:12px; font-weight:700;">
+        <i data-lucide="plus" style="width:16px;height:16px;"></i>
+        <span>Publier une Offre</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="row g-4 mb-4">
+    <div class="col-sm-6 col-xl-4">
+      <div class="stat-card h-100">
+        <div>
+          <div class="stat-card__label">Total Postes Ouverts</div>
+          <div class="stat-card__value">{{ total_postes|default:offres.count }}</div>
+          <div class="stat-card__trend up"><i data-lucide="check" style="width: 14px; height: 14px;"></i> Actifs</div>
+        </div>
+        <div class="stat-card__icon purple"><i data-lucide="briefcase" style="width: 22px; height: 22px;"></i></div>
+      </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-4">
+      <div class="stat-card h-100">
+        <div>
+          <div class="stat-card__label">Total Candidatures</div>
+          <div class="stat-card__value">{{ total_candidats }}</div>
+          <div class="stat-card__trend up"><i data-lucide="trending-up" style="width: 14px; height: 14px;"></i> Reçues</div>
+        </div>
+        <div class="stat-card__icon blue"><i data-lucide="users" style="width: 22px; height: 22px;"></i></div>
+      </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-4">
+      <div class="stat-card h-100">
+        <div>
+          <div class="stat-card__label">Entreprise</div>
+          <div class="stat-card__value" style="font-size:1.3rem;">{{ entreprise.raison_sociale|default:entreprise.utilisateur.nom|default:'Aptus Recrutement' }}</div>
+          <div class="stat-card__trend"><span class="text-secondary">Espace Entreprise Vérifié</span></div>
+        </div>
+        <div class="stat-card__icon teal"><i data-lucide="shield-check" style="width: 22px; height: 22px;"></i></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table of Posts -->
+  <div class="card-flat" style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:24px; overflow:hidden; box-shadow:var(--shadow-card);">
+    <div class="p-4 border-bottom d-flex align-items-center justify-content-between">
+      <h3 class="h5 fw-bold mb-0">Liste de vos annonces</h3>
+      <span class="text-secondary small">{{ offres.count }} poste{{ offres.count|pluralize }} répertorié{{ offres.count|pluralize }}</span>
+    </div>
+
+    <div class="table-responsive">
+      <table class="data-table mb-0">
+        <thead>
+          <tr>
+            <th>Poste / Métier</th>
+            <th>Domaine</th>
+            <th>Salaire</th>
+            <th>Candidats</th>
+            <th>Date Pub.</th>
+            <th>Expiration</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for o in offres %}
+          <tr>
+            <td>
+              <div class="fw-bold" style="color:var(--text-primary); font-size:1rem;">
+                <a href="{% url 'jobs:offre_detail' o.pk %}" style="text-decoration:none; color:inherit;">{{ o.titre }}</a>
+              </div>
+              <small class="text-secondary">{{ o.experience_requise|default:'Tous profils' }}</small>
+            </td>
+            <td>
+              <span class="badge badge-primary">{{ o.domaine|default:'Emploi' }}</span>
+            </td>
+            <td class="fw-bold text-success">
+              {% if o.salaire %}{{ o.salaire }} TND{% else %}Négociable{% endif %}
+            </td>
+            <td>
+              <a href="{% url 'jobs:entreprise_candidatures' %}?offre_id={{ o.pk }}" class="btn btn-sm btn-ghost d-inline-flex align-items-center gap-1" style="font-weight:700; color:var(--accent-primary);">
+                <i data-lucide="users" style="width:14px;height:14px;"></i>
+                <span>{{ o.nb_candidats }} candidat{{ o.nb_candidats|pluralize }}</span>
+              </a>
+            </td>
+            <td class="text-secondary small">{{ o.date_publication|date:"d/m/Y" }}</td>
+            <td class="text-secondary small">
+              {% if o.date_expir %}
+                {{ o.date_expir|date:"d/m/Y" }}
+              {% else %}
+                <span class="text-muted">-</span>
+              {% endif %}
+            </td>
+            <td class="text-end">
+              <div class="d-inline-flex gap-1">
+                <a href="{% url 'jobs:entreprise_candidatures' %}?offre_id={{ o.pk }}" class="btn btn-sm btn-ghost text-primary" title="Voir les candidatures">
+                  <i data-lucide="inbox" style="width:16px;height:16px;"></i>
+                </a>
+                <a href="{% url 'jobs:offre_update' o.pk %}" class="btn btn-sm btn-ghost" title="Modifier">
+                  <i data-lucide="pencil" style="width:16px;height:16px;"></i>
+                </a>
+                <a href="{% url 'jobs:offre_delete' o.pk %}" class="btn btn-sm btn-ghost text-danger" title="Supprimer">
+                  <i data-lucide="trash-2" style="width:16px;height:16px;"></i>
+                </a>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="7" class="text-center py-5 text-secondary">
+              <i data-lucide="briefcase" style="width:40px;height:40px;opacity:0.3;margin-bottom:0.5rem;"></i>
+              <div>Vous n'avez publié aucune offre pour le moment.</div>
+              <a href="{% url 'jobs:offre_create' %}" class="btn btn-sm btn-primary mt-3">Créer ma première offre</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  if (window.lucide) lucide.createIcons();
+</script>
+{% endblock %}

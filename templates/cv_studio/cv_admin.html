@@ -1,0 +1,159 @@
+{% extends 'layout_back.html' %}
+{% load static %}
+
+{% block title %}Templates CV — Aptus Backoffice{% endblock %}
+
+{% block content %}
+<div class="back-page-header">
+  <div class="back-page-header__row">
+    <div>
+      <h1 class="h2 fw-bold mb-1 d-flex align-items-center gap-2">
+        <i data-lucide="layout-template" style="width: 28px; height: 28px; color: var(--accent-primary);"></i>
+        <span>Templates CV</span>
+      </h1>
+      <p class="text-secondary mb-0">Gérez les templates disponibles pour les utilisateurs</p>
+    </div>
+    <a href="{% url 'backoffice_template_create' %}" class="btn btn-primary" id="add-template-btn">
+      <i data-lucide="plus" style="width:18px;height:18px;"></i>
+      <span>Ajouter un Template</span>
+    </a>
+  </div>
+</div>
+
+<!-- ═══ KPI Stats Cards ═══ -->
+<div class="row g-4 mb-4">
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card h-100">
+      <div>
+        <div class="stat-card__label">Total Templates</div>
+        <div class="stat-card__value">{{ stats.total_templates }}</div>
+        <div class="stat-card__trend up"><i data-lucide="trending-up" style="width: 14px; height: 14px;"></i> En ligne</div>
+      </div>
+      <div class="stat-card__icon purple"><i data-lucide="layout-template" style="width: 22px; height: 22px;"></i></div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card h-100">
+      <div>
+        <div class="stat-card__label">CVs Générés</div>
+        <div class="stat-card__value">{{ stats.total_cvs }}</div>
+        <div class="stat-card__trend up"><i data-lucide="file-check" style="width: 14px; height: 14px;"></i> Par les candidats</div>
+      </div>
+      <div class="stat-card__icon blue"><i data-lucide="file-check" style="width: 22px; height: 22px;"></i></div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card h-100">
+      <div>
+        <div class="stat-card__label">Modèles Gratuits</div>
+        <div class="stat-card__value">{{ stats.gratuit }}</div>
+        <div class="stat-card__trend up"><i data-lucide="award" style="width: 14px; height: 14px;"></i> Standard ATS</div>
+      </div>
+      <div class="stat-card__icon teal"><i data-lucide="award" style="width: 22px; height: 22px;"></i></div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card h-100">
+      <div>
+        <div class="stat-card__label">Modèles Premium VIP</div>
+        <div class="stat-card__value">{{ stats.premium }}</div>
+        <div class="stat-card__trend up"><i data-lucide="crown" style="width: 14px; height: 14px;"></i> Avancés</div>
+      </div>
+      <div class="stat-card__icon orange"><i data-lucide="crown" style="width: 22px; height: 22px;"></i></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Table Section Full Width ═══ -->
+<div class="card-flat" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-card);">
+  <div class="p-4 d-flex align-items-center justify-content-between flex-wrap gap-3 border-bottom">
+    <h3 class="h5 fw-bold mb-0">Catalogue des Modèles</h3>
+    <form method="get" class="search-bar" style="max-width:320px; width:100%;">
+      <div style="position:relative; width:100%;">
+        <i data-lucide="search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); width:16px; height:16px; color:var(--text-tertiary);"></i>
+        <input type="text" name="q" value="{{ query|default:'' }}" class="input w-100" placeholder="Rechercher un template..." style="padding-left:36px;">
+      </div>
+    </form>
+  </div>
+
+  <div class="table-responsive">
+    <table class="data-table mb-0">
+      <thead>
+        <tr>
+          <th>Miniature</th>
+          <th>Nom du Template</th>
+          <th>Catégories (Tags)</th>
+          <th>Type</th>
+          <th>Date de création</th>
+          <th class="text-end">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in templates %}
+        <tr>
+          <td style="width: 70px;">
+            <div style="width: 48px; height: 60px; border-radius: 8px; background: linear-gradient(135deg, rgba(79, 181, 255, 0.1), rgba(168, 100, 228, 0.1)); border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; color: var(--accent-primary);">
+              <i data-lucide="file-text" style="width: 24px; height: 24px;"></i>
+            </div>
+          </td>
+          <td>
+            <div class="fw-bold" style="color:var(--text-primary); font-size:1rem;">{{ t.nom }}</div>
+            <small class="text-secondary font-monospace" style="font-size:0.75rem;">ID #{{ t.id_template }}</small>
+          </td>
+          <td>
+            <div class="d-flex flex-wrap gap-1" style="max-width: 300px;">
+              {% if t.description %}
+                <span class="badge" style="background:rgba(14, 165, 233, 0.1); color:#0284c7; font-weight:600; font-size:0.75rem; border:1px solid rgba(14, 165, 233, 0.2);">
+                  {{ t.description }}
+                </span>
+              {% else %}
+                <span class="text-secondary small">Aucun tag</span>
+              {% endif %}
+            </div>
+          </td>
+          <td>
+            {% if t.est_premium %}
+              <span class="badge" style="background:linear-gradient(135deg, #f59e0b, #d946ef); color:white; font-weight:700; padding:0.4rem 0.8rem; border-radius:8px;">
+                <i data-lucide="crown" style="width:13px;height:13px;display:inline-block;vertical-align:middle;margin-right:3px;"></i>
+                Premium VIP
+              </span>
+            {% else %}
+              <span class="badge" style="background:rgba(16, 185, 129, 0.12); color:#10b981; font-weight:700; padding:0.4rem 0.8rem; border-radius:8px;">
+                Gratuit
+              </span>
+            {% endif %}
+          </td>
+          <td class="text-secondary small">{{ t.date_creation|date:"d/m/Y" }}</td>
+          <td class="text-end">
+            <div class="d-inline-flex gap-1">
+              <a href="{% url 'backoffice_template_update' t.pk %}" class="btn btn-sm btn-ghost" title="Modifier">
+                <i data-lucide="pencil" style="width:16px;height:16px;"></i>
+              </a>
+              <a href="{% url 'backoffice_template_delete' t.pk %}" class="btn btn-sm btn-ghost text-danger" title="Supprimer définitivement">
+                <i data-lucide="trash-2" style="width:16px;height:16px;"></i>
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" class="text-center py-5 text-secondary">
+            <i data-lucide="layout-template" style="width:36px;height:36px;margin-bottom:0.5rem;opacity:0.4;"></i>
+            <div>Aucun template de CV trouvé dans le catalogue.</div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  if (window.lucide) lucide.createIcons();
+</script>
+{% endblock %}

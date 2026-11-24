@@ -1,0 +1,114 @@
+{% extends 'layout_front.html' %}
+{% load static %}
+
+{% block title %}Veille du Marché &mdash; Aptus Intelligence{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width: 1240px;">
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h1 class="h2 fw-bold mb-1 d-flex align-items-center gap-2" style="color: var(--text-primary); letter-spacing: -0.5px;">
+        <i data-lucide="line-chart" style="width: 28px; height: 28px; color: var(--accent-primary);"></i>
+        <span>Veille du Marché</span>
+      </h1>
+      <p class="text-secondary mb-0">Rapports, analyses sectorielles et données en temps réel du marché de l'emploi.</p>
+    </div>
+  </div>
+
+  <!-- Phase 1: L'Écho IA (Pulse Ticker) -->
+  <div class="p-3 mb-4 rounded-4 d-flex align-items-center gap-3 text-white" style="background: linear-gradient(135deg, #6B34A3 0%, #00A3DA 100%); box-shadow: 0 4px 15px rgba(107, 52, 163, 0.2);">
+    <div class="d-inline-flex align-items-center gap-1 px-3 py-1 rounded-pill fw-bold text-nowrap" style="background: rgba(255,255,255,0.2); font-size: 0.85rem;">
+      <i data-lucide="zap" style="width: 16px; height: 16px;"></i>
+      <span>L'Écho IA</span>
+    </div>
+    <div class="text-truncate small" style="opacity: 0.95;">
+      Marché Tech en croissance +12.1% &bull; Forte demande en Python, React, Cloud &bull; Salaires moyens constatés: 45 000 €
+    </div>
+  </div>
+
+  <!-- Sector Filter Chips -->
+  <div class="d-flex flex-wrap gap-2 mb-4">
+    <button class="btn btn-sm btn-primary rounded-pill px-3">Tous les secteurs</button>
+    <button class="btn btn-sm btn-secondary rounded-pill px-3">Tech &amp; IT</button>
+    <button class="btn btn-sm btn-secondary rounded-pill px-3">Data Science &amp; IA</button>
+    <button class="btn btn-sm btn-secondary rounded-pill px-3">Finance &amp; Audit</button>
+    <button class="btn btn-sm btn-secondary rounded-pill px-3">Ingénierie</button>
+  </div>
+
+  <!-- 2-Column Layout -->
+  <div class="row g-4">
+    <!-- Left Column: Reports Feed -->
+    <div class="col-lg-8">
+      <div class="d-flex flex-column gap-4">
+        {% for r in rapports %}
+        <div class="card-flat p-4" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; box-shadow: var(--shadow-sm);">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="badge badge-primary">{{ r.secteur_principal|default:'Marché Tech' }}</span>
+            <span class="text-secondary small d-flex align-items-center gap-1">
+              <i data-lucide="map-pin" style="width: 13px; height: 13px;"></i> {{ r.region|default:'Global' }}
+            </span>
+          </div>
+
+          <h3 class="h5 fw-bold mb-2" style="color: var(--text-primary);">
+            <a href="{% url 'market:rapport_detail' r.pk %}" style="color: inherit; text-decoration: none;">{{ r.titre }}</a>
+          </h3>
+          <p class="text-secondary small mb-3">Rédigé par: {{ r.auteur|default:'Analyste Aptus' }} &bull; {{ r.date_publication|date:"d/m/Y" }}</p>
+
+          <p class="text-secondary small mb-3" style="line-height: 1.6;">
+            {{ r.description|truncatewords:25|default:'Analyse approfondie des tensions de recrutement et compétences émergentes.' }}
+          </p>
+
+          <div class="p-2 rounded mb-3 d-flex justify-content-between align-items-center small" style="background: var(--bg-secondary);">
+            <span class="d-flex align-items-center gap-1">
+              <i data-lucide="wallet" style="width: 14px; height: 14px; color: var(--accent-secondary);"></i>
+              <strong>Moy: {{ r.salaire_moyen_global|default:'N/C' }} €</strong>
+            </span>
+            <span class="badge badge-success">{{ r.tendance_generale|default:'En hausse' }}</span>
+          </div>
+
+          <div class="pt-3 border-top d-flex justify-content-between align-items-center" style="border-color: var(--border-color-light) !important;">
+            <a href="{% url 'market:rapport_detail' r.pk %}" class="btn btn-sm btn-primary" style="border-radius: 8px;">
+              <span>Consulter l'analyse complète</span>
+              <i data-lucide="arrow-right" style="width: 14px; height: 14px;"></i>
+            </a>
+          </div>
+        </div>
+        {% empty %}
+        <div class="card-flat p-5 text-center" style="background: var(--bg-card); border: 2px dashed var(--border-color); border-radius: 20px;">
+          <i data-lucide="line-chart" style="width: 48px; height: 48px; color: var(--text-tertiary); margin-bottom: 12px;"></i>
+          <h4 class="h5 fw-bold mb-1">Aucun rapport de marché disponible</h4>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Right Column: Sidebar Stats -->
+    <div class="col-lg-4">
+      <div class="card-flat p-4 mb-4" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; box-shadow: var(--shadow-sm);">
+        <h3 class="h6 fw-bold mb-3 pb-2 border-bottom" style="color: var(--text-primary);">Statistiques Clés du Marché</h3>
+        <div class="d-flex flex-column gap-3">
+          <div class="p-3 rounded-3" style="background: var(--bg-secondary);">
+            <span class="text-secondary small d-block">Salaire Médian Ingénieur</span>
+            <strong class="fs-5 text-success">48 500 € / an</strong>
+          </div>
+          <div class="p-3 rounded-3" style="background: var(--bg-secondary);">
+            <span class="text-secondary small d-block">Indice de Tension Recrutement</span>
+            <strong class="fs-5 text-primary">8.4 / 10</strong>
+          </div>
+          <div class="p-3 rounded-3" style="background: var(--bg-secondary);">
+            <span class="text-secondary small d-block">Compétences Top #1</span>
+            <strong class="text-dark">Python &bull; React &bull; Cloud AWS</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  if (window.lucide) lucide.createIcons();
+</script>
+{% endblock %}

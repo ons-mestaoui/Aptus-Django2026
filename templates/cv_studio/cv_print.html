@@ -1,0 +1,313 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ cv.nom_document }} — {{ cv.nom_complet }}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --primary: #4F46E5;
+      --primary-dark: #3730A3;
+      --text: #1E293B;
+      --text-muted: #64748B;
+      --border: #E2E8F0;
+      --bg-light: #F8FAFC;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #F1F5F9;
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Action bar for screen */
+    .no-print-bar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: #FFFFFF;
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.6rem 1.25rem;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #FFFFFF;
+    }
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-secondary {
+      background: #FFFFFF;
+      color: var(--text);
+      border-color: var(--border);
+    }
+    .btn-secondary:hover {
+      background: var(--bg-light);
+    }
+
+    /* Printable A4 Sheet */
+    .page-wrapper {
+      max-width: 820px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    .cv-sheet {
+      background: #FFFFFF;
+      border-radius: 16px;
+      padding: 3rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+      border: 1px solid var(--border);
+    }
+
+    .cv-header {
+      border-bottom: 2px solid var(--primary);
+      padding-bottom: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .cv-name {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+
+    .cv-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--primary);
+      margin-top: 0.4rem;
+    }
+
+    .cv-contact {
+      margin-top: 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.25rem;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+    }
+
+    .cv-contact-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .cv-section {
+      margin-bottom: 2rem;
+    }
+
+    .cv-section-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--primary);
+      border-left: 4px solid var(--primary);
+      padding-left: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .cv-text {
+      white-space: pre-line;
+      color: #334155;
+      font-size: 0.95rem;
+      line-height: 1.7;
+    }
+
+    .cv-block {
+      background: var(--bg-light);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      white-space: pre-line;
+      font-size: 0.95rem;
+      line-height: 1.7;
+    }
+
+    .cv-meta {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px dashed var(--border);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    /* Print styles */
+    @media print {
+      body {
+        background: #FFFFFF !important;
+        color: #000000 !important;
+      }
+
+      .no-print-bar {
+        display: none !important;
+      }
+
+      .page-wrapper {
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+
+      .cv-sheet {
+        box-shadow: none !important;
+        border: none !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
+      }
+
+      .cv-block {
+        border-color: #CBD5E1 !important;
+        background: #F8FAFC !important;
+      }
+
+      @page {
+        size: A4;
+        margin: 15mm 20mm;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Screen Actions Bar -->
+  <div class="no-print-bar">
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+      <a href="{% url 'cv_studio:cv_detail' cv.pk %}" class="btn btn-secondary">
+        <i data-lucide="arrow-left" style="width: 16px; height: 16px;"></i>
+        <span>Retour au CV</span>
+      </a>
+      <span style="font-weight: 600; color: var(--text);">{{ cv.nom_document }}</span>
+    </div>
+    <div style="display: flex; gap: 0.75rem;">
+      <button onclick="window.print()" class="btn btn-primary">
+        <i data-lucide="printer" style="width: 16px; height: 16px;"></i>
+        <span>Imprimer / Télécharger en PDF</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- A4 Printable Document -->
+  <div class="page-wrapper">
+    <div class="cv-sheet">
+      <!-- Header -->
+      <div class="cv-header">
+        <h1 class="cv-name">{{ cv.nom_complet }}</h1>
+        {% if cv.titre_poste %}
+          <div class="cv-title">{{ cv.titre_poste }}</div>
+        {% endif %}
+        
+        <div class="cv-contact">
+          {% if cv.candidat.utilisateur.email %}
+            <div class="cv-contact-item">
+              <i data-lucide="mail" style="width: 14px; height: 14px;"></i>
+              <span>{{ cv.candidat.utilisateur.email }}</span>
+            </div>
+          {% endif %}
+          {% if cv.candidat.utilisateur.telephone %}
+            <div class="cv-contact-item">
+              <i data-lucide="phone" style="width: 14px; height: 14px;"></i>
+              <span>{{ cv.candidat.utilisateur.telephone }}</span>
+            </div>
+          {% endif %}
+          {% if cv.info_contact %}
+            <div class="cv-contact-item">
+              <i data-lucide="map-pin" style="width: 14px; height: 14px;"></i>
+              <span>{{ cv.info_contact }}</span>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Résumé Professionnel -->
+      {% if cv.resume %}
+      <div class="cv-section">
+        <h2 class="cv-section-title">Profil &amp; Résumé Professionnel</h2>
+        <p class="cv-text">{{ cv.resume }}</p>
+      </div>
+      {% endif %}
+
+      <!-- Expérience Professionnelle -->
+      {% if cv.experience %}
+      <div class="cv-section">
+        <h2 class="cv-section-title">Expérience Professionnelle</h2>
+        <div class="cv-block">{{ cv.experience }}</div>
+      </div>
+      {% endif %}
+
+      <!-- Formation & Diplômes -->
+      {% if cv.formation %}
+      <div class="cv-section">
+        <h2 class="cv-section-title">Formation &amp; Diplômes</h2>
+        <div class="cv-block">{{ cv.formation }}</div>
+      </div>
+      {% endif %}
+
+      <!-- Compétences Clés -->
+      {% if cv.competences %}
+      <div class="cv-section">
+        <h2 class="cv-section-title">Compétences Techniques &amp; Métier</h2>
+        <div class="cv-block">{{ cv.competences }}</div>
+      </div>
+      {% endif %}
+
+      <!-- Langues -->
+      {% if cv.langues %}
+      <div class="cv-section">
+        <h2 class="cv-section-title">Langues</h2>
+        <p class="cv-text">{{ cv.langues }}</p>
+      </div>
+      {% endif %}
+
+      <!-- Footer Meta -->
+      <div class="cv-meta">
+        <span>Généré sur la plateforme <strong>Aptus IA</strong></span>
+        <span>Dernière mise à jour : {{ cv.date_mise_a_jour|date:"d/m/Y" }}</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    if (window.lucide) {
+      lucide.createIcons();
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,312 @@
+{% extends 'layout_front.html' %}
+{% load static %}
+
+{% block title %}Mon Profil — Aptus{% endblock %}
+
+{% block extra_css %}
+<style>
+  .profile-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem 1rem 4rem;
+  }
+  .profile-grid {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 2rem;
+    align-items: start;
+  }
+  @media (max-width: 900px) {
+    .profile-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  .profile-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+  }
+  .avatar-circle-profile {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    margin: 0 auto 1.25rem;
+    position: relative;
+    background: linear-gradient(135deg, #a864e4, #4fb5ff);
+    color: white;
+    font-size: 2.75rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 25px rgba(168, 100, 228, 0.35);
+  }
+  .avatar-cam-btn {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--accent-primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--bg-card);
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+  <!-- Header -->
+  <div class="mb-4">
+    <h1 class="h2 fw-bold mb-1 d-flex align-items-center gap-2" style="color:var(--text-primary);">
+      {% if user_obj.role == 'Entreprise' or current_role == 'Entreprise' or is_entreprise %}
+        <i data-lucide="building-2" style="width:28px;height:28px;color:var(--accent-primary);"></i>
+        <span>Profil Entreprise</span>
+      {% else %}
+        <i data-lucide="user-circle" style="width:28px;height:28px;color:var(--accent-primary);"></i>
+        <span>Mon Profil</span>
+      {% endif %}
+    </h1>
+    <p class="text-secondary mb-0">Gérez vos informations personnelles et professionnelles</p>
+  </div>
+
+  <form method="POST" action="{% url 'profile' %}">
+    {% csrf_token %}
+    <div class="profile-grid">
+      <!-- Left Column: Identity & Card -->
+      <div class="profile-card text-center">
+        <div class="avatar-circle-profile">
+          {% if user_obj.role == 'Entreprise' or current_role == 'Entreprise' or is_entreprise %}
+            {{ entreprise.raison_sociale|default:user_obj.nom|slice:":2"|upper }}
+          {% else %}
+            {{ user_obj.prenom|slice:":1"|upper }}{{ user_obj.nom|slice:":1"|upper }}
+          {% endif %}
+          <div class="avatar-cam-btn" title="Modifier la photo">
+            <i data-lucide="camera" style="width:16px;height:16px;"></i>
+          </div>
+        </div>
+
+        <h3 class="h4 fw-bold mb-1" style="color:var(--text-primary);">
+          {% if user_obj.role == 'Entreprise' or current_role == 'Entreprise' or is_entreprise %}
+            {{ entreprise.raison_sociale|default:user_obj.nom|default:user_obj.prenom }}
+          {% else %}
+            {{ user_obj.prenom }} {{ user_obj.nom|default:'' }}
+          {% endif %}
+        </h3>
+        <p class="text-secondary small mb-3">{{ current_role|default:user_obj.role }}</p>
+
+        <hr style="border-color:var(--border-color-light); margin:1.5rem 0;">
+
+        <div class="d-flex flex-column gap-3 text-start small">
+          <div class="d-flex align-items-center gap-2">
+            <i data-lucide="mail" style="width:16px;height:16px;color:var(--text-tertiary);flex-shrink:0;"></i>
+            <span style="color:var(--text-primary); word-break:break-all;">{{ user_obj.email|default:user.email }}</span>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <i data-lucide="phone" style="width:16px;height:16px;color:var(--text-tertiary);flex-shrink:0;"></i>
+            <span class="text-secondary">{{ user_obj.telephone|default:user.telephone|default:'Téléphone non renseigné' }}</span>
+          </div>
+          {% if profil.date_mise_a_jour %}
+          <div class="d-flex align-items-center gap-2 pt-2 border-top">
+            <i data-lucide="refresh-cw" style="width:14px;height:14px;color:var(--text-tertiary);flex-shrink:0;"></i>
+            <span class="text-secondary" style="font-size:11px;">Mis à jour le {{ profil.date_mise_a_jour|date:"d/m/Y" }}</span>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Right Column: Editable Details Form -->
+      <div class="profile-card">
+        <h3 class="h5 fw-bold mb-4 pb-2 border-bottom d-flex align-items-center gap-2" style="color:var(--text-primary);">
+          <i data-lucide="user" style="width:20px;height:20px;color:var(--accent-primary);"></i>
+          <span>{% if user_obj.role == 'Entreprise' or current_role == 'Entreprise' or is_entreprise %}Informations de l'Entreprise{% else %}Informations Personnelles{% endif %}</span>
+        </h3>
+
+        {% if is_entreprise or current_role == 'Entreprise' or user_obj.role == 'Entreprise' %}
+          <!-- ── INFORMATIONS ENTREPRISE (Fidèle à profil_entreprise.php) ── -->
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold">Nom de l'entreprise (Raison Sociale) <span class="text-danger">*</span></label>
+              <input type="text" name="nom" class="form-control rounded-3" value="{{ entreprise.raison_sociale|default:user_obj.nom|default:'' }}" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold">Secteur d'activité</label>
+              <select name="secteur" class="form-select rounded-3">
+                <option value="">Sélectionnez un secteur...</option>
+                <option value="Technologies" {% if entreprise.secteur == 'Technologies' or entreprise.secteur == 'tech' %}selected{% endif %}>Technologies &amp; Informatique</option>
+                <option value="Finance" {% if entreprise.secteur == 'Finance' or entreprise.secteur == 'finance' %}selected{% endif %}>Finance &amp; Banque</option>
+                <option value="Santé" {% if entreprise.secteur == 'Santé' or entreprise.secteur == 'sante' %}selected{% endif %}>Santé &amp; Pharmacie</option>
+                <option value="Éducation" {% if entreprise.secteur == 'Éducation' or entreprise.secteur == 'education' %}selected{% endif %}>Éducation &amp; EdTech</option>
+                <option value="Commerce" {% if entreprise.secteur == 'Commerce' or entreprise.secteur == 'commerce' %}selected{% endif %}>Commerce &amp; Retail</option>
+                <option value="Industrie" {% if entreprise.secteur == 'Industrie' or entreprise.secteur == 'industrie' %}selected{% endif %}>Industrie &amp; Ingénierie</option>
+                <option value="Services" {% if entreprise.secteur == 'Services' or entreprise.secteur == 'services' %}selected{% endif %}>Services &amp; Conseil</option>
+                <option value="Autre" {% if entreprise.secteur == 'Autre' or entreprise.secteur == 'autre' %}selected{% endif %}>Autre</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold">Numéro SIRET / Identifiant Fiscal</label>
+              <input type="text" name="siret" class="form-control rounded-3" value="{{ entreprise.siret|default:'' }}" placeholder="14 chiffres">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold">Site Web Officiel</label>
+              <input type="url" name="site_web" class="form-control rounded-3" value="{{ profil.site_web|default:'' }}" placeholder="https://votre-entreprise.com">
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold">Email Professionnel (RH / Contact) <span class="text-danger">*</span></label>
+              <input type="email" name="email" class="form-control rounded-3" value="{{ user_obj.email|default:user.email }}" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold">Téléphone de l'entreprise</label>
+              <input type="text" name="telephone" class="form-control rounded-3" value="{{ user_obj.telephone|default:'' }}" placeholder="+216 ...">
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold">Pays du Siège</label>
+              <input type="text" name="pays" class="form-control rounded-3" value="{{ profil.pays|default:'' }}" placeholder="Ex: Tunisie">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold">Ville</label>
+              <input type="text" name="ville" class="form-control rounded-3" value="{{ profil.ville|default:'' }}" placeholder="Ex: Tunis">
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold">Adresse du Siège Social</label>
+              <input type="text" name="adresse" class="form-control rounded-3" value="{{ profil.adresse|default:'' }}" placeholder="Ex: 12 Rue des Oliviers">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold">Page LinkedIn Entreprise</label>
+              <input type="url" name="linkedin" class="form-control rounded-3" value="{{ profil.linkedin|default:'' }}" placeholder="https://linkedin.com/company/...">
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label small fw-semibold">Présentation &amp; Mission de l'entreprise</label>
+            <textarea name="bio" class="form-control rounded-3" rows="4" placeholder="Présentez la mission, l'équipe et la culture de votre entreprise...">{{ profil.bio|default:'' }}</textarea>
+          </div>
+
+        {% else %}
+          <!-- ── INFORMATIONS CANDIDAT / TUTEUR (Fidèle à profil_candidat.php) ── -->
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold">Nom <span class="text-danger">*</span></label>
+              <input type="text" name="nom" class="form-control rounded-3" value="{{ user_obj.nom|default:'' }}" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold">Prénom <span class="text-danger">*</span></label>
+              <input type="text" name="prenom" class="form-control rounded-3" value="{{ user_obj.prenom|default:'' }}" required>
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold">Adresse Email <span class="text-danger">*</span></label>
+              <input type="email" name="email" class="form-control rounded-3" value="{{ user_obj.email|default:user.email }}" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold">Numéro de Téléphone</label>
+              <input type="text" name="telephone" class="form-control rounded-3" value="{{ user_obj.telephone|default:'' }}" placeholder="+216 ...">
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold">Date de naissance</label>
+              <input type="date" name="date_naissance" class="form-control rounded-3" value="{{ profil.date_naissance|date:'Y-m-d'|default:'' }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold">Pays</label>
+              <input type="text" name="pays" class="form-control rounded-3" value="{{ profil.pays|default:'' }}" placeholder="Ex: Tunisie">
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold">Ville</label>
+              <input type="text" name="ville" class="form-control rounded-3" value="{{ profil.ville|default:'' }}" placeholder="Ex: Tunis">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold">Adresse Complète</label>
+              <input type="text" name="adresse" class="form-control rounded-3" value="{{ profil.adresse|default:'' }}" placeholder="Ex: 12 Rue des Oliviers">
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-12">
+              <label class="form-label small fw-semibold">Profil LinkedIn</label>
+              <input type="url" name="linkedin" class="form-control rounded-3" value="{{ profil.linkedin|default:'' }}" placeholder="https://linkedin.com/in/...">
+            </div>
+          </div>
+
+          {% if is_candidat or current_role == 'Candidat' or user_obj.role == 'Candidat' %}
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold">Niveau d'études</label>
+              <select name="niveauEtudes" class="form-select rounded-3">
+                <option value="" {% if not candidat.niveau_etudes %}selected{% endif %}>Non spécifié</option>
+                <option value="Bac" {% if candidat.niveau_etudes == 'Bac' %}selected{% endif %}>Baccalauréat</option>
+                <option value="Bac+3" {% if candidat.niveau_etudes == 'Bac+3' %}selected{% endif %}>Licence (Bac+3)</option>
+                <option value="Bac+5" {% if candidat.niveau_etudes == 'Bac+5' %}selected{% endif %}>Master / Ingénieur (Bac+5)</option>
+                <option value="Doctorat" {% if candidat.niveau_etudes == 'Doctorat' %}selected{% endif %}>Doctorat</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold">Années d'expérience / Séniorité</label>
+              <select name="niveau" class="form-select rounded-3">
+                <option value="" {% if not candidat.niveau %}selected{% endif %}>Non spécifié</option>
+                <option value="Junior" {% if candidat.niveau == 'Junior' %}selected{% endif %}>Junior (0-2 ans)</option>
+                <option value="Intermédiaire" {% if candidat.niveau == 'Intermédiaire' %}selected{% endif %}>Intermédiaire (2-5 ans)</option>
+                <option value="Senior" {% if candidat.niveau == 'Senior' %}selected{% endif %}>Senior (5+ ans)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label small fw-semibold">Compétences techniques &amp; outils</label>
+            <textarea name="competences" class="form-control rounded-3" rows="3" placeholder="Ajoutez vos compétences séparées par des virgules (ex: Python, Django, React, SQL)...">{{ candidat.competences|default:'' }}</textarea>
+          </div>
+          {% endif %}
+
+          <div class="mb-4">
+            <label class="form-label small fw-semibold">Biographie / Présentation</label>
+            <textarea name="bio" class="form-control rounded-3" rows="3" placeholder="Parlez brièvement de votre parcours, objectifs ou expertises...">{{ profil.bio|default:'' }}</textarea>
+          </div>
+        {% endif %}
+
+        <div class="d-flex justify-content-end gap-3 pt-3 border-top">
+          <a href="{% url 'account_settings' %}" class="btn btn-secondary px-4 rounded-3">Annuler</a>
+          <button type="submit" class="btn btn-primary px-4 rounded-3 d-inline-flex align-items-center gap-2">
+            <i data-lucide="save" style="width:16px;height:16px;"></i>
+            <span>Enregistrer les modifications</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  if (window.lucide) {
+    lucide.createIcons();
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,368 @@
+{% extends 'layout_back.html' %}
+{% load static %}
+
+{% block title %}Tableau de Bord &bull; Aptus Platform{% endblock %}
+
+{% block content %}
+<!-- ═══ Page Header ═══ -->
+<div class="back-page-header">
+  <div class="back-page-header__row">
+    <div>
+      <h1 class="text-2xl fw-bold mb-1">Tableau de Bord Aptus</h1>
+      <p class="text-secondary text-sm mb-0">Plateforme Intelligente de Recrutement &amp; Carrière &bull; Architecture Django 5.x Modulaire</p>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+      <span class="badge badge-primary"><i data-lucide="layers" style="width:14px;height:14px;margin-right:4px;"></i> 5 Modules Actifs</span>
+      <span class="badge badge-success"><i data-lucide="check-circle" style="width:14px;height:14px;margin-right:4px;"></i> Système Opérationnel</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Stat Cards (6 Modules Grid) ═══ -->
+<div class="row g-4 mb-8">
+  <!-- Utilisateurs -->
+  <div class="col-sm-6 col-lg-4 col-xl-2">
+    <div class="stat-card h-100">
+      <div>
+        <div class="stat-card__label">Utilisateurs</div>
+        <div class="stat-card__value" id="counter-users">{{ stats.users }}</div>
+        <a href="{% url 'accounts:utilisateur_list' %}" class="stat-card__trend" style="text-decoration:none;">
+          <span>Gérer</span> <i data-lucide="arrow-right" style="width:14px;height:14px;"></i>
+        </a>
+      </div>
+      <div class="stat-card__icon purple">
+        <i data-lucide="users" style="width:22px;height:22px;"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- Offres d'Emploi -->
+  <div class="col-sm-6 col-lg-4 col-xl-2">
+    <div class="stat-card h-100">
+      <div>
+        <div class="stat-card__label">Offres Emploi</div>
+        <div class="stat-card__value" id="counter-offres">{{ stats.offres }}</div>
+        <a href="{% url 'jobs:offre_list' %}" class="stat-card__trend" style="text-decoration:none;color:var(--stat-teal);">
+          <span>Gérer</span> <i data-lucide="arrow-right" style="width:14px;height:14px;"></i>
+        </a>
+      </div>
+      <div class="stat-card__icon teal">
+        <i data-lucide="briefcase" style="width:22px;height:22px;"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- Candidatures -->
+  <div class="col-sm-6 col-lg-4 col-xl-2">
+    <div class="stat-card h-100">
+      <div>
+        <div class="stat-card__label">Candidatures</div>
+        <div class="stat-card__value" id="counter-candidatures">{{ stats.candidatures }}</div>
+        <a href="{% url 'jobs:candidature_list' %}" class="stat-card__trend" style="text-decoration:none;color:var(--stat-blue);">
+          <span>Gérer</span> <i data-lucide="arrow-right" style="width:14px;height:14px;"></i>
+        </a>
+      </div>
+      <div class="stat-card__icon blue">
+        <i data-lucide="send" style="width:22px;height:22px;"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- CV Studio -->
+  <div class="col-sm-6 col-lg-4 col-xl-2">
+    <div class="stat-card h-100">
+      <div>
+        <div class="stat-card__label">CVs Créés</div>
+        <div class="stat-card__value" id="counter-cvs">{{ stats.cvs }}</div>
+        <a href="{% url 'cv_studio:cv_list' %}" class="stat-card__trend" style="text-decoration:none;color:var(--stat-orange);">
+          <span>Gérer</span> <i data-lucide="arrow-right" style="width:14px;height:14px;"></i>
+        </a>
+      </div>
+      <div class="stat-card__icon orange">
+        <i data-lucide="file-badge" style="width:22px;height:22px;"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- Formations -->
+  <div class="col-sm-6 col-lg-4 col-xl-2">
+    <div class="stat-card h-100">
+      <div>
+        <div class="stat-card__label">Formations</div>
+        <div class="stat-card__value" id="counter-formations">{{ stats.formations }}</div>
+        <a href="{% url 'training:formation_list' %}" class="stat-card__trend" style="text-decoration:none;color:var(--stat-purple);">
+          <span>Gérer</span> <i data-lucide="arrow-right" style="width:14px;height:14px;"></i>
+        </a>
+      </div>
+      <div class="stat-card__icon purple">
+        <i data-lucide="graduation-cap" style="width:22px;height:22px;"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- Veille Marché -->
+  <div class="col-sm-6 col-lg-4 col-xl-2">
+    <div class="stat-card h-100">
+      <div>
+        <div class="stat-card__label">Veille Marché</div>
+        <div class="stat-card__value" id="counter-rapports">{{ stats.rapports }}</div>
+        <a href="{% url 'market:rapport_list' %}" class="stat-card__trend" style="text-decoration:none;color:var(--stat-teal);">
+          <span>Gérer</span> <i data-lucide="arrow-right" style="width:14px;height:14px;"></i>
+        </a>
+      </div>
+      <div class="stat-card__icon teal">
+        <i data-lucide="line-chart" style="width:22px;height:22px;"></i>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Quick Actions Bar ═══ -->
+<div class="card p-4 mb-8">
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+    <div class="d-flex align-items-center gap-2">
+      <div style="width:36px;height:36px;border-radius:var(--radius-sm);background:var(--stat-orange-bg);color:var(--stat-orange);display:flex;align-items:center;justify-content:center;">
+        <i data-lucide="zap" style="width:20px;height:20px;"></i>
+      </div>
+      <div>
+        <span class="fw-bold d-block text-sm">Actions Rapides de Création</span>
+        <span class="text-secondary text-xs">Accès instantané aux formulaires CRUD des modules</span>
+      </div>
+    </div>
+
+    <div class="d-flex flex-wrap gap-2">
+      <a href="{% url 'accounts:utilisateur_create' %}" class="btn btn-secondary btn-sm" style="border-radius:var(--radius-sm);">
+        <i data-lucide="user-plus" style="width:15px;height:15px;color:var(--stat-purple);"></i>
+        <span>Utilisateur</span>
+      </a>
+      <a href="{% url 'jobs:offre_create' %}" class="btn btn-secondary btn-sm" style="border-radius:var(--radius-sm);">
+        <i data-lucide="plus-circle" style="width:15px;height:15px;color:var(--stat-teal);"></i>
+        <span>Offre</span>
+      </a>
+      <a href="{% url 'jobs:candidature_create' %}" class="btn btn-secondary btn-sm" style="border-radius:var(--radius-sm);">
+        <i data-lucide="send" style="width:15px;height:15px;color:var(--stat-blue);"></i>
+        <span>Candidature</span>
+      </a>
+      <a href="{% url 'cv_studio:cv_create' %}" class="btn btn-secondary btn-sm" style="border-radius:var(--radius-sm);">
+        <i data-lucide="file-plus" style="width:15px;height:15px;color:var(--stat-orange);"></i>
+        <span>CV</span>
+      </a>
+      <a href="{% url 'training:formation_create' %}" class="btn btn-secondary btn-sm" style="border-radius:var(--radius-sm);">
+        <i data-lucide="book-plus" style="width:15px;height:15px;color:var(--stat-purple);"></i>
+        <span>Formation</span>
+      </a>
+      <a href="{% url 'market:rapport_create' %}" class="btn btn-secondary btn-sm" style="border-radius:var(--radius-sm);">
+        <i data-lucide="bar-chart-2" style="width:15px;height:15px;color:var(--stat-teal);"></i>
+        <span>Rapport</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Interactive Charts Section ═══ -->
+<div class="row g-6 mb-8">
+  <div class="col-lg-5">
+    <div class="card p-4 h-100">
+      <div class="d-flex align-items-center justify-content-between mb-4">
+        <h3 class="text-md fw-semibold mb-0">Répartition des Entités</h3>
+        <span class="text-xs text-secondary">Vue d'ensemble</span>
+      </div>
+      <div class="d-flex align-items-center justify-content-center py-3" id="modules-donut-chart">
+        <!-- Aptus Donut Chart dynamically rendered here -->
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-7">
+    <div class="card p-4 h-100">
+      <div class="d-flex align-items-center justify-content-between mb-4">
+        <h3 class="text-md fw-semibold mb-0">Volume de Données par Module</h3>
+        <span class="text-xs text-secondary">Statistiques en temps réel</span>
+      </div>
+      <div class="py-2" id="modules-bar-chart">
+        <!-- Aptus Bar Chart dynamically rendered here -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Recent Inscriptions & Job Offers Tables ═══ -->
+<div class="row g-6">
+  <!-- Recent Users -->
+  <div class="col-lg-6">
+    <div class="card overflow-hidden h-100">
+      <div class="d-flex align-items-center justify-content-between p-4 border-bottom" style="border-color:var(--border-color) !important;">
+        <div class="d-flex align-items-center gap-2">
+          <i data-lucide="users" style="width:18px;height:18px;color:var(--accent-primary);"></i>
+          <h3 class="text-sm fw-semibold mb-0">Derniers Utilisateurs</h3>
+        </div>
+        <a href="{% url 'accounts:utilisateur_list' %}" class="text-xs fw-medium" style="color:var(--accent-primary);">Voir tout</a>
+      </div>
+
+      <div class="table-responsive">
+        <table class="data-table mb-0">
+          <thead>
+            <tr>
+              <th>Utilisateur</th>
+              <th>Rôle</th>
+              <th class="text-end">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for u in recent_users %}
+            <tr>
+              <td>
+                <div class="d-flex align-items-center gap-3">
+                  <div class="avatar avatar-initials" style="width:32px;height:32px;font-size:11px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--accent-primary-light);color:var(--accent-primary);font-weight:700;flex-shrink:0;">
+                    {{ u.prenom|slice:":1"|upper }}{{ u.nom|slice:":1"|upper }}
+                  </div>
+                  <div>
+                    <span class="fw-semibold text-sm d-block">{{ u.prenom }} {{ u.nom|default:'' }}</span>
+                    <span class="text-secondary text-xs">{{ u.email }}</span>
+                  </div>
+                </div>
+              </td>
+              <td>
+                {% if u.role == 'Admin' %}
+                  <span class="badge badge-danger">Admin</span>
+                {% elif u.role == 'Entreprise' %}
+                  <span class="badge badge-primary">Entreprise</span>
+                {% elif u.role == 'Tuteur' %}
+                  <span class="badge badge-warning">Tuteur</span>
+                {% else %}
+                  <span class="badge badge-info">Candidat</span>
+                {% endif %}
+              </td>
+              <td class="text-end">
+                <a href="{% url 'accounts:utilisateur_detail' u.pk %}" class="btn btn-secondary btn-sm" style="padding:0.3rem 0.75rem;border-radius:var(--radius-sm);font-size:var(--fs-xs);">
+                  <i data-lucide="eye" style="width:13px;height:13px;"></i> Voir
+                </a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="3" class="text-center text-secondary py-8 text-sm">
+                <i data-lucide="users" style="width:32px;height:32px;margin:0 auto var(--space-2);display:block;color:var(--text-tertiary);"></i>
+                Aucun utilisateur enregistré pour le moment.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Job Offers -->
+  <div class="col-lg-6">
+    <div class="card overflow-hidden h-100">
+      <div class="d-flex align-items-center justify-content-between p-4 border-bottom" style="border-color:var(--border-color) !important;">
+        <div class="d-flex align-items-center gap-2">
+          <i data-lucide="briefcase" style="width:18px;height:18px;color:var(--stat-teal);"></i>
+          <h3 class="text-sm fw-semibold mb-0">Dernières Offres d'Emploi</h3>
+        </div>
+        <a href="{% url 'jobs:offre_list' %}" class="text-xs fw-medium" style="color:var(--stat-teal);">Voir tout</a>
+      </div>
+
+      <div class="table-responsive">
+        <table class="data-table mb-0">
+          <thead>
+            <tr>
+              <th>Offre</th>
+              <th>Domaine</th>
+              <th class="text-end">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for o in recent_offres %}
+            <tr>
+              <td>
+                <div>
+                  <span class="fw-semibold text-sm d-block">{{ o.titre }}</span>
+                  <span class="text-secondary text-xs">{{ o.entreprise.raison_sociale|default:o.entreprise.utilisateur.nom|default:'Aptus Recrutement' }}</span>
+                </div>
+              </td>
+              <td>
+                <span class="badge badge-primary">{{ o.domaine|default:'Général' }}</span>
+              </td>
+              <td class="text-end">
+                <a href="{% url 'jobs:offre_detail' o.pk %}" class="btn btn-secondary btn-sm" style="padding:0.3rem 0.75rem;border-radius:var(--radius-sm);font-size:var(--fs-xs);">
+                  <i data-lucide="eye" style="width:13px;height:13px;"></i> Voir
+                </a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="3" class="text-center text-secondary py-8 text-sm">
+                <i data-lucide="briefcase" style="width:32px;height:32px;margin:0 auto var(--space-2);display:block;color:var(--text-tertiary);"></i>
+                Aucune offre d'emploi active.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const usersCount = {{ stats.users|default:0 }};
+  const offresCount = {{ stats.offres|default:0 }};
+  const candCount = {{ stats.candidatures|default:0 }};
+  const cvsCount = {{ stats.cvs|default:0 }};
+  const formationsCount = {{ stats.formations|default:0 }};
+  const rapportsCount = {{ stats.rapports|default:0 }};
+  const totalItems = usersCount + offresCount + candCount + cvsCount + formationsCount + rapportsCount;
+
+  // Animate stat counters with AptusCharts
+  if (typeof AptusCharts !== 'undefined') {
+    AptusCharts.counter('counter-users', usersCount);
+    AptusCharts.counter('counter-offres', offresCount);
+    AptusCharts.counter('counter-candidatures', candCount);
+    AptusCharts.counter('counter-cvs', cvsCount);
+    AptusCharts.counter('counter-formations', formationsCount);
+    AptusCharts.counter('counter-rapports', rapportsCount);
+
+    // Donut Chart: Module distribution
+    if (totalItems > 0) {
+      AptusCharts.donut('modules-donut-chart', [
+        { label: 'Utilisateurs', value: usersCount },
+        { label: 'Offres', value: offresCount },
+        { label: 'Candidatures', value: candCount },
+        { label: 'CVs', value: cvsCount },
+        { label: 'Formations', value: formationsCount },
+        { label: 'Rapports', value: rapportsCount },
+      ], {
+        size: 190,
+        strokeWidth: 26,
+        centerValue: String(totalItems),
+        centerLabel: 'Total'
+      });
+    }
+
+    // Bar Chart: Volumes
+    AptusCharts.bar('modules-bar-chart', [
+      { label: 'Users', value: usersCount },
+      { label: 'Offres', value: offresCount },
+      { label: 'Cand.', value: candCount },
+      { label: 'CVs', value: cvsCount },
+      { label: 'Form.', value: formationsCount },
+      { label: 'Veille', value: rapportsCount },
+    ], {
+      barColor: 'var(--accent-primary)',
+      height: 210,
+      borderRadius: 6
+    });
+  }
+
+  // Refresh Lucide Icons inside dynamic elements
+  if (window.lucide) {
+    lucide.createIcons();
+  }
+});
+</script>
+{% endblock %}

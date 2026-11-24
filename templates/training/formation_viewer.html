@@ -1,0 +1,234 @@
+{% extends 'layout_front.html' %}
+{% load static %}
+
+{% block title %}Visionneuse de Cours — {{ formation.titre }} — Aptus AI{% endblock %}
+
+{% block extra_css %}
+<style>
+  .viewer-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem 1rem 4rem;
+  }
+  .progress-card {
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem 1.75rem;
+    margin-bottom: 2rem;
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    box-shadow: var(--shadow-card);
+  }
+  .formation-hero-banner {
+    position: relative;
+    height: 280px;
+    border-radius: 24px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+  }
+  .formation-hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(15, 23, 42, 0.85) 0%, rgba(15, 23, 42, 0.4) 100%);
+    display: flex;
+    align-items: center;
+    padding: 0 3rem;
+    justify-content: space-between;
+    gap: 2rem;
+  }
+  .chapter-row {
+    background: var(--bg-surface, var(--bg-card));
+    padding: 1.25rem 1.5rem;
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    transition: all 0.2s ease;
+    margin-bottom: 1rem;
+  }
+  .chapter-row:hover {
+    border-color: var(--accent-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.04);
+  }
+  .chapter-row.completed {
+    border-color: #10b981;
+    background: rgba(16, 185, 129, 0.03);
+  }
+  .chapter-idx {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+  .chapter-idx.done {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+  }
+  .chapter-idx.pending {
+    background: var(--accent-primary-light);
+    color: var(--accent-primary);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="viewer-container">
+  <!-- Progress Header Bar -->
+  <div class="progress-card">
+    <div style="flex-shrink:0;">
+      <div style="font-size:0.75rem;font-weight:800;color:var(--accent-primary);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.25rem;display:flex;align-items:center;gap:0.4rem;">
+        <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent-primary);"></span>
+        Progression du parcours
+      </div>
+      <div class="small text-secondary">
+        Statut : <strong style="color:var(--text-primary);">{{ inscription.statut|default:'En cours' }}</strong>
+      </div>
+    </div>
+
+    <div style="flex:1;min-width:160px;">
+      <div class="progress" style="height:10px;border-radius:20px;background:var(--bg-secondary);">
+        <div class="progress-bar" style="width: {{ current_progression }}%; background: linear-gradient(90deg, #6B34A3, #00A3DA); border-radius: 20px; transition: width 0.5s ease;"></div>
+      </div>
+    </div>
+
+    <div style="font-size:1.25rem;font-weight:800;color:var(--accent-primary);flex-shrink:0;">
+      {{ current_progression }}%
+    </div>
+
+    {% if is_completed %}
+    <div class="badge" style="background:rgba(16,185,129,0.15);color:#10B981;border:1px solid #10B981;padding:0.4rem 0.8rem;border-radius:20px;font-weight:700;display:inline-flex;align-items:center;gap:0.3rem;">
+      <i data-lucide="check-circle-2" style="width:14px;height:14px;"></i>
+      <span>Programme Certifié &amp; Terminé</span>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Hero Banner -->
+  <div class="formation-hero-banner">
+    <div class="formation-hero-overlay">
+      <div style="color:white; max-width:700px;">
+        <span style="background:linear-gradient(90deg, #0ea5e9, #8b5cf6); padding:5px 14px; border-radius:20px; font-size:0.75rem; font-weight:800; text-transform:uppercase; display:inline-block; margin-bottom:1rem; letter-spacing:0.05em;">
+          {{ formation.domaine|default:'E-Learning Aptus' }} &bull; {{ formation.niveau }}
+        </span>
+        <h1 style="font-size:2.2rem; font-weight:800; margin-bottom:0.5rem; line-height:1.2; color:#fff;">
+          {{ formation.titre }}
+        </h1>
+        <div class="d-flex align-items-center gap-2 small opacity-75">
+          <i data-lucide="user-check" style="width:16px;height:16px;"></i>
+          <span>Formateur : <strong>{{ formation.tuteur.prenom|default:'Expert' }} {{ formation.tuteur.nom|default:'Aptus' }}</strong></span>
+          {% if formation.is_online %}
+            <span>&bull;</span>
+            <span class="badge bg-success"><i data-lucide="video" style="width:12px;height:12px;"></i> Session en ligne</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="d-flex flex-column gap-2">
+        {% if formation.lien_api_room %}
+        <a href="{{ formation.lien_api_room }}" target="_blank" class="btn btn-primary" style="border-radius:12px; font-weight:700; white-space:nowrap;">
+          <i data-lucide="video" style="width:16px;height:16px;"></i>
+          <span>Rejoindre la visio live</span>
+        </a>
+        {% endif %}
+        <a href="{% url 'training:formation_my' %}" class="btn btn-secondary" style="border-radius:12px; font-weight:600; white-space:nowrap; background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.25); color:white;">
+          <i data-lucide="arrow-left" style="width:14px;height:14px;"></i>
+          <span>Quitter le cours</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Course Content & Interactive Chapters -->
+  <div class="card p-4 p-md-5 mb-4" style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:24px; box-shadow:var(--shadow-card);">
+    <h2 class="h4 fw-bold mb-3 d-flex align-items-center gap-2" style="color:var(--text-primary);">
+      <i data-lucide="book-open" style="width:22px;height:22px;color:var(--accent-primary);"></i>
+      <span>Programme Pédagogique du Cours</span>
+    </h2>
+    <div class="mb-4" style="color:var(--text-secondary); line-height:1.75; font-size:1rem; white-space:pre-line;">
+      {{ formation.description }}
+    </div>
+
+    <hr style="border-color:var(--border-color-light); margin: 2rem 0;">
+
+    <h3 class="h5 fw-bold mb-3 d-flex align-items-center gap-2" style="color:var(--text-primary);">
+      <i data-lucide="layers" style="width:20px;height:20px;color:var(--accent-primary);"></i>
+      <span>Modules &amp; Chapitres d'Apprentissage</span>
+    </h3>
+
+    <div class="d-flex flex-column">
+      {% for ch in chapters %}
+      <div class="chapter-row {% if ch.is_done %}completed{% endif %}">
+        <div class="chapter-idx {% if ch.is_done %}done{% else %}pending{% endif %}">
+          {% if ch.is_done %}
+            <i data-lucide="check" style="width:20px;height:20px;"></i>
+          {% else %}
+            {{ ch.num }}
+          {% endif %}
+        </div>
+
+        <div style="flex:1;">
+          <div class="text-secondary small fw-bold text-uppercase" style="font-size:11px; letter-spacing:0.05em; margin-bottom:2px;">
+            Chapitre {{ ch.num }} &bull; {{ ch.type }}
+          </div>
+          <h4 class="h6 fw-bold mb-0" style="color:var(--text-primary);">
+            {{ ch.title }}
+          </h4>
+        </div>
+
+        <div>
+          {% if ch.is_done %}
+            <span class="badge" style="background:rgba(16,185,129,0.15); color:#10B981; font-weight:700; padding:0.4rem 0.8rem; border-radius:10px;">
+              <i data-lucide="check-circle" style="width:14px;height:14px;vertical-align:-2px;"></i> Validé
+            </span>
+          {% else %}
+            <form method="POST" action="{% url 'training:formation_viewer' formation.pk %}">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="complete_chapter">
+              <input type="hidden" name="chapter_num" value="{{ ch.num }}">
+              <button type="submit" class="btn btn-sm btn-primary" style="border-radius:10px; font-weight:600;">
+                <i data-lucide="check" style="width:14px;height:14px;"></i>
+                <span>Valider le chapitre</span>
+              </button>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Complete Course Action -->
+    {% if not is_completed %}
+    <div class="mt-4 pt-3 border-top text-end">
+      <form method="POST" action="{% url 'training:formation_viewer' formation.pk %}">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="finish_course">
+        <button type="submit" class="btn btn-success px-4 py-2" style="border-radius:12px; font-weight:700; background:#10B981; border:none;">
+          <i data-lucide="award" style="width:18px;height:18px;vertical-align:-3px;"></i>
+          <span>Terminer et valider l'ensemble du cours (100%)</span>
+        </button>
+      </form>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  if (window.lucide) {
+    lucide.createIcons();
+  }
+</script>
+{% endblock %}

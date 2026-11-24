@@ -1,0 +1,165 @@
+{% extends 'layout_back.html' %}
+{% load static %}
+
+{% block title %}Gestion Formations &mdash; Aptus Backoffice{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="back-page-header">
+  <div class="back-page-header__row">
+    <div>
+      <h1 class="h2 fw-bold mb-1 d-flex align-items-center gap-2">
+        <i data-lucide="graduation-cap" style="width: 28px; height: 28px; color: var(--accent-primary);"></i>
+        <span>Formations</span>
+      </h1>
+      <p class="text-secondary mb-0">Gérez le catalogue des cours, tuteurs et inscriptions</p>
+    </div>
+    <a href="{% url 'backoffice_formation_create' %}" class="btn btn-primary" id="add-formation-btn">
+      <i data-lucide="plus" style="width: 18px; height: 18px;"></i>
+      <span>Ajouter une formation</span>
+    </a>
+  </div>
+</div>
+
+<!-- 4 Stat Metric Cards (Image 2) -->
+<div class="row g-4 mb-4">
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card h-100">
+      <div>
+        <div class="stat-card__label">Total Formations</div>
+        <div class="stat-card__value">{{ stats.total|default:formations.count }}</div>
+        <div class="stat-card__trend up"><i data-lucide="trending-up" style="width: 14px; height: 14px;"></i> +3 ce mois</div>
+      </div>
+      <div class="stat-card__icon purple"><i data-lucide="book-open" style="width: 22px; height: 22px;"></i></div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card h-100">
+      <div>
+        <div class="stat-card__label">Apprenants Inscrits</div>
+        <div class="stat-card__value">{{ stats.inscriptions|default:'148' }}</div>
+        <div class="stat-card__trend up"><i data-lucide="users" style="width: 14px; height: 14px;"></i> Actifs</div>
+      </div>
+      <div class="stat-card__icon teal"><i data-lucide="user-check" style="width: 22px; height: 22px;"></i></div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card h-100">
+      <div>
+        <div class="stat-card__label">Sessions en Ligne</div>
+        <div class="stat-card__value">{{ stats.actives|default:'12' }}</div>
+        <div class="stat-card__trend up"><i data-lucide="video" style="width: 14px; height: 14px;"></i> API Room</div>
+      </div>
+      <div class="stat-card__icon blue"><i data-lucide="video" style="width: 22px; height: 22px;"></i></div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card h-100">
+      <div>
+        <div class="stat-card__label">Taux de Complétion</div>
+        <div class="stat-card__value">{{ stats.taux|default:'94%' }}</div>
+        <div class="stat-card__trend up"><i data-lucide="award" style="width: 14px; height: 14px;"></i> Certifiés</div>
+      </div>
+      <div class="stat-card__icon orange"><i data-lucide="award" style="width: 22px; height: 22px;"></i></div>
+    </div>
+  </div>
+</div>
+
+<!-- Filter Toolbar -->
+<div class="card-flat mb-4 p-3" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+  <div class="row g-2 align-items-center">
+    <div class="col-md-6">
+      <div class="input-group">
+        <span class="input-group-text bg-transparent border-end-0 text-secondary" style="border-color: var(--border-color);">
+          <i data-lucide="search" style="width: 18px; height: 18px;"></i>
+        </span>
+        <input type="text" class="input form-control border-start-0" placeholder="Rechercher une formation..." id="formationSearch">
+      </div>
+    </div>
+    <div class="col-md-3">
+      <select class="select form-select">
+        <option value="">Tous les domaines</option>
+        <option value="IT">Informatique &amp; IT</option>
+        <option value="Data">Data &amp; IA</option>
+        <option value="Management">Management</option>
+      </select>
+    </div>
+    <div class="col-md-3">
+      <select class="select form-select">
+        <option value="">Tous les niveaux</option>
+        <option value="Débutant">Débutant</option>
+        <option value="Intermédiaire">Intermédiaire</option>
+        <option value="Avancé">Avancé</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- Rounded Data Table (Image 2) -->
+<div class="card-flat" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-card);">
+  <div class="table-responsive">
+    <table class="data-table mb-0">
+      <thead>
+        <tr>
+          <th>Formation</th>
+          <th>Domaine</th>
+          <th>Niveau</th>
+          <th>Lieu / Format</th>
+          <th>Date</th>
+          <th class="text-end" style="width: 140px;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for f in formations %}
+        <tr>
+          <td>
+            <div class="d-flex align-items-center gap-3">
+              <div class="avatar avatar-sm avatar-initials" style="width: 36px; height: 36px; border-radius: 10px;">
+                {{ f.titre|slice:":2"|upper }}
+              </div>
+              <div>
+                <a href="{% url 'training:formation_detail' f.pk %}" class="fw-bold text-primary" style="text-decoration: none;">{{ f.titre }}</a>
+                <div class="text-secondary small">Tuteur: {{ f.tuteur.prenom|default:'Non assigné' }}</div>
+              </div>
+            </div>
+          </td>
+          <td><span class="badge badge-primary">{{ f.domaine|default:'Général' }}</span></td>
+          <td><span class="badge badge-neutral">{{ f.niveau }}</span></td>
+          <td>
+            {% if f.is_online %}
+              <span class="text-info small fw-semibold"><i data-lucide="video" style="width: 14px; height: 14px; margin-right: 4px;"></i> En ligne</span>
+            {% else %}
+              <span class="text-secondary small"><i data-lucide="map-pin" style="width: 14px; height: 14px; margin-right: 4px;"></i> Salle</span>
+            {% endif %}
+          </td>
+          <td class="text-secondary small">{{ f.date_formation|date:"d/m/Y H:i"|default:'À planifier' }}</td>
+          <td class="text-end">
+            <div class="d-flex justify-content-end gap-1">
+              <a href="{% url 'backoffice_formation_update' f.pk %}" class="btn btn-sm btn-ghost text-warning" title="Modifier">
+                <i data-lucide="pencil" style="width: 16px; height: 16px;"></i>
+              </a>
+              <a href="{% url 'backoffice_formation_delete' f.pk %}" class="btn btn-sm btn-ghost text-danger" title="Supprimer définitivement">
+                <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" class="text-center py-5 text-secondary">Aucune formation disponible.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  if (window.lucide) lucide.createIcons();
+</script>
+{% endblock %}

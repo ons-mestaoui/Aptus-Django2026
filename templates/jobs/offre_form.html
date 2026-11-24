@@ -1,0 +1,189 @@
+{% extends layout_template|default:'layout_back.html' %}
+{% load static %}
+
+{% block title %}{{ title }} — Aptus{% endblock %}
+
+{% block content %}
+<div class="{% if is_entreprise %}container py-4{% endif %}">
+<div class="mb-3" style="max-width: 1100px; margin: 0 auto 1rem auto; width: 100%;">
+  <a href="{% url return_url|default:'backoffice_offres' %}" class="text-secondary small d-inline-flex align-items-center gap-1" style="text-decoration:none;">
+    <i data-lucide="arrow-left" style="width:16px;height:16px;"></i>
+    <span>{{ return_label|default:"Retour aux offres d'emploi" }}</span>
+  </a>
+</div>
+
+<div class="card" style="max-width: 1100px; margin: 0 auto; width: 100%; background: var(--bg-card); border-radius: 24px; border: 1px solid var(--border-color); box-shadow: 0 10px 40px rgba(0,0,0,0.06); padding: 2.5rem;">
+  <!-- Header with title & close button -->
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1.5rem;">
+    <div>
+      <h2 style="font-size: 1.75rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.75rem;">
+        <i data-lucide="briefcase" style="width:30px;height:30px;color:var(--accent-primary);"></i>
+        <span>{{ title }}</span>
+      </h2>
+      <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 0;">Remplissez les informations ci-dessous pour publier ou mettre à jour votre offre d'emploi.</p>
+    </div>
+    <a href="{% url return_url|default:'backoffice_offres' %}" style="width: 44px; height: 44px; border-radius: 12px; background: var(--bg-secondary); display: flex; align-items: center; justify-content: center; color: var(--text-secondary); transition: all 0.2s; text-decoration:none;" title="Fermer">
+      <i data-lucide="x" style="width: 22px; height: 22px;"></i>
+    </a>
+  </div>
+
+  {% if form.errors %}
+  <div style="background: var(--accent-tertiary-light); border: 1px solid var(--accent-tertiary); color: var(--accent-tertiary); padding: 1.25rem; border-radius: 16px; margin-bottom: 2rem; display: flex; align-items: flex-start; gap: 1rem;">
+    <i data-lucide="alert-circle" style="width: 24px; height: 24px; flex-shrink: 0; margin-top: 2px;"></i>
+    <div>
+      <strong style="display: block; margin-bottom: 0.25rem; font-size: 1rem;">Attention</strong>
+      <p style="font-size: 0.9rem; line-height: 1.5; margin: 0;">Veuillez corriger les erreurs signalées dans le formulaire ci-dessous pour pouvoir valider l'offre.</p>
+    </div>
+  </div>
+  {% endif %}
+
+  <form method="POST">
+    {% csrf_token %}
+    
+    <div class="form-grid-2cols" style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; width: 100%;">
+      <!-- ═══ COLONNE GAUCHE ═══ -->
+      <div style="display: flex; flex-direction: column; gap: 2rem;">
+        <!-- Section 1: Informations Générales -->
+        <section>
+          <h3 style="font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent-primary); font-weight: 700; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+            <i data-lucide="info" style="width: 16px; height: 16px;"></i> Informations Générales
+          </h3>
+          <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+            {% if not is_entreprise %}
+            <div class="form-group">
+              <label class="form-label" style="font-weight: 600; margin-bottom: 0.4rem;" for="{{ form.entreprise.id_for_label }}">
+                Entreprise Partenaire <span style="color: var(--accent-tertiary);">*</span>
+              </label>
+              {{ form.entreprise }}
+              {% if form.entreprise.errors %}<div class="text-danger small mt-1">{{ form.entreprise.errors }}</div>{% endif %}
+            </div>
+            {% else %}
+              <div style="display:none;">{{ form.entreprise }}</div>
+            {% endif %}
+
+            <div class="form-group">
+              <label class="form-label" style="font-weight: 600; margin-bottom: 0.4rem;" for="{{ form.titre.id_for_label }}">
+                Intitulé du Poste <span style="color: var(--accent-tertiary);">*</span>
+              </label>
+              {{ form.titre }}
+              {% if form.titre.errors %}<div class="text-danger small mt-1">{{ form.titre.errors }}</div>{% endif %}
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" style="font-weight: 600; margin-bottom: 0.4rem;" for="{{ form.domaine.id_for_label }}">
+                Domaine d'Activité <span style="color: var(--accent-tertiary);">*</span>
+              </label>
+              {{ form.domaine }}
+              {% if form.domaine.errors %}<div class="text-danger small mt-1">{{ form.domaine.errors }}</div>{% endif %}
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 2: Détails du Poste -->
+        <section>
+          <h3 style="font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent-primary); font-weight: 700; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+            <i data-lucide="file-text" style="width: 16px; height: 16px;"></i> Rémunération &amp; Description
+          </h3>
+          <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <div class="form-group">
+                <label class="form-label" style="font-weight: 600; margin-bottom: 0.4rem;" for="{{ form.salaire.id_for_label }}">
+                  Salaire Proposé (€/an)
+                </label>
+                {{ form.salaire }}
+                {% if form.salaire.errors %}<div class="text-danger small mt-1">{{ form.salaire.errors }}</div>{% endif %}
+              </div>
+              <div class="form-group">
+                <label class="form-label" style="font-weight: 600; margin-bottom: 0.4rem;" for="{{ form.experience_requise.id_for_label }}">
+                  Expérience Requise
+                </label>
+                {{ form.experience_requise }}
+                {% if form.experience_requise.errors %}<div class="text-danger small mt-1">{{ form.experience_requise.errors }}</div>{% endif %}
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" style="font-weight: 600; margin-bottom: 0.4rem;" for="{{ form.description.id_for_label }}">
+                Description Complète du Poste <span style="color: var(--accent-tertiary);">*</span>
+              </label>
+              {{ form.description }}
+              {% if form.description.errors %}<div class="text-danger small mt-1">{{ form.description.errors }}</div>{% endif %}
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ═══ COLONNE DROITE ═══ -->
+      <div style="display: flex; flex-direction: column; gap: 2rem;">
+        <!-- Section 3: Profil Recherché -->
+        <section>
+          <h3 style="font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent-primary); font-weight: 700; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+            <i data-lucide="user-check" style="width: 16px; height: 16px;"></i> Profil &amp; Compétences
+          </h3>
+          <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+            <div class="form-group">
+              <label class="form-label" style="font-weight: 600; margin-bottom: 0.4rem;" for="{{ form.competences_requises.id_for_label }}">
+                Compétences Clés Requises
+              </label>
+              {{ form.competences_requises }}
+              <small class="text-secondary small mt-1 d-block">Séparez les technologies ou compétences par des virgules (ex: Python, Django, React, SQL).</small>
+              {% if form.competences_requises.errors %}<div class="text-danger small mt-1">{{ form.competences_requises.errors }}</div>{% endif %}
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" style="font-weight: 600; margin-bottom: 0.4rem;" for="{{ form.question.id_for_label }}">
+                Question de Filtrage Personnalisée
+              </label>
+              {{ form.question }}
+              <small class="text-secondary small mt-1 d-block">Cette question sera posée au candidat lors du dépôt de sa candidature.</small>
+              {% if form.question.errors %}<div class="text-danger small mt-1">{{ form.question.errors }}</div>{% endif %}
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 4: Calendrier -->
+        <section>
+          <h3 style="font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent-primary); font-weight: 700; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+            <i data-lucide="calendar" style="width: 16px; height: 16px;"></i> Échéance &amp; Validité
+          </h3>
+          <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+            <div class="form-group">
+              <label class="form-label" style="font-weight: 600; margin-bottom: 0.4rem;" for="{{ form.date_expir.id_for_label }}">
+                Date d'Expiration de l'Offre
+              </label>
+              {{ form.date_expir }}
+              {% if form.date_expir.errors %}<div class="text-danger small mt-1">{{ form.date_expir.errors }}</div>{% endif %}
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- Form Footer Actions -->
+    <div style="margin-top: 3rem; padding-top: 1.75rem; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 1.25rem; align-items: center;">
+      <a href="{% url return_url|default:'backoffice_offres' %}" class="btn btn-secondary" style="padding: 0.75rem 2rem; border-radius: 12px; font-weight: 600;">Annuler</a>
+      <button type="submit" class="btn btn-primary" style="padding: 0.75rem 2.5rem; border-radius: 12px; font-weight: 700;">
+        <i data-lucide="check" style="width: 18px; height: 18px;"></i>
+        <span>Enregistrer l'offre</span>
+      </button>
+    </div>
+  </form>
+</div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<style>
+  @media (max-width: 900px) {
+    .form-grid-2cols {
+      grid-template-columns: 1fr !important;
+      gap: 1.5rem !important;
+    }
+  }
+</style>
+<script>
+  if (window.lucide) {
+    lucide.createIcons();
+  }
+</script>
+{% endblock %}

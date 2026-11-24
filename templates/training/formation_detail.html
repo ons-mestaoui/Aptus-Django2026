@@ -1,0 +1,125 @@
+{% extends 'layout_front.html' %}
+{% load static %}
+
+{% block title %}{{ formation.titre }} — Formation{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="mb-4">
+    <a href="{% url 'training:formation_list' %}" class="text-secondary small d-inline-flex align-items-center gap-1" style="text-decoration:none;">
+      <i data-lucide="arrow-left" style="width:16px;height:16px;"></i>
+      <span>Retour au catalogue des formations</span>
+    </a>
+  </div>
+
+  <div class="row g-4">
+    <!-- Main Column: Formation Content (Clean Front View) -->
+    <div class="col-lg-8">
+      <div class="card p-4 p-md-5 mb-4" style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:24px; box-shadow:0 10px 40px rgba(0,0,0,0.05);">
+        <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
+          <span class="badge badge-primary" style="font-size:0.85rem; padding:0.45rem 0.9rem; border-radius:8px;">{{ formation.domaine|default:'Formation' }}</span>
+          <span class="badge" style="background:rgba(59,130,246,0.1); color:#3B82F6; font-weight:700; font-size:0.85rem; padding:0.45rem 0.9rem; border-radius:8px;">
+            <i data-lucide="video" style="width:14px;height:14px;display:inline-block;vertical-align:middle;margin-right:4px;"></i>
+            {% if formation.is_online %}Session Interactive En Ligne{% else %}Sur Site{% endif %}
+          </span>
+        </div>
+
+        <h1 class="h2 fw-bold mb-2" style="color:var(--text-primary); letter-spacing:-0.5px;">{{ formation.titre }}</h1>
+        <p class="text-secondary small mb-4 d-flex align-items-center gap-2 flex-wrap">
+          <span class="d-inline-flex align-items-center gap-1 fw-bold text-primary">
+            <i data-lucide="user-check" style="width:16px;height:16px;color:var(--accent-primary);"></i>
+            Tuteur : {{ formation.tuteur.prenom|default:'Formateur' }} {{ formation.tuteur.nom|default:'' }}
+          </span>
+          <span>&bull;</span>
+          <span class="d-inline-flex align-items-center gap-1">
+            <i data-lucide="calendar" style="width:14px;height:14px;"></i> Session : {{ formation.date_formation|date:"d/m/Y à H:i"|default:'À planifier' }}
+          </span>
+        </p>
+
+        <hr style="border-color:var(--border-color-light);">
+
+        <h5 class="fw-bold mb-3 d-flex align-items-center gap-2" style="color:var(--text-primary);">
+          <i data-lucide="book-open" style="width:18px;height:18px;color:var(--accent-primary);"></i>
+          <span>Description du programme</span>
+        </h5>
+        <div style="white-space: pre-line; color:var(--text-secondary); line-height:1.75; font-size:1rem;">
+          {{ formation.description }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Candidat Registration Card & Meta -->
+    <div class="col-lg-4">
+      <div class="card p-4 mb-4" style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:24px; box-shadow:0 10px 40px rgba(0,0,0,0.06);">
+        {% if is_enrolled %}
+          <div class="text-center py-2">
+            <div style="width:56px; height:56px; border-radius:50%; background:rgba(16, 185, 129, 0.15); color:#10B981; display:flex; align-items:center; justify-content:center; margin:0 auto 1rem;">
+              <i data-lucide="check-circle" style="width:28px;height:28px;"></i>
+            </div>
+            <h5 class="fw-bold text-success mb-1">Vous êtes inscrit !</h5>
+            <p class="text-secondary small mb-3">Progression actuelle : <strong>{{ user_progression }}%</strong></p>
+            <a href="{% url 'training:formation_viewer' formation.pk %}" class="btn btn-primary w-100 py-3 mb-2" style="border-radius:14px; font-weight:700; font-size:1.05rem; display:flex; align-items:center; justify-content:center; gap:0.5rem;">
+              <i data-lucide="play" style="width:18px;height:18px;"></i>
+              <span>Accéder au cours</span>
+            </a>
+            <a href="{% url 'training:formation_my' %}" class="btn btn-ghost w-100" style="border-radius:12px; font-weight:600; border:1px solid var(--border-color);">
+              <i data-lucide="book-open" style="width:16px;height:16px;"></i>
+              <span>Voir mes cours</span>
+            </a>
+          </div>
+        {% else %}
+          <h4 class="fw-bold mb-2" style="color:var(--text-primary);">S'inscrire à ce cours</h4>
+          <p class="text-secondary small mb-4">Rejoignez la cohorte pour accéder aux supports pédagogiques et au tutorat live.</p>
+          <form method="post" action="{% url 'training:formation_sinscrire' formation.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary w-100 py-3" style="border-radius:14px; font-weight:700; font-size:1.05rem; display:flex; align-items:center; justify-content:center; gap:0.5rem;">
+              <i data-lucide="user-plus" style="width:18px;height:18px;"></i>
+              <span>Participer à la formation</span>
+            </button>
+          </form>
+        {% endif %}
+      </div>
+
+      <!-- Quick Info Meta Card -->
+      <div class="card p-4" style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:24px; box-shadow:0 10px 40px rgba(0,0,0,0.05);">
+        <h5 class="fw-bold mb-3" style="color:var(--text-primary);">Informations clés</h5>
+        <ul class="list-unstyled mb-0 d-flex flex-column gap-3">
+          <li class="d-flex align-items-center gap-3">
+            <div style="width:40px;height:40px;border-radius:12px;background:rgba(59,130,246,0.1);color:#3B82F6;display:flex;align-items:center;justify-content:center;">
+              <i data-lucide="award" style="width:20px;height:20px;"></i>
+            </div>
+            <div>
+              <div class="small text-secondary">Niveau</div>
+              <div class="fw-bold">{{ formation.niveau|default:'Tous niveaux' }}</div>
+            </div>
+          </li>
+          <li class="d-flex align-items-center gap-3">
+            <div style="width:40px;height:40px;border-radius:12px;background:rgba(16,185,129,0.1);color:#10B981;display:flex;align-items:center;justify-content:center;">
+              <i data-lucide="clock" style="width:20px;height:20px;"></i>
+            </div>
+            <div>
+              <div class="small text-secondary">Durée estimée</div>
+              <div class="fw-bold">{% if formation.duree_heures %}{{ formation.duree_heures }} heures{% else %}Autonomie{% endif %}</div>
+            </div>
+          </li>
+          <li class="d-flex align-items-center gap-3">
+            <div style="width:40px;height:40px;border-radius:12px;background:rgba(245,158,11,0.1);color:#F59E0B;display:flex;align-items:center;justify-content:center;">
+              <i data-lucide="users" style="width:20px;height:20px;"></i>
+            </div>
+            <div>
+              <div class="small text-secondary">Apprenants inscrits</div>
+              <div class="fw-bold">{{ inscriptions.count }} participants</div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  if (window.lucide) lucide.createIcons();
+</script>
+{% endblock %}

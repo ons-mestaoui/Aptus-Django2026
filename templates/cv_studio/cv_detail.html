@@ -1,0 +1,131 @@
+{% extends 'layout_front.html' %}
+{% load static %}
+
+{% block title %}{{ cv.nom_document }} — CV Studio{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="mb-4">
+    <a href="{% url 'cv_studio:cv_list' %}" class="text-secondary small d-inline-flex align-items-center gap-1" style="text-decoration:none;">
+      <i data-lucide="arrow-left" style="width:16px;height:16px;"></i>
+      <span>Retour à la liste des CVs</span>
+    </a>
+  </div>
+
+  <div class="row g-4">
+    <!-- Main CV Content -->
+    <div class="col-lg-8">
+      <div class="card p-4 p-md-5 mb-4" style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:24px; box-shadow:0 10px 40px rgba(0,0,0,0.05);">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+          <div>
+            <h2 class="h3 fw-bold mb-1" style="color:var(--text-primary);">{{ cv.nom_complet }}</h2>
+            <h5 class="text-primary fw-medium mb-0">{{ cv.titre_poste|default:'Poste non spécifié' }}</h5>
+          </div>
+          <div class="d-flex gap-2">
+            <a href="{% url 'cv_studio:cv_print' cv.pk %}" target="_blank" class="btn btn-sm btn-primary" style="border-radius:8px;">
+              <i data-lucide="printer" style="width:15px;height:15px;"></i> Imprimer / Export PDF
+            </a>
+            <a href="{% url 'cv_studio:cv_update' cv.pk %}" class="btn btn-sm btn-secondary" style="border-radius:8px;">
+              <i data-lucide="pencil" style="width:15px;height:15px;"></i> Modifier
+            </a>
+          </div>
+        </div>
+
+        <p class="text-secondary small mb-4 d-flex align-items-center gap-2">
+          <i data-lucide="template" style="width:16px;height:16px;color:var(--accent-primary);"></i>
+          <span>Template: <strong>{{ cv.template.nom|default:'Moderne Aptus' }}</strong></span>
+        </p>
+
+        <hr style="border-color:var(--border-color-light);">
+
+        <h5 class="fw-bold mb-3 d-flex align-items-center gap-2" style="color:var(--text-primary);">
+          <i data-lucide="user" style="width:18px;height:18px;color:var(--accent-primary);"></i>
+          <span>Résumé Professionnel</span>
+        </h5>
+        <p style="white-space: pre-line; color:var(--text-secondary); line-height:1.7;">{{ cv.resume|default:'Aucun résumé renseigné.' }}</p>
+
+        <h5 class="fw-bold mt-4 mb-3 d-flex align-items-center gap-2" style="color:var(--text-primary);">
+          <i data-lucide="briefcase" style="width:18px;height:18px;color:var(--accent-primary);"></i>
+          <span>Expérience Professionnelle</span>
+        </h5>
+        <div class="p-3 rounded-3" style="background:var(--bg-secondary); border:1px solid var(--border-color-light); line-height:1.6; white-space: pre-line;">
+          {{ cv.experience|default:'Non renseigné' }}
+        </div>
+
+        <h5 class="fw-bold mt-4 mb-3 d-flex align-items-center gap-2" style="color:var(--text-primary);">
+          <i data-lucide="graduation-cap" style="width:18px;height:18px;color:var(--accent-primary);"></i>
+          <span>Formation &amp; Diplômes</span>
+        </h5>
+        <div class="p-3 rounded-3" style="background:var(--bg-secondary); border:1px solid var(--border-color-light); line-height:1.6; white-space: pre-line;">
+          {{ cv.formation|default:'Non renseigné' }}
+        </div>
+
+        <h5 class="fw-bold mt-4 mb-3 d-flex align-items-center gap-2" style="color:var(--text-primary);">
+          <i data-lucide="cpu" style="width:18px;height:18px;color:var(--accent-primary);"></i>
+          <span>Compétences Techniques</span>
+        </h5>
+        <div class="p-3 rounded-3" style="background:var(--bg-secondary); border:1px solid var(--border-color-light); line-height:1.6;">
+          {{ cv.competences|default:'Non renseigné' }}
+        </div>
+      </div>
+
+      {% if rapports %}
+      <div class="card p-4 mb-4" style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:24px; box-shadow:0 10px 40px rgba(0,0,0,0.05);">
+        <h5 class="fw-bold mb-3 d-flex align-items-center gap-2" style="color:var(--text-primary);">
+          <i data-lucide="sparkles" style="width:18px;height:18px;color:var(--accent-primary);"></i>
+          <span>Analyses IA Associées</span>
+        </h5>
+        <div class="d-flex flex-column gap-3">
+          {% for r in rapports %}
+          <div class="p-3 rounded-3 border" style="background:var(--bg-secondary);">
+            <div class="d-flex justify-content-between mb-2">
+              <span class="fw-bold">{{ r.date_rapport|date:"d/m/Y à H:i" }}</span>
+              <span class="badge badge-success">Score: {{ r.score_ats }}%</span>
+            </div>
+            <p class="small text-secondary mb-0">{{ r.feedback }}</p>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Sidebar Column: Metadata -->
+    <div class="col-lg-4">
+      <div class="card p-4 mb-4" style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:24px; box-shadow:0 10px 40px rgba(0,0,0,0.06);">
+        <h5 class="fw-bold mb-3 pb-2 border-bottom" style="color:var(--text-primary); border-color:var(--border-color-light) !important;">Métadonnées CV</h5>
+        
+        <div class="d-flex flex-column gap-3">
+          <div class="p-3 rounded-3" style="background:var(--bg-secondary); border:1px solid var(--border-color-light);">
+            <div class="text-secondary small mb-1">Nom du Document</div>
+            <div class="fw-bold" style="color:var(--text-primary);">{{ cv.nom_document }}</div>
+          </div>
+
+          <div class="p-3 rounded-3" style="background:var(--bg-secondary); border:1px solid var(--border-color-light);">
+            <div class="text-secondary small mb-1">Candidat Associé</div>
+            <div class="fw-bold text-primary">{{ cv.candidat.utilisateur.prenom }} {{ cv.candidat.utilisateur.nom|default:'' }}</div>
+          </div>
+
+          <div class="p-3 rounded-3" style="background:var(--bg-secondary); border:1px solid var(--border-color-light);">
+            <div class="text-secondary small mb-1">Statut</div>
+            <div><span class="badge badge-info">{{ cv.statut|default:'Actif' }}</span></div>
+          </div>
+
+          <div class="p-3 rounded-3" style="background:var(--bg-secondary); border:1px solid var(--border-color-light);">
+            <div class="text-secondary small mb-1">Dernière Mise à Jour</div>
+            <div class="fw-semibold" style="color:var(--text-primary);">{{ cv.date_mise_a_jour|date:"d/m/Y à H:i" }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  if (window.lucide) {
+    lucide.createIcons();
+  }
+</script>
+{% endblock %}

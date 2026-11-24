@@ -1,0 +1,42 @@
+{% extends 'layout_back.html' %}
+{% load static %}
+
+{% block title %}Supprimer le Template — Aptus Backoffice{% endblock %}
+
+{% block content %}
+<div class="back-page-header">
+  <div class="back-page-header__row">
+    <div>
+      <a href="{% url 'backoffice_cv_templates' %}" class="btn btn-ghost btn-sm mb-2" style="padding-left:0; color:var(--text-tertiary);">
+        <i data-lucide="arrow-left" style="width:16px;height:16px;"></i>
+        <span>Retour aux templates</span>
+      </a>
+      <h1 class="h2 fw-bold mb-1 text-danger">Supprimer le Template CV</h1>
+      <p class="text-secondary mb-0">Confirmation de suppression irréversible du modèle</p>
+    </div>
+  </div>
+</div>
+
+<div class="card-flat p-4 p-md-5 max-w-xl mx-auto text-center" style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:24px; box-shadow:var(--shadow-card); max-width:600px; margin:2rem auto;">
+  <div style="width:64px; height:64px; border-radius:50%; background:rgba(239,68,68,0.15); color:#ef4444; display:flex; align-items:center; justify-content:center; margin:0 auto 1.5rem;">
+    <i data-lucide="alert-triangle" style="width:32px;height:32px;"></i>
+  </div>
+
+  <h3 class="h4 fw-bold mb-2">Êtes-vous sûr de vouloir supprimer ce template ?</h3>
+  <p class="text-secondary mb-4">
+    Le template <strong class="text-danger">"{{ template.nom }}"</strong> sera définitivement retiré du catalogue et ne sera plus disponible pour les candidats.
+  </p>
+
+  <form method="post" class="d-flex justify-content-center gap-3">
+    {% csrf_token %}
+    <a href="{% url 'backoffice_cv_templates' %}" class="btn btn-secondary px-4 py-2" style="border-radius:12px;">Annuler</a>
+    <button type="submit" class="btn btn-danger px-4 py-2" style="border-radius:12px;">Confirmer la suppression</button>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  if (window.lucide) lucide.createIcons();
+</script>
+{% endblock %}
