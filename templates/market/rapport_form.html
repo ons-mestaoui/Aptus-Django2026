@@ -3,403 +3,1631 @@
 
 {% block title %}{{ title }} — Aptus Admin{% endblock %}
 
+{% block extra_css %}
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.css" rel="stylesheet">
+<style>
+  .rapport-wizard-card {
+    max-width: 1240px;
+    margin: 0 auto;
+    width: 100%;
+    background: var(--bg-card);
+    border-radius: 24px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+  }
+
+  .rapport-wizard-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.75rem 2rem 1.25rem;
+  }
+
+  /* ── 4-Step Stepper Header ── */
+  .stepper-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 0.25rem 2rem 1.5rem;
+    position: relative;
+    border-bottom: 1px solid var(--border-color);
+  }
+  .stepper-header::before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 12%;
+    right: 12%;
+    height: 2px;
+    background: var(--border-color);
+    z-index: 1;
+  }
+  .stepper-step {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    padding: 0;
+  }
+  .step-circle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--bg-card);
+    border: 2px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    transition: all 0.25s ease;
+  }
+  .stepper-step.active .step-circle {
+    background: var(--accent-primary);
+    border-color: var(--accent-primary);
+    color: #fff;
+    box-shadow: 0 0 0 5px rgba(107, 52, 163, 0.16);
+  }
+  .stepper-step.completed .step-circle {
+    background: var(--accent-primary);
+    border-color: var(--accent-primary);
+    color: #fff;
+  }
+  .step-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-align: center;
+  }
+  .stepper-step.active .step-label {
+    color: var(--accent-primary);
+    font-weight: 700;
+  }
+
+  /* ── Split Stepper Layout ── */
+  .stepper-layout {
+    display: flex;
+    gap: 2rem;
+    padding: 2rem;
+    align-items: stretch;
+  }
+  .stepper-left-panel {
+    flex: 1.25;
+    min-width: 0;
+  }
+  .stepper-right-panel {
+    flex: 1;
+    min-width: 0;
+    background: var(--bg-secondary);
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    min-height: 430px;
+  }
+
+  .step-content {
+    display: none;
+    animation: rapportFadeIn 0.25s ease;
+  }
+  .step-content.active {
+    display: block;
+  }
+  .viz-panel {
+    display: none;
+    width: 100%;
+    height: 100%;
+    flex-direction: column;
+    flex: 1;
+    animation: rapportFadeIn 0.3s ease;
+  }
+  .viz-panel.active {
+    display: flex;
+  }
+  @keyframes rapportFadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .viz-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 1rem;
+    padding-bottom: 0.65rem;
+    border-bottom: 1px solid var(--border-color);
+    width: 100%;
+  }
+
+  /* ── Hybrid Sector Tags ── */
+  .tag-input-wrapper { position: relative; width: 100%; }
+  .tag-input-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 7px 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    min-height: 44px;
+    align-items: center;
+    cursor: text;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .tag-input-container:focus-within {
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px rgba(107, 52, 163, 0.12);
+  }
+  .tag-input-container input {
+    border: none;
+    background: transparent;
+    outline: none;
+    color: var(--text-primary);
+    font-size: 14px;
+    flex: 1;
+    min-width: 120px;
+    padding: 2px 0;
+  }
+  .tag-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    background: rgba(107, 52, 163, 0.12);
+    color: var(--accent-primary);
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .tag-chip .remove-tag {
+    cursor: pointer;
+    font-size: 15px;
+    line-height: 1;
+    opacity: 0.7;
+  }
+  .tag-chip .remove-tag:hover { opacity: 1; }
+  .tag-suggestions {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    max-height: 190px;
+    overflow-y: auto;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    z-index: 1050;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+    display: none;
+  }
+  .tag-suggestion-item {
+    padding: 9px 14px;
+    cursor: pointer;
+    font-size: 13.5px;
+    color: var(--text-primary);
+  }
+  .tag-suggestion-item:hover {
+    background: rgba(107, 52, 163, 0.08);
+    color: var(--accent-primary);
+  }
+
+  /* ── Cover Image Dropzone ── */
+  .image-upload-zone {
+    border: 2px dashed var(--border-color);
+    border-radius: 14px;
+    padding: 24px 16px;
+    text-align: center;
+    background: var(--bg-secondary);
+    transition: all 0.25s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    min-height: 140px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .image-upload-zone:hover, .image-upload-zone.dragover {
+    border-color: var(--accent-primary);
+    background: rgba(107, 52, 163, 0.05);
+  }
+  .image-upload-preview {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: none;
+    z-index: 5;
+  }
+  .image-upload-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.58);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    color: #fff;
+    gap: 6px;
+  }
+  .image-upload-zone.has-image .image-upload-preview,
+  .image-upload-zone.has-image .image-upload-overlay {
+    display: flex;
+  }
+  .image-upload-zone.has-image:hover .image-upload-overlay {
+    opacity: 1;
+  }
+
+  /* ── Quill Editor ── */
+  .ql-editor {
+    min-height: 200px;
+    color: var(--text-primary);
+    font-size: 14.5px;
+    line-height: 1.65;
+  }
+  .ql-toolbar.ql-snow {
+    background: var(--bg-secondary);
+    border-color: var(--border-color);
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+  }
+  .ql-container.ql-snow {
+    border-color: var(--border-color);
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    background: var(--bg-card);
+  }
+  [data-theme="dark"] .ql-stroke { stroke: #cbd5e1; }
+  [data-theme="dark"] .ql-fill { fill: #cbd5e1; }
+  [data-theme="dark"] .ql-picker-label { color: #cbd5e1; }
+
+  /* ── Article Live Preview (Step 2) ── */
+  .article-preview {
+    width: 100%;
+    flex: 1;
+    overflow-y: auto;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.25rem;
+  }
+  .article-preview-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    line-height: 1.3;
+  }
+  .article-preview-meta {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+  }
+  .article-preview-img {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    display: none;
+  }
+  .article-preview-content {
+    color: var(--text-secondary);
+    font-size: 13.5px;
+    line-height: 1.65;
+  }
+
+  /* ── NoUiSlider & Demand Blocks (Step 3) ── */
+  .noUi-target {
+    background: #e2e8f0;
+    border: none;
+    box-shadow: none;
+    height: 8px;
+  }
+  [data-theme="dark"] .noUi-target { background: #334155; }
+  .noUi-connect { background: var(--accent-primary); }
+  .noUi-handle {
+    border: 2px solid var(--accent-primary);
+    border-radius: 50%;
+    background: #fff;
+    cursor: grab;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.14);
+    width: 22px !important;
+    height: 22px !important;
+    right: -11px !important;
+    top: -7px !important;
+  }
+  .noUi-handle::before, .noUi-handle::after { display: none; }
+  .noUi-tooltip {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    background: var(--bg-card);
+    border-radius: 6px;
+  }
+  .demand-blocks {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .demand-block {
+    flex: 1;
+    height: 38px;
+    background: #e2e8f0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-secondary);
+  }
+  [data-theme="dark"] .demand-block { background: #334155; }
+  .demand-block:hover { filter: brightness(0.95); }
+  .demand-block.active {
+    background: var(--accent-primary);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(107, 52, 163, 0.28);
+  }
+
+  /* ── Step 4 Summary Counter ── */
+  .summary-counter {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    border: 4px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    font-weight: 800;
+    color: var(--text-secondary);
+    background: var(--bg-card);
+    margin: 0 auto 1.25rem;
+    transition: all 0.3s ease;
+  }
+  .summary-counter.valid {
+    border-color: #10b981;
+    color: #10b981;
+    box-shadow: 0 0 0 6px rgba(16, 185, 129, 0.12);
+  }
+
+  .stepper-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 2rem;
+    border-top: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+  }
+
+  .reference-row-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1.2fr 1fr auto;
+    gap: 0.75rem;
+    align-items: start;
+  }
+
+  .is-invalid-field {
+    border-color: #ef4444 !important;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12) !important;
+  }
+
+  @media (max-width: 1024px) {
+    .stepper-layout {
+      flex-direction: column;
+      padding: 1.25rem;
+    }
+    .stepper-right-panel {
+      min-height: 340px;
+    }
+    .reference-row-grid {
+      grid-template-columns: 1fr !important;
+    }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="mb-3" style="max-width: 1100px; margin: 0 auto 1rem auto; width: 100%;">
+<div class="mb-3" style="max-width: 1240px; margin: 0 auto 1rem auto; width: 100%;">
   <a href="{% url 'backoffice_veille' %}" class="text-secondary small d-inline-flex align-items-center gap-1" style="text-decoration:none;">
     <i data-lucide="arrow-left" style="width:16px;height:16px;"></i>
     <span>Retour à la veille marché (Backoffice)</span>
   </a>
 </div>
 
-<div class="card" style="max-width: 1100px; margin: 0 auto; width: 100%; background: var(--bg-card); border-radius: 24px; border: 1px solid var(--border-color); box-shadow: 0 10px 40px rgba(0,0,0,0.06); padding: 2.5rem;">
-  <!-- Header with title & close button -->
-  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1.5rem;">
+<div class="rapport-wizard-card">
+  <!-- Header -->
+  <div class="rapport-wizard-header">
     <div>
-      <h2 style="font-size: 1.75rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.75rem;">
-        <i data-lucide="line-chart" style="width:30px;height:30px;color:var(--accent-primary);"></i>
+      <h2 style="font-size: 1.65rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.3rem; display: flex; align-items: center; gap: 0.7rem;">
+        <i data-lucide="line-chart" style="width:28px;height:28px;color:var(--accent-primary);"></i>
         <span>{{ title }}</span>
       </h2>
-      <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 0;">Saisissez les paramètres de synthèse, statistiques salariales (TND), contenu détaillé et sources de référence.</p>
+      <p style="color: var(--text-secondary); font-size: 0.92rem; margin-bottom: 0;">Configurez l'identité géographique, le contenu éditorial, l'analyse salariale (TND) et les références de source en 4 étapes.</p>
     </div>
-    <a href="{% url 'backoffice_veille' %}" style="width: 44px; height: 44px; border-radius: 12px; background: var(--bg-secondary); display: flex; align-items: center; justify-content: center; color: var(--text-secondary); transition: all 0.2s; text-decoration:none;" title="Fermer">
-      <i data-lucide="x" style="width: 22px; height: 22px;"></i>
+    <a href="{% url 'backoffice_veille' %}" style="width: 42px; height: 42px; border-radius: 12px; background: var(--bg-secondary); display: flex; align-items: center; justify-content: center; color: var(--text-secondary); text-decoration:none;" title="Fermer">
+      <i data-lucide="x" style="width: 20px; height: 20px;"></i>
     </a>
   </div>
 
+  <!-- 4-Step Stepper Header -->
+  <div class="stepper-header" id="rapport-stepper-header">
+    <button type="button" class="stepper-step active" data-step-indicator="1">
+      <div class="step-circle">1</div>
+      <div class="step-label">Identité</div>
+    </button>
+    <button type="button" class="stepper-step" data-step-indicator="2">
+      <div class="step-circle">2</div>
+      <div class="step-label">Contenu</div>
+    </button>
+    <button type="button" class="stepper-step" data-step-indicator="3">
+      <div class="step-circle">3</div>
+      <div class="step-label">Analyse</div>
+    </button>
+    <button type="button" class="stepper-step" data-step-indicator="4">
+      <div class="step-circle">4</div>
+      <div class="step-label">Références</div>
+    </button>
+  </div>
+
   {% if form.errors or form.non_field_errors or formset.errors or formset.non_form_errors %}
-  <div style="background: var(--accent-tertiary-light); border: 1px solid var(--accent-tertiary); color: var(--accent-tertiary); padding: 1.25rem; border-radius: 16px; margin-bottom: 2rem; display: flex; align-items: flex-start; gap: 1rem;">
-    <i data-lucide="alert-circle" style="width: 24px; height: 24px; flex-shrink: 0; margin-top: 2px;"></i>
+  <div class="mx-4 mt-4" style="background: var(--accent-tertiary-light); border: 1px solid var(--accent-tertiary); color: var(--accent-tertiary); padding: 1rem 1.25rem; border-radius: 14px; display: flex; align-items: flex-start; gap: 0.85rem;">
+    <i data-lucide="alert-circle" style="width: 22px; height: 22px; flex-shrink: 0; margin-top: 2px;"></i>
     <div>
-      <strong style="display: block; margin-bottom: 0.25rem; font-size: 1rem;">Attention</strong>
-      <p style="font-size: 0.9rem; line-height: 1.5; margin: 0;">Veuillez vérifier les informations saisies.</p>
-      {% if form.non_field_errors %}
-        <div class="small mt-1">{{ form.non_field_errors }}</div>
-      {% endif %}
-      {% if formset.non_form_errors %}
-        <div class="small mt-1">{{ formset.non_form_errors }}</div>
-      {% endif %}
+      <strong style="display: block; margin-bottom: 0.2rem;">Attention</strong>
+      <p style="font-size: 0.9rem; margin: 0;">Veuillez vérifier les informations saisies.</p>
+      {% if form.non_field_errors %}<div class="small mt-1">{{ form.non_field_errors }}</div>{% endif %}
+      {% if formset.non_form_errors %}<div class="small mt-1">{{ formset.non_form_errors }}</div>{% endif %}
     </div>
   </div>
   {% endif %}
 
-  <form method="POST">
+  <form method="POST" id="rapport-wizard-form" novalidate>
     {% csrf_token %}
 
-    <div class="form-grid-2cols" style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; width: 100%;">
-      <!-- ═══ COLONNE GAUCHE ═══ -->
-      <div style="display: flex; flex-direction: column; gap: 2rem;">
-        <section>
-          <h3 style="font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent-primary); font-weight: 700; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
-            <i data-lucide="file-text" style="width: 16px; height: 16px;"></i> Synthèse &amp; Secteur
-          </h3>
-          <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+    <div class="stepper-layout">
+      <!-- ═══ LEFT PANEL: 4 STEPS ═══ -->
+      <div class="stepper-left-panel">
+
+        <!-- STEP 1: IDENTITÉ -->
+        <div class="step-content active" id="step-rapport-1">
+          <div class="d-flex flex-column gap-3">
             <div class="form-group">
-              <label class="form-label" style="font-weight: 600; margin-bottom: 0.4rem;" for="{{ form.titre.id_for_label }}">
+              <label class="form-label fw-semibold" for="{{ form.titre.id_for_label }}">
                 Titre du Rapport de Veille <span style="color: var(--accent-tertiary);">*</span>
               </label>
               {{ form.titre }}
-              {% if form.titre.errors %}<div class="text-danger small mt-1">{{ form.titre.errors }}</div>{% endif %}
+              {% if form.titre.errors %}<div class="text-danger small mt-1 field-error">{{ form.titre.errors }}</div>{% endif %}
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
               <div class="form-group">
-                <label class="form-label" style="font-weight: 600; margin-bottom: 0.4rem;" for="{{ form.secteur_principal.id_for_label }}">
-                  Secteur Principal
-                </label>
-                {{ form.secteur_principal }}
-                {% if form.secteur_principal.errors %}<div class="text-danger small mt-1">{{ form.secteur_principal.errors }}</div>{% endif %}
-              </div>
-              <div class="form-group">
-                <label class="form-label" style="font-weight: 600; margin-bottom: 0.4rem;" for="{{ form.region.id_for_label }}">
-                  Région Géographique
-                </label>
-                {{ form.region }}
-                {% if form.region.errors %}<div class="text-danger small mt-1">{{ form.region.errors }}</div>{% endif %}
-              </div>
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
-              <div class="form-group">
-                <label class="form-label" style="font-weight: 600; margin-bottom: 0.4rem;" for="{{ form.auteur.id_for_label }}">
+                <label class="form-label fw-semibold" for="{{ form.auteur.id_for_label }}">
                   Auteur / Analyste
                 </label>
                 {{ form.auteur }}
-                {% if form.auteur.errors %}<div class="text-danger small mt-1">{{ form.auteur.errors }}</div>{% endif %}
+                {% if form.auteur.errors %}<div class="text-danger small mt-1 field-error">{{ form.auteur.errors }}</div>{% endif %}
               </div>
               <div class="form-group">
-                <label class="form-label" style="font-weight: 600; margin-bottom: 0.4rem;" for="{{ form.date_publication.id_for_label }}">
+                <label class="form-label fw-semibold" for="{{ form.date_publication.id_for_label }}">
                   Date de Publication
                 </label>
                 {{ form.date_publication }}
-                {% if form.date_publication.errors %}<div class="text-danger small mt-1">{{ form.date_publication.errors }}</div>{% endif %}
+                {% if form.date_publication.errors %}<div class="text-danger small mt-1 field-error">{{ form.date_publication.errors }}</div>{% endif %}
               </div>
             </div>
 
-            <div class="form-group">
-              <label class="form-label" style="font-weight: 600; margin-bottom: 0.4rem;" for="{{ form.description.id_for_label }}">
-                Résumé Exécutif
-              </label>
-              {{ form.description }}
-              {% if form.description.errors %}<div class="text-danger small mt-1">{{ form.description.errors }}</div>{% endif %}
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <div class="form-group">
+                <label class="form-label fw-semibold" for="{{ form.region.id_for_label }}">
+                  Région Géographique
+                </label>
+                {{ form.region }}
+                {% if form.region.errors %}<div class="text-danger small mt-1 field-error">{{ form.region.errors }}</div>{% endif %}
+              </div>
+
+              <div class="form-group">
+                <label class="form-label fw-semibold" for="tag-input">
+                  Secteur Principal
+                </label>
+                <div class="tag-input-wrapper" id="secteur-tag-wrapper">
+                  <div class="tag-input-container" id="tag-container">
+                    <input type="text" id="tag-input" placeholder="Ajouter un secteur..." autocomplete="off">
+                  </div>
+                  <div class="tag-suggestions" id="tag-suggestions"></div>
+                </div>
+                <div class="d-none">{{ form.secteur_principal }}</div>
+                {% if form.secteur_principal.errors %}<div class="text-danger small mt-1 field-error">{{ form.secteur_principal.errors }}</div>{% endif %}
+              </div>
             </div>
 
-            <div class="form-group">
-              <label class="form-label" style="font-weight: 600; margin-bottom: 0.4rem;" for="{{ form.contenu_detaille.id_for_label }}">
-                Contenu Détaillé du Rapport
-              </label>
-              {{ form.contenu_detaille }}
-              {% if form.contenu_detaille.errors %}<div class="text-danger small mt-1">{{ form.contenu_detaille.errors }}</div>{% endif %}
+            <div id="intl-country-container" style="display:none;" class="form-group">
+              <label class="form-label fw-semibold small" for="rapport-pays">Cibler un pays sur la carte mondiale</label>
+              <select class="form-select" id="rapport-pays">
+                <option value="">Vue mondiale globale...</option>
+                <option value="France">France</option>
+                <option value="Canada">Canada</option>
+                <option value="États-Unis">États-Unis</option>
+                <option value="Royaume-Uni">Royaume-Uni</option>
+                <option value="Allemagne">Allemagne</option>
+                <option value="Italie">Italie</option>
+                <option value="Espagne">Espagne</option>
+                <option value="Belgique">Belgique</option>
+                <option value="Suisse">Suisse</option>
+                <option value="Maroc">Maroc</option>
+                <option value="Algérie">Algérie</option>
+                <option value="Égypte">Égypte</option>
+                <option value="Arabie Saoudite">Arabie Saoudite</option>
+                <option value="Émirats Arabes Unis">Émirats Arabes Unis</option>
+                <option value="Qatar">Qatar</option>
+                <option value="Chine">Chine</option>
+                <option value="Japon">Japon</option>
+                <option value="Brésil">Brésil</option>
+              </select>
             </div>
           </div>
-        </section>
-      </div>
+        </div>
 
-      <!-- ═══ COLONNE DROITE ═══ -->
-      <div style="display: flex; flex-direction: column; gap: 2rem;">
-        <section>
-          <h3 style="font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent-primary); font-weight: 700; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
-            <i data-lucide="trending-up" style="width: 16px; height: 16px;"></i> Statistiques Salariales &amp; Tendance
-          </h3>
-          <div style="display: flex; flex-direction: column; gap: 1.25rem;">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
-              <div class="form-group">
-                <label class="form-label" style="font-weight: 600; margin-bottom: 0.4rem;" for="{{ form.salaire_min_global.id_for_label }}">
-                  Salaire Min (TND)
-                </label>
-                {{ form.salaire_min_global }}
-                {% if form.salaire_min_global.errors %}<div class="text-danger small mt-1">{{ form.salaire_min_global.errors }}</div>{% endif %}
-              </div>
-              <div class="form-group">
-                <label class="form-label" style="font-weight: 600; margin-bottom: 0.4rem;" for="{{ form.salaire_max_global.id_for_label }}">
-                  Salaire Max (TND)
-                </label>
-                {{ form.salaire_max_global }}
-                {% if form.salaire_max_global.errors %}<div class="text-danger small mt-1">{{ form.salaire_max_global.errors }}</div>{% endif %}
-              </div>
-            </div>
-
+        <!-- STEP 2: CONTENU -->
+        <div class="step-content" id="step-rapport-2">
+          <div class="d-flex flex-column gap-3">
             <div class="form-group">
-              <label class="form-label" style="font-weight: 600; margin-bottom: 0.4rem;" for="{{ form.salaire_moyen_global.id_for_label }}">
-                Salaire Moyen Marché (TND)
-              </label>
-              {{ form.salaire_moyen_global }}
-              <div id="salary-auto-hint" class="small text-secondary mt-1">Laissez vide pour calculer automatiquement la moyenne entre Min et Max.</div>
-              {% if form.salaire_moyen_global.errors %}<div class="text-danger small mt-1">{{ form.salaire_moyen_global.errors }}</div>{% endif %}
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
-              <div class="form-group">
-                <label class="form-label" style="font-weight: 600; margin-bottom: 0.4rem;" for="{{ form.tendance_generale.id_for_label }}">
-                  Tendance Globale
-                </label>
-                {{ form.tendance_generale }}
-                {% if form.tendance_generale.errors %}<div class="text-danger small mt-1">{{ form.tendance_generale.errors }}</div>{% endif %}
-              </div>
-              <div class="form-group">
-                <label class="form-label" style="font-weight: 600; margin-bottom: 0.4rem;" for="{{ form.niveau_demande_global.id_for_label }}">
-                  Niveau de Demande
-                </label>
-                {{ form.niveau_demande_global }}
-                {% if form.niveau_demande_global.errors %}<div class="text-danger small mt-1">{{ form.niveau_demande_global.errors }}</div>{% endif %}
-              </div>
-            </div>
-
-            <!-- Image de couverture (URL ou fichier local base64) -->
-            <div class="form-group" style="margin-top: 0.5rem;">
-              <label class="form-label" style="font-weight: 600; margin-bottom: 0.4rem;" for="{{ form.image_couverture.id_for_label }}">
+              <label class="form-label fw-semibold" for="{{ form.image_couverture.id_for_label }}">
                 Image de Couverture (optionnelle)
               </label>
-              {{ form.image_couverture }}
-              {% if form.image_couverture.errors %}<div class="text-danger small mt-1">{{ form.image_couverture.errors }}</div>{% endif %}
-              <div class="d-flex align-items-center gap-2 mt-2 flex-wrap">
-                <label for="cover-file-input" class="btn btn-sm btn-secondary mb-0" style="cursor:pointer; border-radius: 8px;">
-                  <i data-lucide="image" style="width:14px;height:14px;"></i> Importer une image
-                </label>
+              <div class="image-upload-zone" id="rapport-upload-zone">
+                <i data-lucide="image-plus" style="width: 36px; height: 36px; color: var(--text-tertiary);"></i>
+                <div style="font-size: 13.5px; color: var(--text-secondary);">
+                  <strong style="color: var(--accent-primary);">Cliquez pour importer</strong> ou glissez-déposez
+                </div>
+                <div style="font-size: 11.5px; color: var(--text-tertiary);">PNG, JPG ou WEBP (Max. 5 Mo)</div>
                 <input type="file" id="cover-file-input" accept="image/*" style="display:none;">
-                <button type="button" id="cover-clear-btn" class="btn btn-sm btn-ghost text-danger" style="display:none;">
+                <img id="rapport-image-preview" src="" alt="" class="image-upload-preview">
+                <div class="image-upload-overlay">
+                  <i data-lucide="refresh-cw" style="width: 22px; height: 22px;"></i>
+                  <span style="font-size: 12.5px; font-weight: 600;">Changer l'image</span>
+                </div>
+              </div>
+              <div class="d-flex gap-2 align-items-center mt-2">
+                {{ form.image_couverture }}
+                <button type="button" id="cover-clear-btn" class="btn btn-sm btn-ghost text-danger" style="display:none; white-space:nowrap;">
                   <i data-lucide="trash-2" style="width:14px;height:14px;"></i> Retirer
                 </button>
               </div>
-              <div id="cover-preview-box" class="mt-2" style="display:none;">
-                <img id="cover-preview-img" src="" alt="Aperçu couverture" style="max-height: 150px; width: 100%; object-fit: cover; border-radius: 12px; border: 1px solid var(--border-color);">
+              {% if form.image_couverture.errors %}<div class="text-danger small mt-1 field-error">{{ form.image_couverture.errors }}</div>{% endif %}
+            </div>
+
+            <div class="form-group">
+              <label class="form-label fw-semibold" for="{{ form.description.id_for_label }}">
+                Résumé Exécutif (optionnel)
+              </label>
+              {{ form.description }}
+              {% if form.description.errors %}<div class="text-danger small mt-1 field-error">{{ form.description.errors }}</div>{% endif %}
+            </div>
+
+            <div class="form-group">
+              <label class="form-label fw-semibold" for="{{ form.contenu_detaille.id_for_label }}">
+                Corps du Rapport (Contenu Détaillé)
+              </label>
+              <div id="quill-wrapper">
+                <div id="editor-container"></div>
+              </div>
+              <div id="raw-contenu-fallback" class="d-none">
+                {{ form.contenu_detaille }}
+              </div>
+              {% if form.contenu_detaille.errors %}<div class="text-danger small mt-1 field-error">{{ form.contenu_detaille.errors }}</div>{% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 3: ANALYSE -->
+        <div class="step-content" id="step-rapport-3">
+          <div class="d-flex flex-column gap-3">
+            <div class="p-3 rounded-3 small" style="background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-secondary);">
+              <i data-lucide="info" style="width:15px;height:15px;color:var(--accent-primary);vertical-align:-2px;"></i>
+              Saisissez les montants salariaux en <strong>TND</strong> ou ajustez directement le curseur et les blocs de demande dans le panneau interactif à droite.
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <div class="form-group">
+                <label class="form-label fw-semibold" for="{{ form.salaire_min_global.id_for_label }}">
+                  Salaire Min (TND)
+                </label>
+                {{ form.salaire_min_global }}
+                {% if form.salaire_min_global.errors %}<div class="text-danger small mt-1 field-error">{{ form.salaire_min_global.errors }}</div>{% endif %}
+              </div>
+              <div class="form-group">
+                <label class="form-label fw-semibold" for="{{ form.salaire_max_global.id_for_label }}">
+                  Salaire Max (TND)
+                </label>
+                {{ form.salaire_max_global }}
+                {% if form.salaire_max_global.errors %}<div class="text-danger small mt-1 field-error">{{ form.salaire_max_global.errors }}</div>{% endif %}
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label fw-semibold" for="{{ form.salaire_moyen_global.id_for_label }}">
+                Salaire Moyen Marché (TND)
+              </label>
+              {{ form.salaire_moyen_global }}
+              <div id="salary-auto-hint" class="small text-secondary mt-1">Calcul automatique prévu si laissé vide.</div>
+              {% if form.salaire_moyen_global.errors %}<div class="text-danger small mt-1 field-error">{{ form.salaire_moyen_global.errors }}</div>{% endif %}
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <div class="form-group">
+                <label class="form-label fw-semibold" for="{{ form.tendance_generale.id_for_label }}">
+                  Tendance Globale
+                </label>
+                {{ form.tendance_generale }}
+                {% if form.tendance_generale.errors %}<div class="text-danger small mt-1 field-error">{{ form.tendance_generale.errors }}</div>{% endif %}
+              </div>
+              <div class="form-group">
+                <label class="form-label fw-semibold" for="{{ form.niveau_demande_global.id_for_label }}">
+                  Niveau de Demande
+                </label>
+                {{ form.niveau_demande_global }}
+                {% if form.niveau_demande_global.errors %}<div class="text-danger small mt-1 field-error">{{ form.niveau_demande_global.errors }}</div>{% endif %}
               </div>
             </div>
           </div>
-        </section>
+        </div>
+
+        <!-- STEP 4: RÉFÉRENCES & SOURCES -->
+        <div class="step-content" id="step-rapport-4">
+          <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+            <div>
+              <h4 class="h6 fw-bold mb-1 d-flex align-items-center gap-2" style="color: var(--accent-primary);">
+                <i data-lucide="book-open" style="width: 17px; height: 17px;"></i>
+                <span>Références &amp; Sources d'information</span>
+              </h4>
+              <p class="text-secondary small mb-0">Indiquez d'où proviennent les données de ce rapport (organismes, études, liens URL ou notes méthodologiques).</p>
+            </div>
+            <button type="button" id="add-reference-btn" class="btn btn-sm btn-primary" style="border-radius: 10px; font-weight: 600;">
+              <i data-lucide="plus" style="width: 15px; height: 15px;"></i>
+              <span>Ajouter une référence</span>
+            </button>
+          </div>
+
+          {{ formset.management_form }}
+
+          <div id="references-container" style="display: flex; flex-direction: column; gap: 0.85rem; max-height: 360px; overflow-y: auto; padding-right: 4px;">
+            {% for ref_form in formset %}
+            <div class="reference-row p-3 rounded-3" style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
+              {{ ref_form.id_reference }}
+              <div class="d-none">{{ ref_form.DELETE }}</div>
+              <div class="reference-row-grid">
+                <div>
+                  <label class="form-label small fw-semibold mb-1">Source / Organisme</label>
+                  {{ ref_form.titre_source }}
+                  {% if ref_form.titre_source.errors %}<div class="text-danger small mt-1 field-error">{{ ref_form.titre_source.errors }}</div>{% endif %}
+                </div>
+                <div>
+                  <label class="form-label small fw-semibold mb-1">Lien URL (optionnel)</label>
+                  {{ ref_form.url_source }}
+                  {% if ref_form.url_source.errors %}<div class="text-danger small mt-1 field-error">{{ ref_form.url_source.errors }}</div>{% endif %}
+                </div>
+                <div>
+                  <label class="form-label small fw-semibold mb-1">Précision / Note</label>
+                  {{ ref_form.note_source }}
+                  {% if ref_form.note_source.errors %}<div class="text-danger small mt-1 field-error">{{ ref_form.note_source.errors }}</div>{% endif %}
+                </div>
+                <div style="padding-top: 1.65rem;">
+                  <button type="button" class="btn btn-sm btn-ghost text-danger btn-remove-ref" title="Supprimer cette référence">
+                    <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+
+          <template id="reference-empty-form">
+            <div class="reference-row p-3 rounded-3" style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
+              {{ formset.empty_form.id_reference }}
+              <div class="d-none">{{ formset.empty_form.DELETE }}</div>
+              <div class="reference-row-grid">
+                <div>
+                  <label class="form-label small fw-semibold mb-1">Source / Organisme</label>
+                  {{ formset.empty_form.titre_source }}
+                </div>
+                <div>
+                  <label class="form-label small fw-semibold mb-1">Lien URL (optionnel)</label>
+                  {{ formset.empty_form.url_source }}
+                </div>
+                <div>
+                  <label class="form-label small fw-semibold mb-1">Précision / Note</label>
+                  {{ formset.empty_form.note_source }}
+                </div>
+                <div style="padding-top: 1.65rem;">
+                  <button type="button" class="btn btn-sm btn-ghost text-danger btn-remove-ref" title="Supprimer cette référence">
+                    <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+
+      </div>
+
+      <!-- ═══ RIGHT PANEL: LIVE VISUALIZATION PER STEP ═══ -->
+      <div class="stepper-right-panel">
+        <!-- Viz 1: Couverture Géographique (ECharts Tunisia / World) -->
+        <div id="viz-step-1" class="viz-panel active" style="align-items: center;">
+          <div class="viz-title">Couverture Géographique</div>
+          <div id="echarts-map" style="width: 100%; height: 340px; border-radius: 10px; overflow: hidden;"></div>
+          <div id="map-caption" class="small text-secondary text-center mt-2">
+            Sélectionnez un gouvernorat tunisien ou « International » pour cibler la zone sur la carte.
+          </div>
+        </div>
+
+        <!-- Viz 2: Aperçu de l'Article -->
+        <div id="viz-step-2" class="viz-panel">
+          <div class="viz-title">Aperçu de l'Article</div>
+          <div class="article-preview">
+            <h3 class="article-preview-title" id="live-article-title">Titre du rapport...</h3>
+            <div class="article-preview-meta">
+              <span><i data-lucide="user" style="width:13px;height:13px;vertical-align:-2px;"></i> <span id="live-article-author">Analyste Aptus</span></span>
+              <span><i data-lucide="calendar" style="width:13px;height:13px;vertical-align:-2px;"></i> <span id="live-article-date">--/--/----</span></span>
+              <span><i data-lucide="map-pin" style="width:13px;height:13px;vertical-align:-2px;"></i> <span id="live-article-region">Tunisie</span></span>
+            </div>
+            <img id="live-article-img" class="article-preview-img" src="" alt="">
+            <p id="live-article-desc" class="small fw-medium mb-2" style="color: var(--accent-primary); display:none;"></p>
+            <div id="live-article-content" class="article-preview-content">
+              <p style="color:var(--text-secondary); font-style:italic;">Commencez à rédiger le corps du rapport pour voir l'aperçu ici...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Viz 3: Indicateurs de Marché (NoUiSlider + Demand Blocks) -->
+        <div id="viz-step-3" class="viz-panel" style="justify-content: center;">
+          <div class="viz-title">Indicateurs de Marché</div>
+          <div style="width: 92%; margin: 0 auto;">
+            <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:14px;">
+              <h4 style="font-size:14px; font-weight:700; color:var(--text-primary); margin:0;">Échelle Salariale</h4>
+              <span style="font-size:13px; font-weight:700; color:var(--accent-primary);" id="slider-salary-live">1000 - 4000 TND</span>
+            </div>
+            <div id="salary-slider" style="margin: 26px 0 42px;"></div>
+
+            <div class="p-3 rounded-3 mb-4 text-center" style="background: var(--bg-card); border: 1px solid var(--border-color);">
+              <div class="small text-secondary">Moyenne Marché Estimée</div>
+              <div class="fs-4 fw-bold text-success" id="slider-avg-live">2500 TND</div>
+            </div>
+
+            <h4 style="font-size:14px; font-weight:700; color:var(--text-primary); margin-bottom:4px;">Niveau de Demande</h4>
+            <div class="demand-blocks" id="interactive-demand-blocks">
+              <div class="demand-block" data-val="1">1</div>
+              <div class="demand-block" data-val="2">2</div>
+              <div class="demand-block" data-val="3">3</div>
+              <div class="demand-block" data-val="4">4</div>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:12px; margin-top:6px; color:var(--text-secondary);">
+              <span>Faible</span>
+              <span>Très Forte</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Viz 4: Validation & Synthèse Références -->
+        <div id="viz-step-4" class="viz-panel" style="justify-content: center; align-items: center;">
+          <div class="viz-title">Synthèse &amp; Sources</div>
+          <div class="summary-counter" id="final-summary-counter">0</div>
+          <div class="text-center mb-4" style="font-size: 14.5px; color: var(--text-secondary);">
+            Référence(s) source(s) ajoutée(s).<br>
+            <span class="small">Documentez l'origine de vos données pour renforcer la crédibilité du rapport.</span>
+          </div>
+          <div class="w-100 p-3 rounded-3" style="background: var(--bg-card); border: 1px solid var(--border-color); font-size: 13px;">
+            <div class="d-flex justify-content-between py-1 border-bottom" style="border-color: var(--border-color-light) !important;">
+              <span class="text-secondary">Rapport :</span>
+              <strong id="summary-titre" class="text-truncate ms-2" style="max-width: 220px; color: var(--text-primary);">—</strong>
+            </div>
+            <div class="d-flex justify-content-between py-1 border-bottom" style="border-color: var(--border-color-light) !important;">
+              <span class="text-secondary">Zone :</span>
+              <strong id="summary-region" style="color: var(--text-primary);">—</strong>
+            </div>
+            <div class="d-flex justify-content-between py-1">
+              <span class="text-secondary">Fourchette (TND) :</span>
+              <strong id="summary-salary" class="text-success">—</strong>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- ═══ RÉFÉRENCES & SOURCES D'INFORMATION ═══ -->
-    <section style="margin-top: 2.75rem; padding-top: 2rem; border-top: 1px solid var(--border-color);">
-      <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
-        <div>
-          <h3 style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent-primary); font-weight: 700; margin-bottom: 0.35rem; display: flex; align-items: center; gap: 0.5rem;">
-            <i data-lucide="book-open" style="width: 16px; height: 16px;"></i> Références &amp; Sources d'information
-          </h3>
-          <p class="text-secondary small mb-0">Indiquez d'où proviennent les données de ce rapport (organismes, études, enquêtes, liens URL ou notes méthodologiques).</p>
-        </div>
-        <button type="button" id="add-reference-btn" class="btn btn-sm btn-primary" style="border-radius: 10px; font-weight: 600;">
-          <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
-          <span>Ajouter une référence</span>
+    <!-- Stepper Footer -->
+    <div class="stepper-footer">
+      <div class="d-flex gap-2">
+        <a href="{% url 'backoffice_veille' %}" class="btn btn-secondary" style="border-radius: 10px; font-weight: 600;">Annuler</a>
+        <button type="button" class="btn btn-secondary" id="btn-prev-step" style="display:none; border-radius: 10px; font-weight: 600;">
+          <i data-lucide="arrow-left" style="width: 16px; height: 16px;"></i>
+          <span>Précédent</span>
         </button>
       </div>
-
-      {{ formset.management_form }}
-
-      <div id="references-container" style="display: flex; flex-direction: column; gap: 1rem;">
-        {% for ref_form in formset %}
-        <div class="reference-row p-3 rounded-3" style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
-          {{ ref_form.id_reference }}
-          <div class="d-none">{{ ref_form.DELETE }}</div>
-          <div style="display: grid; grid-template-columns: 1.2fr 1.2fr 1fr auto; gap: 0.85rem; align-items: start;" class="reference-row-grid">
-            <div>
-              <label class="form-label small fw-semibold mb-1">Source / Organisme</label>
-              {{ ref_form.titre_source }}
-              {% if ref_form.titre_source.errors %}<div class="text-danger small mt-1">{{ ref_form.titre_source.errors }}</div>{% endif %}
-            </div>
-            <div>
-              <label class="form-label small fw-semibold mb-1">Lien URL (optionnel)</label>
-              {{ ref_form.url_source }}
-              {% if ref_form.url_source.errors %}<div class="text-danger small mt-1">{{ ref_form.url_source.errors }}</div>{% endif %}
-            </div>
-            <div>
-              <label class="form-label small fw-semibold mb-1">Précision / Note</label>
-              {{ ref_form.note_source }}
-              {% if ref_form.note_source.errors %}<div class="text-danger small mt-1">{{ ref_form.note_source.errors }}</div>{% endif %}
-            </div>
-            <div style="padding-top: 1.65rem;">
-              <button type="button" class="btn btn-sm btn-ghost text-danger btn-remove-ref" title="Supprimer cette référence">
-                <i data-lucide="trash-2" style="width: 17px; height: 17px;"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-        {% endfor %}
+      <div class="d-flex gap-2">
+        <button type="button" class="btn btn-primary" id="btn-next-step" style="border-radius: 10px; font-weight: 700;">
+          <span>Suivant</span>
+          <i data-lucide="arrow-right" style="width: 16px; height: 16px;"></i>
+        </button>
+        <button type="submit" class="btn btn-primary" id="btn-submit-rapport" style="display:none; border-radius: 10px; font-weight: 700;">
+          <i data-lucide="check" style="width: 17px; height: 17px;"></i>
+          <span>Enregistrer le rapport</span>
+        </button>
       </div>
-
-      <template id="reference-empty-form">
-        <div class="reference-row p-3 rounded-3" style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
-          {{ formset.empty_form.id_reference }}
-          <div class="d-none">{{ formset.empty_form.DELETE }}</div>
-          <div style="display: grid; grid-template-columns: 1.2fr 1.2fr 1fr auto; gap: 0.85rem; align-items: start;" class="reference-row-grid">
-            <div>
-              <label class="form-label small fw-semibold mb-1">Source / Organisme</label>
-              {{ formset.empty_form.titre_source }}
-            </div>
-            <div>
-              <label class="form-label small fw-semibold mb-1">Lien URL (optionnel)</label>
-              {{ formset.empty_form.url_source }}
-            </div>
-            <div>
-              <label class="form-label small fw-semibold mb-1">Précision / Note</label>
-              {{ formset.empty_form.note_source }}
-            </div>
-            <div style="padding-top: 1.65rem;">
-              <button type="button" class="btn btn-sm btn-ghost text-danger btn-remove-ref" title="Supprimer cette référence">
-                <i data-lucide="trash-2" style="width: 17px; height: 17px;"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-      </template>
-    </section>
-
-    <!-- Form Footer Actions -->
-    <div style="margin-top: 3rem; padding-top: 1.75rem; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 1.25rem; align-items: center;">
-      <a href="{% url 'backoffice_veille' %}" class="btn btn-secondary" style="padding: 0.75rem 2rem; border-radius: 12px; font-weight: 600;">Annuler</a>
-      <button type="submit" class="btn btn-primary" style="padding: 0.75rem 2.5rem; border-radius: 12px; font-weight: 700;">
-        <i data-lucide="check" style="width: 18px; height: 18px;"></i>
-        <span>Enregistrer le rapport</span>
-      </button>
     </div>
   </form>
 </div>
 {% endblock %}
 
 {% block extra_js %}
-<style>
-  @media (max-width: 900px) {
-    .form-grid-2cols, .reference-row-grid {
-      grid-template-columns: 1fr !important;
-      gap: 1.25rem !important;
-    }
-  }
-</style>
+<script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.js"></script>
+
 <script>
-  if (window.lucide) {
-    lucide.createIcons();
-  }
+document.addEventListener('DOMContentLoaded', function() {
+  if (window.lucide) lucide.createIcons();
 
-  document.addEventListener('DOMContentLoaded', function() {
-    // 1. Dynamic inline formset for Références
-    const container = document.getElementById('references-container');
-    const addBtn = document.getElementById('add-reference-btn');
-    const template = document.getElementById('reference-empty-form');
-    const totalFormsInput = document.getElementById('id_references-TOTAL_FORMS');
+  const formEl = document.getElementById('rapport-wizard-form');
+  const titreInput = document.getElementById('id_titre');
+  const auteurInput = document.getElementById('id_auteur');
+  const dateInput = document.getElementById('id_date_publication');
+  const regionSelect = document.getElementById('id_region');
+  const secteurHidden = document.getElementById('id_secteur_principal');
+  const descInput = document.getElementById('id_description');
+  const contenuInput = document.getElementById('id_contenu_detaille');
+  const coverInput = document.getElementById('id_image_couverture');
+  const minInput = document.getElementById('id_salaire_min_global');
+  const maxInput = document.getElementById('id_salaire_max_global');
+  const moyInput = document.getElementById('id_salaire_moyen_global');
+  const demandeSelect = document.getElementById('id_niveau_demande_global');
 
-    function bindRemoveButton(row) {
-      const btn = row.querySelector('.btn-remove-ref');
-      if (!btn) return;
-      btn.addEventListener('click', function() {
-        const deleteCheckbox = row.querySelector('input[type="checkbox"][name$="-DELETE"]');
-        if (deleteCheckbox) {
-          deleteCheckbox.checked = true;
-        }
-        row.style.display = 'none';
-      });
-    }
+  // ── 1. Stepper Navigation ──
+  let currentStep = 1;
+  const totalSteps = 4;
+  const stepBtns = document.querySelectorAll('.stepper-step');
+  const stepPanels = document.querySelectorAll('.step-content');
+  const vizPanels = document.querySelectorAll('.viz-panel');
+  const btnPrev = document.getElementById('btn-prev-step');
+  const btnNext = document.getElementById('btn-next-step');
+  const btnSubmit = document.getElementById('btn-submit-rapport');
 
-    container.querySelectorAll('.reference-row').forEach(function(row) {
-      const deleteCheckbox = row.querySelector('input[type="checkbox"][name$="-DELETE"]');
-      if (deleteCheckbox && deleteCheckbox.checked) {
-        row.style.display = 'none';
-      }
-      bindRemoveButton(row);
+  function goToStep(step) {
+    currentStep = Math.max(1, Math.min(totalSteps, step));
+    stepPanels.forEach((el, idx) => el.classList.toggle('active', idx + 1 === currentStep));
+    vizPanels.forEach((el, idx) => el.classList.toggle('active', idx + 1 === currentStep));
+    stepBtns.forEach((el, idx) => {
+      const s = idx + 1;
+      el.classList.toggle('active', s === currentStep);
+      el.classList.toggle('completed', s < currentStep);
     });
 
-    if (addBtn && template && totalFormsInput) {
-      addBtn.addEventListener('click', function() {
-        const index = parseInt(totalFormsInput.value, 10);
-        const html = template.innerHTML.replace(/__prefix__/g, index);
-        const wrapper = document.createElement('div');
-        wrapper.innerHTML = html.trim();
-        const newRow = wrapper.firstElementChild;
-        container.appendChild(newRow);
-        totalFormsInput.value = index + 1;
-        bindRemoveButton(newRow);
-        if (window.lucide) lucide.createIcons();
-      });
+    btnPrev.style.display = currentStep > 1 ? 'inline-flex' : 'none';
+    btnNext.style.display = currentStep < totalSteps ? 'inline-flex' : 'none';
+    btnSubmit.style.display = currentStep === totalSteps ? 'inline-flex' : 'none';
+
+    if (currentStep === 1) {
+      setTimeout(() => { if (mapChart) mapChart.resize(); }, 60);
+    } else if (currentStep === 2) {
+      updateLivePreview();
+    } else if (currentStep === 3) {
+      updateSalaryHint();
+    } else if (currentStep === 4) {
+      updateReferencesCounter();
     }
+  }
 
-    // 2. Cover image file-to-base64 & preview
-    const coverInput = document.getElementById('id_image_couverture');
-    const coverFile = document.getElementById('cover-file-input');
-    const coverPreviewBox = document.getElementById('cover-preview-box');
-    const coverPreviewImg = document.getElementById('cover-preview-img');
-    const coverClearBtn = document.getElementById('cover-clear-btn');
+  function validateCurrentStep(step) {
+    if (step === 1) {
+      flushPendingTag();
+      if (titreInput && titreInput.value.trim().length < 3) {
+        titreInput.classList.add('is-invalid-field');
+        titreInput.focus();
+        return false;
+      }
+      if (titreInput) titreInput.classList.remove('is-invalid-field');
+    } else if (step === 3 && minInput && maxInput) {
+      const smin = parseFloat(minInput.value);
+      const smax = parseFloat(maxInput.value);
+      if (!isNaN(smin) && !isNaN(smax) && smin > smax) {
+        maxInput.classList.add('is-invalid-field');
+        maxInput.focus();
+        return false;
+      }
+      maxInput.classList.remove('is-invalid-field');
+    }
+    return true;
+  }
 
-    function refreshCoverPreview() {
-      if (!coverInput) return;
-      const val = (coverInput.value || '').trim();
-      if (val) {
-        coverPreviewImg.src = val;
-        coverPreviewBox.style.display = 'block';
-        coverClearBtn.style.display = 'inline-flex';
+  stepBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = parseInt(btn.dataset.stepIndicator, 10);
+      if (target <= currentStep || validateCurrentStep(currentStep)) {
+        goToStep(target);
+      }
+    });
+  });
+
+  btnPrev.addEventListener('click', () => goToStep(currentStep - 1));
+  btnNext.addEventListener('click', () => {
+    if (validateCurrentStep(currentStep)) {
+      goToStep(currentStep + 1);
+    }
+  });
+
+  // ── 2. Hybrid Sector Tags (Step 1) ──
+  const SECTORS_LIST = [
+    'Technologie', 'Informatique', 'Data & IA', 'Cybersécurité', 'Finance',
+    'Banque', 'Assurance', 'Santé', 'Pharmacie', 'Industrie', 'Énergie',
+    'Agriculture', 'Tourisme', 'Hôtellerie', 'Commerce', 'Retail',
+    'Éducation', 'Formation', 'Services Publics', 'Marketing', 'Communication',
+    'Logistique', 'Transport', 'Immobilier', 'Construction', 'Juridique',
+    'Ressources Humaines', 'E-commerce'
+  ];
+
+  const tagContainer = document.getElementById('tag-container');
+  const tagInput = document.getElementById('tag-input');
+  const tagSuggestions = document.getElementById('tag-suggestions');
+  let tags = (secteurHidden && secteurHidden.value)
+    ? secteurHidden.value.split(',').map(s => s.trim()).filter(Boolean)
+    : [];
+
+  function renderTags() {
+    tagContainer.querySelectorAll('.tag-chip').forEach(el => el.remove());
+    tags.forEach(tag => {
+      const chip = document.createElement('span');
+      chip.className = 'tag-chip';
+      const label = document.createTextNode(tag + ' ');
+      const rm = document.createElement('span');
+      rm.className = 'remove-tag';
+      rm.innerHTML = '&times;';
+      rm.addEventListener('click', () => {
+        tags = tags.filter(t => t !== tag);
+        renderTags();
+      });
+      chip.appendChild(label);
+      chip.appendChild(rm);
+      tagContainer.insertBefore(chip, tagInput);
+    });
+    if (secteurHidden) secteurHidden.value = tags.join(', ');
+  }
+
+  function addTag(val) {
+    const clean = (val || '').trim();
+    if (clean && !tags.includes(clean)) {
+      tags.push(clean);
+      renderTags();
+    }
+    tagInput.value = '';
+    tagSuggestions.style.display = 'none';
+  }
+
+  function flushPendingTag() {
+    if (tagInput && tagInput.value.trim()) {
+      addTag(tagInput.value);
+    }
+  }
+
+  renderTags();
+
+  if (tagInput) {
+    tagInput.addEventListener('input', (e) => {
+      const q = e.target.value.toLowerCase().trim();
+      if (!q) {
+        tagSuggestions.style.display = 'none';
+        return;
+      }
+      const matches = SECTORS_LIST.filter(s => s.toLowerCase().includes(q) && !tags.includes(s));
+      if (matches.length) {
+        tagSuggestions.innerHTML = '';
+        matches.forEach(m => {
+          const item = document.createElement('div');
+          item.className = 'tag-suggestion-item';
+          item.textContent = m;
+          item.addEventListener('mousedown', (ev) => {
+            ev.preventDefault();
+            addTag(m);
+          });
+          tagSuggestions.appendChild(item);
+        });
+        tagSuggestions.style.display = 'block';
       } else {
-        coverPreviewImg.src = '';
-        coverPreviewBox.style.display = 'none';
-        coverClearBtn.style.display = 'none';
+        tagSuggestions.style.display = 'none';
+      }
+    });
+
+    tagInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ',') {
+        e.preventDefault();
+        addTag(tagInput.value);
+      } else if (e.key === 'Backspace' && !tagInput.value && tags.length) {
+        tags.pop();
+        renderTags();
+      } else if (e.key === 'Escape') {
+        tagSuggestions.style.display = 'none';
+      }
+    });
+
+    tagInput.addEventListener('blur', () => {
+      setTimeout(() => { tagSuggestions.style.display = 'none'; }, 150);
+    });
+    tagContainer.addEventListener('click', () => tagInput.focus());
+  }
+
+  // ── 3. Interactive ECharts Tunisia & World Map (Step 1 Right) ──
+  const intlContainer = document.getElementById('intl-country-container');
+  const countrySelect = document.getElementById('rapport-pays');
+  const mapEl = document.getElementById('echarts-map');
+  const mapCaption = document.getElementById('map-caption');
+  let mapChart = null;
+  let tunisiaLoaded = false;
+  let worldLoaded = false;
+  let currentMapView = 'Tunisia';
+
+  const TUNISIA_REGIONS_VIEW = {
+    'Tunis':       { center: [10.25, 36.82], zoom: 4.5 },
+    'Ariana':      { center: [10.12, 36.94], zoom: 4.5 },
+    'Ben Arous':   { center: [10.26, 36.68], zoom: 4.2 },
+    'Manouba':     { center: [9.91, 36.79],  zoom: 4.5 },
+    'Nabeul':      { center: [10.75, 36.65], zoom: 3.2 },
+    'Zaghouan':    { center: [10.14, 36.31], zoom: 3.8 },
+    'Bizerte':     { center: [9.38, 37.15],  zoom: 3.5 },
+    'Béja':        { center: [9.27, 36.73],  zoom: 3.8 },
+    'Jendouba':    { center: [8.65, 36.68],  zoom: 3.8 },
+    'Le Kef':      { center: [8.75, 36.06],  zoom: 3.8 },
+    'Siliana':     { center: [9.36, 35.94],  zoom: 3.5 },
+    'Sousse':      { center: [10.45, 35.84], zoom: 4.5 },
+    'Monastir':    { center: [10.82, 35.63], zoom: 4.5 },
+    'Mahdia':      { center: [10.75, 35.25], zoom: 3.5 },
+    'Sfax':        { center: [10.42, 34.78], zoom: 2.8 },
+    'Kairouan':    { center: [9.85, 35.69],  zoom: 3.0 },
+    'Kasserine':   { center: [8.85, 35.30],  zoom: 3.0 },
+    'Sidi Bouzid': { center: [9.52, 34.93],  zoom: 3.2 },
+    'Gabès':       { center: [10.00, 33.79], zoom: 3.5 },
+    'Médenine':    { center: [10.95, 33.15], zoom: 2.5 },
+    'Tataouine':   { center: [10.55, 32.30], zoom: 1.8 },
+    'Gafsa':       { center: [8.85, 34.34],  zoom: 3.2 },
+    'Tozeur':      { center: [8.18, 33.95],  zoom: 3.8 },
+    'Kebili':      { center: [9.05, 33.35],  zoom: 2.5 }
+  };
+
+  const WORLD_NAME_MAP = {
+    'France': 'France', 'Canada': 'Canada', 'États-Unis': 'United States',
+    'Royaume-Uni': 'United Kingdom', 'Allemagne': 'Germany', 'Italie': 'Italy',
+    'Espagne': 'Spain', 'Belgique': 'Belgium', 'Suisse': 'Switzerland',
+    'Maroc': 'Morocco', 'Algérie': 'Algeria', 'Égypte': 'Egypt',
+    'Arabie Saoudite': 'Saudi Arabia', 'Émirats Arabes Unis': 'United Arab Emirates',
+    'Qatar': 'Qatar', 'Chine': 'China', 'Japon': 'Japan', 'Brésil': 'Brazil'
+  };
+
+  const COUNTRY_VIEW = {
+    'France': { center: [2.2, 46.2], zoom: 5 },
+    'Canada': { center: [-96.8, 56.1], zoom: 2.5 },
+    'États-Unis': { center: [-98.5, 39.5], zoom: 3 },
+    'Royaume-Uni': { center: [-3.4, 55.4], zoom: 5 },
+    'Allemagne': { center: [10.5, 51.2], zoom: 5.5 },
+    'Italie': { center: [12.5, 41.8], zoom: 5.5 },
+    'Espagne': { center: [-3.7, 40.4], zoom: 5.5 },
+    'Belgique': { center: [4.4, 50.5], zoom: 10 },
+    'Suisse': { center: [8.2, 46.8], zoom: 9 },
+    'Maroc': { center: [-7.0, 31.7], zoom: 4.5 },
+    'Algérie': { center: [3.0, 28.0], zoom: 2.5 },
+    'Égypte': { center: [30.8, 26.8], zoom: 3.5 },
+    'Arabie Saoudite': { center: [45.0, 23.8], zoom: 2.5 },
+    'Émirats Arabes Unis': { center: [54.0, 24.0], zoom: 7 },
+    'Qatar': { center: [51.2, 25.3], zoom: 12 },
+    'Chine': { center: [104.2, 35.9], zoom: 2.5 },
+    'Japon': { center: [138.0, 36.5], zoom: 4.5 },
+    'Brésil': { center: [-51.9, -14.2], zoom: 2.5 }
+  };
+
+  function normalizeTunisiaKey(val) {
+    if (val === 'Kébili') return 'Kebili';
+    return val;
+  }
+
+  function getOrInitMap() {
+    if (!mapChart && typeof echarts !== 'undefined' && mapEl) {
+      mapChart = echarts.init(mapEl, null, { renderer: 'svg' });
+    }
+    return mapChart;
+  }
+
+  function renderTunisiaMap(regionVal) {
+    if (!tunisiaLoaded || typeof echarts === 'undefined') return;
+    const chart = getOrInitMap();
+    if (!chart) return;
+    const isSwitch = currentMapView !== 'Tunisia';
+    currentMapView = 'Tunisia';
+
+    const hl = normalizeTunisiaKey(regionVal || '');
+    const view = TUNISIA_REGIONS_VIEW[hl] || { center: [9.4, 34.2], zoom: 1.0 };
+    const isNational = (regionVal === 'National (Tunisie)' || regionVal === 'National');
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const baseFill = isDark ? '#1e293b' : '#e8edf5';
+    const baseBorder = isDark ? '#334155' : '#b8c4d4';
+
+    const seriesData = hl && TUNISIA_REGIONS_VIEW[hl]
+      ? [{
+          name: hl,
+          itemStyle: { areaColor: '#6b34a3', borderColor: '#a855f7', borderWidth: 2 },
+          label: { show: true, color: '#fff', fontSize: 11, fontWeight: 700 }
+        }]
+      : (isNational
+          ? Object.keys(TUNISIA_REGIONS_VIEW).map(k => ({
+              name: k,
+              itemStyle: { areaColor: '#7c3aed', borderColor: '#c4b5fd', borderWidth: 0.8 }
+            }))
+          : []);
+
+    chart.setOption({
+      animation: true,
+      animationDurationUpdate: 900,
+      animationEasing: 'cubicInOut',
+      backgroundColor: 'transparent',
+      series: [{
+        type: 'map',
+        map: 'Tunisia',
+        roam: false,
+        aspectScale: 0.72,
+        center: view.center,
+        zoom: view.zoom,
+        label: { show: false, color: '#fff' },
+        emphasis: {
+          label: { show: true, color: '#fff' },
+          itemStyle: { areaColor: '#8b5cf6', borderColor: '#6b34a3' }
+        },
+        itemStyle: { areaColor: baseFill, borderColor: baseBorder, borderWidth: 0.8 },
+        data: seriesData
+      }]
+    }, isSwitch);
+
+    if (mapCaption) {
+      mapCaption.textContent = hl && TUNISIA_REGIONS_VIEW[hl]
+        ? 'Zone ciblée : ' + regionVal
+        : (isNational ? 'Couverture nationale : toute la Tunisie' : 'Carte de Tunisie — sélectionnez une région pour zoomer');
+    }
+  }
+
+  function renderWorldMap(countryVal) {
+    if (!worldLoaded || typeof echarts === 'undefined') return;
+    const chart = getOrInitMap();
+    if (!chart) return;
+    const isSwitch = currentMapView !== 'World';
+    currentMapView = 'World';
+
+    const echName = WORLD_NAME_MAP[countryVal] || null;
+    const view = echName ? (COUNTRY_VIEW[countryVal] || { center: [10, 20], zoom: 1.1 }) : { center: [10, 20], zoom: 1.1 };
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+
+    chart.setOption({
+      animation: true,
+      animationDurationUpdate: 900,
+      animationEasing: 'cubicInOut',
+      backgroundColor: 'transparent',
+      geo: {
+        map: 'World',
+        roam: false,
+        center: view.center,
+        zoom: view.zoom,
+        label: { show: false },
+        itemStyle: {
+          areaColor: isDark ? '#1e293b' : '#dde4ef',
+          borderColor: isDark ? '#334155' : '#b8c4d4',
+          borderWidth: 0.5
+        },
+        regions: echName ? [{
+          name: echName,
+          itemStyle: { areaColor: '#6b34a3', borderColor: '#c4b5fd' },
+          label: { show: true, color: '#fff', fontWeight: 700 }
+        }] : []
+      },
+      series: []
+    }, isSwitch);
+
+    if (mapCaption) {
+      mapCaption.textContent = countryVal ? ('Zone internationale ciblée : ' + countryVal) : 'Couverture internationale / globale';
+    }
+  }
+
+  function syncMapFromRegion() {
+    const val = regionSelect ? regionSelect.value : '';
+    if (val === 'International' || val === 'Global') {
+      if (intlContainer) intlContainer.style.display = val === 'International' ? 'block' : 'none';
+      if (worldLoaded) {
+        renderWorldMap(countrySelect ? countrySelect.value : '');
+      }
+    } else {
+      if (intlContainer) intlContainer.style.display = 'none';
+      if (tunisiaLoaded) {
+        renderTunisiaMap(val);
+      }
+    }
+  }
+
+  if (typeof echarts !== 'undefined') {
+    fetch("{% static 'js/tunisia.json' %}")
+      .then(r => r.json())
+      .then(data => {
+        echarts.registerMap('Tunisia', data);
+        tunisiaLoaded = true;
+        syncMapFromRegion();
+      })
+      .catch(() => {});
+
+    fetch("{% static 'js/world.json' %}")
+      .then(r => r.json())
+      .then(data => {
+        echarts.registerMap('World', data);
+        worldLoaded = true;
+        syncMapFromRegion();
+      })
+      .catch(() => {});
+  }
+
+  if (regionSelect) regionSelect.addEventListener('change', syncMapFromRegion);
+  if (countrySelect) countrySelect.addEventListener('change', () => renderWorldMap(countrySelect.value));
+  window.addEventListener('resize', () => { if (mapChart) mapChart.resize(); });
+  window.addEventListener('themeChanged', syncMapFromRegion);
+
+  // ── 4. Cover Image Upload + Quill Rich Editor + Live Preview (Step 2) ──
+  const uploadZone = document.getElementById('rapport-upload-zone');
+  const coverFile = document.getElementById('cover-file-input');
+  const coverPreviewImg = document.getElementById('rapport-image-preview');
+  const coverClearBtn = document.getElementById('cover-clear-btn');
+
+  function refreshCoverUI() {
+    const val = coverInput ? (coverInput.value || '').trim() : '';
+    if (val) {
+      coverPreviewImg.src = val;
+      uploadZone.classList.add('has-image');
+      coverClearBtn.style.display = 'inline-flex';
+    } else {
+      coverPreviewImg.src = '';
+      uploadZone.classList.remove('has-image');
+      coverClearBtn.style.display = 'none';
+    }
+    updateLivePreview();
+  }
+
+  function handleCoverFile(file) {
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      alert("L'image est trop lourde (max 5 Mo).");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      if (coverInput) coverInput.value = evt.target.result;
+      refreshCoverUI();
+    };
+    reader.readAsDataURL(file);
+  }
+
+  if (uploadZone && coverFile) {
+    uploadZone.addEventListener('click', () => coverFile.click());
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(ev => {
+      uploadZone.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); });
+    });
+    ['dragenter', 'dragover'].forEach(ev => uploadZone.addEventListener(ev, () => uploadZone.classList.add('dragover')));
+    ['dragleave', 'drop'].forEach(ev => uploadZone.addEventListener(ev, () => uploadZone.classList.remove('dragover')));
+    uploadZone.addEventListener('drop', e => {
+      if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
+        handleCoverFile(e.dataTransfer.files[0]);
+      }
+    });
+    coverFile.addEventListener('change', e => handleCoverFile(e.target.files && e.target.files[0]));
+  }
+  if (coverInput) coverInput.addEventListener('input', refreshCoverUI);
+  if (coverClearBtn) {
+    coverClearBtn.addEventListener('click', () => {
+      if (coverInput) coverInput.value = '';
+      if (coverFile) coverFile.value = '';
+      refreshCoverUI();
+    });
+  }
+
+  // Quill init (with safe offline fallback)
+  let quill = null;
+  const editorContainer = document.getElementById('editor-container');
+  const rawContenuFallback = document.getElementById('raw-contenu-fallback');
+
+  if (typeof Quill !== 'undefined' && editorContainer) {
+    quill = new Quill('#editor-container', {
+      theme: 'snow',
+      placeholder: 'Rédigez le contenu détaillé du rapport ici...',
+      modules: {
+        toolbar: [
+          [{ 'header': [1, 2, 3, false] }],
+          ['bold', 'italic', 'underline', 'strike'],
+          [{ 'color': [] }, { 'background': [] }],
+          ['link', 'blockquote'],
+          [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+          ['clean']
+        ]
+      }
+    });
+    const initialBody = contenuInput ? contenuInput.value : '';
+    if (initialBody) {
+      if (/<[a-z][\s\S]*>/i.test(initialBody)) {
+        quill.root.innerHTML = initialBody;
+      } else {
+        quill.setText(initialBody);
+      }
+    }
+    quill.on('text-change', function() {
+      if (contenuInput) {
+        const html = quill.root.innerHTML.trim();
+        contenuInput.value = (html === '<p><br></p>') ? '' : html;
+      }
+      if (currentStep === 2) updateLivePreview();
+    });
+  } else {
+    document.getElementById('quill-wrapper').style.display = 'none';
+    if (rawContenuFallback) rawContenuFallback.classList.remove('d-none');
+  }
+
+  function updateLivePreview() {
+    const tEl = document.getElementById('live-article-title');
+    const aEl = document.getElementById('live-article-author');
+    const dEl = document.getElementById('live-article-date');
+    const rEl = document.getElementById('live-article-region');
+    const imgEl = document.getElementById('live-article-img');
+    const descPreviewEl = document.getElementById('live-article-desc');
+    const contentEl = document.getElementById('live-article-content');
+
+    if (tEl) tEl.textContent = (titreInput && titreInput.value.trim()) || 'Titre du rapport...';
+    if (aEl) aEl.textContent = (auteurInput && auteurInput.value.trim()) || 'Analyste Aptus';
+    if (dEl) dEl.textContent = (dateInput && dateInput.value) || '--/--/----';
+    if (rEl) rEl.textContent = (regionSelect && regionSelect.value) || 'Tunisie';
+
+    const imgVal = coverInput ? coverInput.value.trim() : '';
+    if (imgEl) {
+      if (imgVal) {
+        imgEl.src = imgVal;
+        imgEl.style.display = 'block';
+      } else {
+        imgEl.src = '';
+        imgEl.style.display = 'none';
       }
     }
 
-    if (coverInput) {
-      refreshCoverPreview();
-      coverInput.addEventListener('input', refreshCoverPreview);
+    const descVal = descInput ? descInput.value.trim() : '';
+    if (descPreviewEl) {
+      if (descVal) {
+        descPreviewEl.textContent = descVal;
+        descPreviewEl.style.display = 'block';
+      } else {
+        descPreviewEl.style.display = 'none';
+      }
     }
 
-    if (coverFile && coverInput) {
-      coverFile.addEventListener('change', function(e) {
-        const file = e.target.files && e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = function(evt) {
-          coverInput.value = evt.target.result;
-          refreshCoverPreview();
-        };
-        reader.readAsDataURL(file);
-      });
+    if (contentEl) {
+      const bodyHtml = quill ? quill.root.innerHTML.trim() : (contenuInput ? contenuInput.value.trim() : '');
+      if (bodyHtml && bodyHtml !== '<p><br></p>') {
+        contentEl.innerHTML = quill ? bodyHtml : bodyHtml.replace(/\n/g, '<br>');
+      } else {
+        contentEl.innerHTML = '<p style="color:var(--text-secondary); font-style:italic;">Commencez à rédiger le corps du rapport pour voir l\'aperçu ici...</p>';
+      }
     }
+  }
 
-    if (coverClearBtn && coverInput) {
-      coverClearBtn.addEventListener('click', function() {
-        coverInput.value = '';
-        if (coverFile) coverFile.value = '';
-        refreshCoverPreview();
-      });
+  refreshCoverUI();
+  [titreInput, auteurInput, dateInput, regionSelect, descInput, contenuInput].forEach(el => {
+    if (el) el.addEventListener('input', () => { if (currentStep === 2) updateLivePreview(); });
+  });
+
+  // ── 5. NoUiSlider + Demand Blocks (Step 3) ──
+  const salarySliderEl = document.getElementById('salary-slider');
+  const liveSalaryText = document.getElementById('slider-salary-live');
+  const liveAvgText = document.getElementById('slider-avg-live');
+  const hint = document.getElementById('salary-auto-hint');
+  let syncingSlider = false;
+
+  function updateSalaryHint() {
+    if (!minInput || !maxInput || !moyInput) return;
+    const minVal = parseFloat(minInput.value);
+    const maxVal = parseFloat(maxInput.value);
+    const hasBoth = !isNaN(minVal) && !isNaN(maxVal) && minVal <= maxVal;
+    const computedAvg = hasBoth ? Math.round(((minVal + maxVal) / 2) * 100) / 100 : null;
+    const shownMoy = moyInput.value.trim() ? parseFloat(moyInput.value) : computedAvg;
+
+    if (liveSalaryText) {
+      liveSalaryText.textContent = hasBoth ? `${minVal} - ${maxVal} TND` : 'Fourchette non définie';
     }
-
-    // 3. Auto-compute hint for salaire_moyen_global
-    const minInput = document.getElementById('id_salaire_min_global');
-    const maxInput = document.getElementById('id_salaire_max_global');
-    const moyInput = document.getElementById('id_salaire_moyen_global');
-    const hint = document.getElementById('salary-auto-hint');
-
-    function updateSalaryHint() {
-      if (!minInput || !maxInput || !moyInput || !hint) return;
-      const minVal = parseFloat(minInput.value);
-      const maxVal = parseFloat(maxInput.value);
-      if (!isNaN(minVal) && !isNaN(maxVal) && minVal <= maxVal && !moyInput.value.trim()) {
-        const avg = Math.round(((minVal + maxVal) / 2) * 100) / 100;
-        hint.textContent = 'Calcul automatique prévu à l’enregistrement : ' + avg + ' TND';
+    if (liveAvgText) {
+      liveAvgText.textContent = (shownMoy !== null && !isNaN(shownMoy)) ? `${shownMoy} TND` : 'N/C';
+    }
+    if (hint) {
+      if (hasBoth && !moyInput.value.trim()) {
+        hint.textContent = `Calcul automatique prévu à l’enregistrement : ${computedAvg} TND`;
       } else {
         hint.textContent = 'Laissez vide pour calculer automatiquement la moyenne entre Min et Max.';
       }
     }
+  }
 
-    [minInput, maxInput, moyInput].forEach(function(el) {
+  if (salarySliderEl && typeof noUiSlider !== 'undefined' && minInput && maxInput) {
+    const startMin = Math.min(10000, Math.max(500, parseInt(minInput.value, 10) || 1200));
+    const startMax = Math.min(10000, Math.max(startMin, parseInt(maxInput.value, 10) || 3500));
+
+    noUiSlider.create(salarySliderEl, {
+      start: [startMin, startMax],
+      connect: true,
+      step: 50,
+      range: { 'min': 500, 'max': 10000 },
+      tooltips: [true, true],
+      format: {
+        to: v => Math.round(v),
+        from: v => Number(v)
+      }
+    });
+
+    salarySliderEl.noUiSlider.on('slide', function(values) {
+      syncingSlider = true;
+      minInput.value = values[0];
+      maxInput.value = values[1];
+      updateSalaryHint();
+      syncingSlider = false;
+    });
+
+    [minInput, maxInput].forEach(el => {
+      el.addEventListener('input', () => {
+        if (syncingSlider) return;
+        const vMin = parseFloat(minInput.value);
+        const vMax = parseFloat(maxInput.value);
+        if (!isNaN(vMin) && !isNaN(vMax) && vMin <= vMax && vMax <= 10000 && vMin >= 500) {
+          salarySliderEl.noUiSlider.set([vMin, vMax]);
+        }
+        updateSalaryHint();
+      });
+    });
+  } else {
+    [minInput, maxInput].forEach(el => {
       if (el) el.addEventListener('input', updateSalaryHint);
     });
-    updateSalaryHint();
+  }
+  if (moyInput) moyInput.addEventListener('input', updateSalaryHint);
+  updateSalaryHint();
+
+  const demandBlocks = document.querySelectorAll('#interactive-demand-blocks .demand-block');
+  function syncDemandBlocksFromSelect() {
+    const rawVal = demandeSelect ? parseInt(demandeSelect.value, 10) : 0;
+    const activeLevel = !isNaN(rawVal) ? (rawVal > 4 ? 4 : Math.max(0, rawVal)) : 0;
+    demandBlocks.forEach(b => {
+      const bVal = parseInt(b.dataset.val, 10);
+      b.classList.toggle('active', bVal <= activeLevel);
+    });
+  }
+  demandBlocks.forEach(b => {
+    b.addEventListener('click', () => {
+      const val = b.dataset.val;
+      if (demandeSelect) demandeSelect.value = val;
+      syncDemandBlocksFromSelect();
+    });
   });
+  if (demandeSelect) demandeSelect.addEventListener('change', syncDemandBlocksFromSelect);
+  syncDemandBlocksFromSelect();
+
+  // ── 6. Dynamic Inline Formset & Summary Counter (Step 4) ──
+  const container = document.getElementById('references-container');
+  const addBtn = document.getElementById('add-reference-btn');
+  const emptyTpl = document.getElementById('reference-empty-form');
+  const totalFormsInput = document.getElementById('id_references-TOTAL_FORMS');
+  const counterEl = document.getElementById('final-summary-counter');
+
+  function updateReferencesCounter() {
+    let activeCount = 0;
+    if (container) {
+      container.querySelectorAll('.reference-row').forEach(row => {
+        const del = row.querySelector('input[type="checkbox"][name$="-DELETE"]');
+        const titleField = row.querySelector('input[name$="-titre_source"]');
+        if ((!del || !del.checked) && row.style.display !== 'none' && titleField && titleField.value.trim()) {
+          activeCount++;
+        }
+      });
+    }
+    if (counterEl) {
+      counterEl.textContent = activeCount;
+      counterEl.classList.toggle('valid', activeCount > 0);
+    }
+    const sumTitre = document.getElementById('summary-titre');
+    const sumRegion = document.getElementById('summary-region');
+    const sumSalary = document.getElementById('summary-salary');
+    if (sumTitre) sumTitre.textContent = (titreInput && titreInput.value.trim()) || '—';
+    if (sumRegion) sumRegion.textContent = (regionSelect && regionSelect.value) || 'Non spécifiée';
+    if (sumSalary) {
+      const smin = minInput && minInput.value ? minInput.value : '';
+      const smax = maxInput && maxInput.value ? maxInput.value : '';
+      sumSalary.textContent = (smin || smax) ? `${smin || '?'} – ${smax || '?'} TND` : 'N/C';
+    }
+  }
+
+  function bindReferenceRow(row) {
+    const btn = row.querySelector('.btn-remove-ref');
+    if (btn) {
+      btn.addEventListener('click', function() {
+        const del = row.querySelector('input[type="checkbox"][name$="-DELETE"]');
+        if (del) del.checked = true;
+        row.style.display = 'none';
+        updateReferencesCounter();
+      });
+    }
+    const titleField = row.querySelector('input[name$="-titre_source"]');
+    if (titleField) {
+      titleField.addEventListener('input', updateReferencesCounter);
+    }
+  }
+
+  if (container) {
+    container.querySelectorAll('.reference-row').forEach(row => {
+      const del = row.querySelector('input[type="checkbox"][name$="-DELETE"]');
+      if (del && del.checked) row.style.display = 'none';
+      bindReferenceRow(row);
+    });
+  }
+
+  if (addBtn && emptyTpl && totalFormsInput && container) {
+    addBtn.addEventListener('click', function() {
+      const idx = parseInt(totalFormsInput.value, 10);
+      const html = emptyTpl.innerHTML.replace(/__prefix__/g, idx);
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = html.trim();
+      const newRow = wrapper.firstElementChild;
+      container.appendChild(newRow);
+      totalFormsInput.value = idx + 1;
+      bindReferenceRow(newRow);
+      updateReferencesCounter();
+      if (window.lucide) lucide.createIcons();
+    });
+  }
+
+  // Sync tags + Quill before form submit
+  if (formEl) {
+    formEl.addEventListener('submit', function() {
+      flushPendingTag();
+      if (quill && contenuInput) {
+        const html = quill.root.innerHTML.trim();
+        contenuInput.value = (html === '<p><br></p>') ? '' : html;
+      }
+    });
+  }
+
+  // Jump to first step with server-side error if POST failed
+  const firstErr = formEl ? formEl.querySelector('.field-error') : null;
+  if (firstErr) {
+    const stepBox = firstErr.closest('.step-content');
+    if (stepBox && stepBox.id && stepBox.id.startsWith('step-rapport-')) {
+      goToStep(parseInt(stepBox.id.replace('step-rapport-', ''), 10));
+    }
+  }
+});
 </script>
 {% endblock %}
