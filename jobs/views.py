@@ -103,11 +103,20 @@ def offre_postuler(request, pk):
         if user_updated:
             user.save()
 
-        # Validation stricte (règles PHP apply.php : texte non vide et au moins 10 caractères)
+        # Validation stricte (règles PHP apply.php : texte non vide et au moins 10 caractères + CV obligatoire)
         import re
         plain_reponses = re.sub(r'<[^>]+>', '', reponses_ques).replace('&nbsp;', ' ').strip()
         if not plain_reponses or len(plain_reponses) < 10:
             messages.error(request, "Votre réponse à la question de motivation est obligatoire et doit comporter au moins 10 caractères.")
+            return render(request, 'jobs/apply.html', {
+                'offre': offre,
+                'candidat': candidat,
+                'current_user': user,
+                'user_obj': user,
+            })
+
+        if not cv_cand:
+            messages.error(request, "Le dépôt de votre CV au format PDF est obligatoire pour postuler.")
             return render(request, 'jobs/apply.html', {
                 'offre': offre,
                 'candidat': candidat,
