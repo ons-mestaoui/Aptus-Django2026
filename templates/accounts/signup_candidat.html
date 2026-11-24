@@ -4,353 +4,533 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Inscription Candidat &bull; Aptus</title>
-
-  <!-- Google Fonts Inter & Outfit -->
+  <title>Inscription Candidat &mdash; Aptus</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
-  <!-- Bootstrap 5 Grid -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
-  <!-- Aptus CSS -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/variables.css' %}">
   <link rel="stylesheet" href="{% static 'css/global.css' %}">
   <link rel="stylesheet" href="{% static 'css/auth.css' %}">
-
-  <!-- Theme Toggle -->
   <script src="{% static 'js/theme-toggle.js' %}"></script>
-
   <style>
-    body {
-      min-height: 100vh;
+    /* Page-specific parity overrides matching PHP signup_candidat.php */
+    .auth-alert {
       display: flex;
       align-items: center;
-      justify-content: center;
-      background: var(--bg-body);
-      font-family: var(--font-family);
-      padding: 2.5rem 1rem;
-      position: relative;
-      overflow-x: hidden;
-    }
-    .auth-bg-blobs {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 0;
-      overflow: hidden;
-    }
-    .auth-blob {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(80px);
-      opacity: 0.12;
-      animation: floatBlob 12s infinite alternate ease-in-out;
-    }
-    .auth-blob--1 {
-      width: 480px;
-      height: 480px;
-      background: var(--accent-primary);
-      top: -120px;
-      left: -120px;
-    }
-    .auth-blob--2 {
-      width: 400px;
-      height: 400px;
-      background: var(--accent-secondary);
-      bottom: -100px;
-      right: -100px;
-    }
-    @keyframes floatBlob {
-      0% { transform: translate(0, 0) scale(1); }
-      100% { transform: translate(30px, 40px) scale(1.08); }
-    }
-    .auth-top-bar {
-      position: absolute;
-      top: 1.5rem;
-      left: 1.5rem;
-      right: 1.5rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      z-index: 10;
-    }
-    .auth-card--candidat {
-      width: 100%;
-      max-width: 820px;
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-lg);
-      padding: var(--space-8);
-      position: relative;
-      z-index: 5;
-      margin-top: 2rem;
-    }
-    @media (max-width: 768px) {
-      .auth-card--candidat {
-        padding: var(--space-5);
-      }
-    }
-    .steps-dots {
-      display: flex;
-      justify-content: center;
-      gap: 8px;
-      margin-bottom: var(--space-6);
-    }
-    .step-dot {
-      width: 28px;
-      height: 6px;
-      border-radius: 9999px;
-      background: var(--border-color);
-      transition: var(--transition-fast);
-    }
-    .step-dot.active {
-      background: var(--accent-primary);
-      width: 44px;
-    }
-    .form-grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: var(--space-4);
-    }
-    @media (max-width: 768px) {
-      .form-grid-2 {
-        grid-template-columns: 1fr;
-      }
-    }
-    .suggested-pill {
-      cursor: pointer;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: 9999px;
-      padding: 4px 12px;
-      font-size: var(--fs-xs);
+      gap: 0.6rem;
+      padding: 0.75rem 1rem;
+      margin-bottom: var(--space-4);
+      border-radius: var(--radius-sm);
+      font-size: var(--fs-sm);
       font-weight: 500;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      background: var(--bg-danger);
+      color: var(--text-danger);
+    }
+    .auth-alert--success {
+      border-color: rgba(16, 185, 129, 0.3);
+      background: var(--bg-success);
+      color: var(--text-success);
+    }
+    .auth-card__header h1 {
+      color: var(--text-primary);
+      font-weight: var(--fw-bold);
+    }
+    .auth-card__header p {
       color: var(--text-secondary);
+    }
+    .required-star {
+      color: #ef4444;
+    }
+    .tag-input-box {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-3);
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      cursor: text;
+      min-height: 44px;
       transition: var(--transition-fast);
     }
-    .suggested-pill:hover {
+    .tag-input-box:focus-within {
+      background: var(--bg-input-focus);
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
+    }
+    .suggested-skills-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+    }
+    .suggested-skill-btn {
+      border: 1px solid var(--border-color);
+      border-radius: 50px;
+      padding: 4px 12px;
+      font-weight: 400;
+      color: var(--text-secondary);
+      background: transparent;
+      transition: var(--transition-fast);
+    }
+    .suggested-skill-btn:hover {
       border-color: var(--accent-primary);
       color: var(--accent-primary);
       background: var(--accent-primary-light);
     }
+    .suggested-skill-btn.active {
+      border-color: var(--accent-primary);
+      color: var(--accent-primary);
+      background: var(--accent-primary-light);
+      font-weight: 600;
+    }
+    .auth-step-hint {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      margin-top: -1rem;
+      margin-bottom: var(--space-6);
+      font-size: var(--fs-xs);
+      color: var(--text-tertiary);
+    }
+    .auth-step-hint span.active {
+      color: var(--accent-primary);
+      font-weight: 600;
+    }
+    .auth-step-hint span.completed {
+      color: var(--accent-secondary);
+      font-weight: 500;
+    }
+    .auth-section-divider {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin: 0.25rem 0 -0.25rem;
+      font-size: var(--fs-xs);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-tertiary);
+    }
+    .auth-section-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border-color);
+    }
+    .auth-footer-alt {
+      margin-top: var(--space-2);
+      font-size: var(--fs-xs);
+      color: var(--text-tertiary);
+    }
   </style>
 </head>
 <body>
-  <!-- Ambient Animated Blobs -->
-  <div class="auth-bg-blobs">
-    <div class="auth-blob auth-blob--1"></div>
-    <div class="auth-blob auth-blob--2"></div>
-  </div>
+  <div class="auth-page">
+    <div class="auth-card auth-card--wide">
+      <!-- Theme toggle -->
+      <div style="position:absolute;top:var(--space-4);right:var(--space-4);">
+        <button type="button" class="theme-toggle" id="theme-toggle-btn" aria-label="Basculer le thème" title="Basculer le thème">
+          <i data-lucide="sun" class="icon-sun" style="display:none;"></i>
+          <i data-lucide="moon" class="icon-moon"></i>
+        </button>
+      </div>
 
-  <!-- Top Utilities Bar (Logo + Retour + Theme Toggle) -->
-  <div class="auth-top-bar">
-    <a href="{% url 'landing' %}" class="d-inline-flex align-items-center gap-2 text-decoration-none text-primary fw-bold" style="font-family:var(--font-heading);">
-      <img src="{% static 'img/logo sans bg.png' %}" alt="Aptus" style="height:32px;width:auto;">
-      <span style="font-size:1.25rem;letter-spacing:-0.5px;">Aptus</span>
-    </a>
+      <!-- Logo -->
+      <div class="auth-card__logo">
+        <a href="{% url 'landing' %}" style="display:flex;align-items:center;gap:var(--space-2);text-decoration:none;color:inherit;">
+          <img src="{% static 'img/logo.png' %}" alt="Aptus" class="auth-card__logo-icon" style="background:none;padding:4px;">
+          <span class="auth-card__logo-text">Aptus</span>
+        </a>
+      </div>
 
-    <div class="d-flex align-items-center gap-2">
-      <button class="theme-toggle" id="theme-toggle" title="Basculer le thème" aria-label="Basculer le thème">
-        <i data-lucide="sun" class="sun-icon"></i>
-        <i data-lucide="moon" class="moon-icon"></i>
-      </button>
-      <a href="{% url 'landing' %}" class="btn btn-sm btn-secondary d-inline-flex align-items-center gap-1" style="border-radius:var(--radius-sm);">
-        <i data-lucide="arrow-left" style="width:14px;height:14px;"></i>
-        <span>Retour</span>
-      </a>
+      <!-- Header -->
+      <div class="auth-card__header">
+        <span class="auth-card__type-badge candidat">
+          <i data-lucide="user" style="width:14px;height:14px;"></i>
+          Candidat
+        </span>
+        <h1>Créer votre compte</h1>
+        <p>Rejoignez la communauté et trouvez votre emploi idéal</p>
+      </div>
+
+      <!-- Progress Steps -->
+      <div class="steps" id="signup-steps" aria-label="Progression de l'inscription">
+        <span class="step-dot active" data-step="1"></span>
+        <span class="step-dot" data-step="2"></span>
+        <span class="step-dot" data-step="3"></span>
+      </div>
+      <div class="auth-step-hint" id="signup-step-labels">
+        <span class="active" data-step="1">1. Identité &amp; Accès</span>
+        <span data-step="2">2. Coordonnées</span>
+        <span data-step="3">3. Profil &amp; Compétences</span>
+      </div>
+
+      <!-- Inline Server Messages -->
+      {% if messages %}
+        {% for message in messages %}
+          <div class="auth-alert {% if message.tags != 'error' %}auth-alert--success{% endif %}" role="alert">
+            <span>{{ message }}</span>
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      <!-- Signup Form -->
+      <form class="auth-form" id="signup-candidat-form" method="POST" action="{% url 'signup_candidat' %}" data-validate>
+        {% csrf_token %}
+
+        <!-- Step 1: Identité & Accès -->
+        <div class="auth-form__row" data-step-section="1">
+          <div class="form-group">
+            <label class="form-label" for="candidat-nom">Nom <span class="required-star">*</span></label>
+            <input type="text" class="input" id="candidat-nom" name="nom" value="{{ form_data.nom|default:'' }}" placeholder="Votre nom" required>
+            <span class="form-error"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="candidat-prenom">Prénom <span class="required-star">*</span></label>
+            <input type="text" class="input" id="candidat-prenom" name="prenom" value="{{ form_data.prenom|default:'' }}" placeholder="Votre prénom" required>
+            <span class="form-error"></span>
+          </div>
+        </div>
+
+        <div class="form-group" data-step-section="1">
+          <label class="form-label" for="candidat-email">Adresse Email <span class="required-star">*</span></label>
+          <div class="input-icon-wrapper">
+            <i data-lucide="mail" style="width:18px;height:18px;"></i>
+            <input type="email" class="input" id="candidat-email" name="email" value="{{ form_data.email|default:'' }}" placeholder="votre@email.com" required>
+          </div>
+          <span class="form-error"></span>
+        </div>
+
+        <div class="auth-form__row" data-step-section="1">
+          <div class="form-group">
+            <label class="form-label" for="candidat-password">Mot de passe <span class="required-star">*</span></label>
+            <div class="input-icon-wrapper">
+              <i data-lucide="lock" style="width:18px;height:18px;"></i>
+              <input type="password" class="input" id="candidat-password" name="password" placeholder="Min. 8 caractères" required minlength="8">
+            </div>
+            <span class="form-error"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="candidat-password2">Confirmer <span class="required-star">*</span></label>
+            <div class="input-icon-wrapper">
+              <i data-lucide="lock" style="width:18px;height:18px;"></i>
+              <input type="password" class="input" id="candidat-password2" name="password_confirm" placeholder="Confirmez" required minlength="8" data-match="candidat-password">
+            </div>
+            <span class="form-error"></span>
+          </div>
+        </div>
+
+        <!-- Step 2: Coordonnées -->
+        <div class="auth-section-divider">Coordonnées</div>
+
+        <div class="auth-form__row" data-step-section="2">
+          <div class="form-group">
+            <label class="form-label" for="candidat-tel">Téléphone</label>
+            <div class="input-icon-wrapper">
+              <i data-lucide="phone" style="width:18px;height:18px;"></i>
+              <input type="text" class="input" id="candidat-tel" name="telephone" value="{{ form_data.telephone|default:'' }}" placeholder="+216 XX XXX XXX">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="candidat-linkedin">LinkedIn</label>
+            <div class="input-icon-wrapper">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/></svg>
+              <input type="url" class="input" id="candidat-linkedin" name="linkedin" value="{{ form_data.linkedin|default:'' }}" placeholder="https://linkedin.com/in/...">
+            </div>
+          </div>
+        </div>
+
+        <div class="auth-form__row" data-step-section="2">
+          <div class="form-group">
+            <label class="form-label" for="candidat-date">Date de naissance</label>
+            <div class="input-icon-wrapper">
+              <i data-lucide="calendar" style="width:18px;height:18px;"></i>
+              <input type="date" class="input" id="candidat-date" name="date_naissance" value="{{ form_data.date_naissance|default:'' }}">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="candidat-pays">Pays</label>
+            <div class="input-icon-wrapper">
+              <i data-lucide="globe" style="width:18px;height:18px;"></i>
+              <input type="text" class="input" id="candidat-pays" name="pays" value="{{ form_data.pays|default:'' }}" placeholder="Ex: Tunisie">
+            </div>
+          </div>
+        </div>
+
+        <div class="auth-form__row" data-step-section="2">
+          <div class="form-group">
+            <label class="form-label" for="candidat-ville">Ville</label>
+            <div class="input-icon-wrapper">
+              <i data-lucide="map-pin" style="width:18px;height:18px;"></i>
+              <input type="text" class="input" id="candidat-ville" name="ville" value="{{ form_data.ville|default:'' }}" placeholder="Ex: Tunis">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="candidat-adresse">Adresse Complète</label>
+            <input type="text" class="input" id="candidat-adresse" name="adresse" value="{{ form_data.adresse|default:'' }}" placeholder="Ex: 12 Rue des Oliviers">
+          </div>
+        </div>
+
+        <!-- Step 3: Profil & Compétences -->
+        <div class="auth-section-divider">Profil &amp; Compétences</div>
+
+        <div class="auth-form__row" data-step-section="3">
+          <div class="form-group">
+            <label class="form-label" for="candidat-etudes">Niveau d'études</label>
+            <select id="candidat-etudes" name="niveauEtudes" class="select">
+              <option value="" {% if not form_data.niveauEtudes %}selected{% endif %}>Non spécifié</option>
+              <option value="Bac" {% if form_data.niveauEtudes == 'Bac' %}selected{% endif %}>Bac</option>
+              <option value="Bac+2" {% if form_data.niveauEtudes == 'Bac+2' %}selected{% endif %}>Bac+2 (BTS, DUT)</option>
+              <option value="Bac+3" {% if form_data.niveauEtudes == 'Bac+3' %}selected{% endif %}>Bac+3 (Licence)</option>
+              <option value="Bac+5" {% if form_data.niveauEtudes == 'Bac+5' %}selected{% endif %}>Bac+5 (Master, Ingénieur)</option>
+              <option value="Doctorat" {% if form_data.niveauEtudes == 'Doctorat' %}selected{% endif %}>Doctorat / PhD</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="candidat-niveau">Années d'expérience</label>
+            <select id="candidat-niveau" name="niveau" class="select">
+              <option value="" {% if not form_data.niveau %}selected{% endif %}>Non spécifié</option>
+              <option value="Junior" {% if form_data.niveau == 'Junior' %}selected{% endif %}>Junior (0-2 ans)</option>
+              <option value="Confirmé" {% if form_data.niveau == 'Confirmé' %}selected{% endif %}>Confirmé (3-5 ans)</option>
+              <option value="Senior" {% if form_data.niveau == 'Senior' %}selected{% endif %}>Senior (5+ ans)</option>
+              <option value="Expert" {% if form_data.niveau == 'Expert' %}selected{% endif %}>Expert (10+ ans)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group" data-step-section="3">
+          <label class="form-label" for="skills-field">Compétences</label>
+          <div class="tag-input-box" id="skills-tag-input">
+            <div class="tag-input__tags" id="skills-tags"></div>
+            <input type="text" id="skills-field" class="tag-input__field" list="skills-list" placeholder="Ajoutez vos compétences...">
+            <input type="hidden" id="skills-hidden" name="competences" value="{{ form_data.competences|default:'' }}">
+          </div>
+          <datalist id="skills-list">
+            <option value="React">
+            <option value="Node.js">
+            <option value="PHP">
+            <option value="MySQL">
+            <option value="Python">
+            <option value="Django">
+            <option value="Java">
+            <option value="Design UX/UI">
+            <option value="Marketing SEO">
+            <option value="Gestion de Projet">
+          </datalist>
+          <span class="form-hint" style="display:block;margin-bottom:var(--space-2);">Appuyez sur Entrée ou virgule pour ajouter</span>
+
+          <div class="suggested-skills">
+            <div style="font-size:var(--fs-sm);font-weight:var(--fw-medium);margin-bottom:var(--space-2);color:var(--text-secondary);">Compétences suggérées</div>
+            <div class="suggested-skills-row">
+              <button type="button" class="btn btn-ghost btn-sm suggested-skill-btn" data-skill="React">
+                <i data-lucide="plus" style="width:14px;height:14px;"></i> React
+              </button>
+              <button type="button" class="btn btn-ghost btn-sm suggested-skill-btn" data-skill="Node.js">
+                <i data-lucide="plus" style="width:14px;height:14px;"></i> Node.js
+              </button>
+              <button type="button" class="btn btn-ghost btn-sm suggested-skill-btn" data-skill="MySQL">
+                <i data-lucide="plus" style="width:14px;height:14px;"></i> MySQL
+              </button>
+              <button type="button" class="btn btn-ghost btn-sm suggested-skill-btn" data-skill="PHP">
+                <i data-lucide="plus" style="width:14px;height:14px;"></i> PHP
+              </button>
+              <button type="button" class="btn btn-ghost btn-sm suggested-skill-btn" data-skill="Python">
+                <i data-lucide="plus" style="width:14px;height:14px;"></i> Python
+              </button>
+              <button type="button" class="btn btn-ghost btn-sm suggested-skill-btn" data-skill="Java">
+                <i data-lucide="plus" style="width:14px;height:14px;"></i> Java
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg w-full" id="signup-candidat-submit">
+          <i data-lucide="user-plus" style="width:18px;height:18px;"></i>
+          Créer mon compte
+        </button>
+      </form>
+
+      <div class="auth-footer">
+        <div style="margin-bottom: var(--space-2);">Déjà inscrit ? <a href="{% url 'login' %}">Se connecter</a></div>
+        <div class="auth-footer-alt">
+          Vous recrutez ou encadrez ? <a href="{% url 'signup_choice' %}">Choisir un autre profil</a>
+        </div>
+        <a href="{% url 'landing' %}" class="back-to-site">
+          <i data-lucide="arrow-left" style="width:16px;height:16px;"></i>
+          Retour au site
+        </a>
+      </div>
     </div>
   </div>
 
-  <!-- Main Card -->
-  <div class="auth-card--candidat">
-    <!-- Header -->
-    <div class="text-center mb-5">
-      <div class="d-inline-flex align-items-center gap-1 px-3 py-1 rounded-pill mb-2" style="background:var(--accent-primary-light);color:var(--accent-primary);font-size:var(--fs-xs);font-weight:700;">
-        <i data-lucide="user" style="width:14px;height:14px;"></i>
-        <span>ESPACE CANDIDAT</span>
-      </div>
-      <h1 class="h2 fw-bold text-primary mb-1">Créer votre compte Candidat</h1>
-      <p class="text-secondary text-sm mb-0">Rejoignez Aptus et accédez à des offres qualifiées par IA et du coaching personnalisé</p>
-    </div>
-
-    <!-- Steps -->
-    <div class="steps-dots">
-      <span class="step-dot active"></span>
-      <span class="step-dot"></span>
-      <span class="step-dot"></span>
-    </div>
-
-    <!-- Form -->
-    <form method="POST" action="{% url 'signup_candidat' %}" id="signup-candidat-form">
-      {% csrf_token %}
-
-      <!-- Nom & Prénom -->
-      <div class="form-grid-2 mb-3">
-        <div>
-          <label class="form-label text-xs fw-bold text-uppercase text-secondary">Nom <span class="text-danger">*</span></label>
-          <input type="text" name="nom" value="{{ form_data.nom|default:'' }}" class="form-control" placeholder="Ex: Dupont" required>
-        </div>
-        <div>
-          <label class="form-label text-xs fw-bold text-uppercase text-secondary">Prénom <span class="text-danger">*</span></label>
-          <input type="text" name="prenom" value="{{ form_data.prenom|default:'' }}" class="form-control" placeholder="Ex: Jean" required>
-        </div>
-      </div>
-
-      <!-- Email -->
-      <div class="mb-3">
-        <label class="form-label text-xs fw-bold text-uppercase text-secondary">Adresse Email <span class="text-danger">*</span></label>
-        <div class="input-group">
-          <span class="input-group-text bg-transparent border-end-0"><i data-lucide="mail" style="width:16px;height:16px;"></i></span>
-          <input type="email" name="email" value="{{ form_data.email|default:'' }}" class="form-control border-start-0" placeholder="jean.dupont@email.com" required>
-        </div>
-      </div>
-
-      <!-- Mots de Passe -->
-      <div class="form-grid-2 mb-3">
-        <div>
-          <label class="form-label text-xs fw-bold text-uppercase text-secondary">Mot de passe <span class="text-danger">*</span></label>
-          <div class="input-group">
-            <span class="input-group-text bg-transparent border-end-0"><i data-lucide="lock" style="width:16px;height:16px;"></i></span>
-            <input type="password" name="password" class="form-control border-start-0" placeholder="Min. 8 caractères" required minlength="8">
-          </div>
-        </div>
-        <div>
-          <label class="form-label text-xs fw-bold text-uppercase text-secondary">Confirmer Mot de passe <span class="text-danger">*</span></label>
-          <div class="input-group">
-            <span class="input-group-text bg-transparent border-end-0"><i data-lucide="lock" style="width:16px;height:16px;"></i></span>
-            <input type="password" name="password_confirm" class="form-control border-start-0" placeholder="Confirmer" required minlength="8">
-          </div>
-        </div>
-      </div>
-
-      <!-- Téléphone & LinkedIn -->
-      <div class="form-grid-2 mb-3">
-        <div>
-          <label class="form-label text-xs fw-bold text-uppercase text-secondary">Téléphone</label>
-          <div class="input-group">
-            <span class="input-group-text bg-transparent border-end-0"><i data-lucide="phone" style="width:16px;height:16px;"></i></span>
-            <input type="text" name="telephone" value="{{ form_data.telephone|default:'' }}" class="form-control border-start-0" placeholder="+33 6 12 34 56 78">
-          </div>
-        </div>
-        <div>
-          <label class="form-label text-xs fw-bold text-uppercase text-secondary">Profil LinkedIn</label>
-          <div class="input-group">
-            <span class="input-group-text bg-transparent border-end-0"><i data-lucide="linkedin" style="width:16px;height:16px;"></i></span>
-            <input type="url" name="linkedin" value="{{ form_data.linkedin|default:'' }}" class="form-control border-start-0" placeholder="https://linkedin.com/in/...">
-          </div>
-        </div>
-      </div>
-
-      <!-- Date de naissance & Pays -->
-      <div class="form-grid-2 mb-3">
-        <div>
-          <label class="form-label text-xs fw-bold text-uppercase text-secondary">Date de naissance</label>
-          <div class="input-group">
-            <span class="input-group-text bg-transparent border-end-0"><i data-lucide="calendar" style="width:16px;height:16px;"></i></span>
-            <input type="date" name="date_naissance" value="{{ form_data.date_naissance|default:'' }}" class="form-control border-start-0">
-          </div>
-        </div>
-        <div>
-          <label class="form-label text-xs fw-bold text-uppercase text-secondary">Pays</label>
-          <div class="input-group">
-            <span class="input-group-text bg-transparent border-end-0"><i data-lucide="globe" style="width:16px;height:16px;"></i></span>
-            <input type="text" name="pays" value="{{ form_data.pays|default:'France' }}" class="form-control border-start-0" placeholder="Ex: France">
-          </div>
-        </div>
-      </div>
-
-      <!-- Ville & Adresse -->
-      <div class="form-grid-2 mb-3">
-        <div>
-          <label class="form-label text-xs fw-bold text-uppercase text-secondary">Ville</label>
-          <div class="input-group">
-            <span class="input-group-text bg-transparent border-end-0"><i data-lucide="map-pin" style="width:16px;height:16px;"></i></span>
-            <input type="text" name="ville" value="{{ form_data.ville|default:'Paris' }}" class="form-control border-start-0" placeholder="Ex: Paris">
-          </div>
-        </div>
-        <div>
-          <label class="form-label text-xs fw-bold text-uppercase text-secondary">Adresse</label>
-          <input type="text" name="adresse" value="{{ form_data.adresse|default:'' }}" class="form-control" placeholder="Ex: 12 avenue des Champs">
-        </div>
-      </div>
-
-      <!-- Niveau d'études & Expérience -->
-      <div class="form-grid-2 mb-3">
-        <div>
-          <label class="form-label text-xs fw-bold text-uppercase text-secondary">Niveau d'études</label>
-          <select name="niveauEtudes" class="form-select">
-            <option value="Bac">Bac</option>
-            <option value="Bac+2">Bac+2 (DUT, BTS)</option>
-            <option value="Bac+3">Bac+3 (Licence / Bachelor)</option>
-            <option value="Bac+5" selected>Bac+5 (Master / Ingénieur)</option>
-            <option value="Doctorat">Doctorat / PhD</option>
-          </select>
-        </div>
-        <div>
-          <label class="form-label text-xs fw-bold text-uppercase text-secondary">Expérience</label>
-          <select name="niveau" class="form-select">
-            <option value="Junior">Junior (0-2 ans)</option>
-            <option value="Confirmé" selected>Confirmé (3-5 ans)</option>
-            <option value="Senior">Senior (5+ ans)</option>
-            <option value="Expert">Expert (10+ ans)</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Compétences & Badges -->
-      <div class="mb-4">
-        <label class="form-label text-xs fw-bold text-uppercase text-secondary">Compétences clés</label>
-        <input type="text" id="skills-input" name="competences" value="{{ form_data.competences|default:'Python, Django, React' }}" class="form-control mb-2" placeholder="Ex: Python, React, SQL, DevOps">
-        <div class="d-flex flex-wrap gap-2 align-items-center">
-          <span class="text-xs text-secondary">Suggestions :</span>
-          <span class="suggested-pill" onclick="addSkill('Python')">+ Python</span>
-          <span class="suggested-pill" onclick="addSkill('React')">+ React</span>
-          <span class="suggested-pill" onclick="addSkill('Django')">+ Django</span>
-          <span class="suggested-pill" onclick="addSkill('Docker')">+ Docker</span>
-          <span class="suggested-pill" onclick="addSkill('Machine Learning')">+ ML</span>
-          <span class="suggested-pill" onclick="addSkill('PostgreSQL')">+ PostgreSQL</span>
-        </div>
-      </div>
-
-      <!-- Bouton Soumettre -->
-      <button type="submit" class="btn btn-primary w-100 py-3 fw-bold" style="border-radius:var(--radius-sm);font-size:var(--fs-sm);">
-        <i data-lucide="user-plus" style="width:18px;height:18px;margin-right:6px;"></i>
-        <span>Créer mon compte Candidat</span>
-      </button>
-    </form>
-
-    <!-- Footer -->
-    <div class="text-center mt-4 pt-3 border-top border-color text-sm text-secondary">
-      Déjà inscrit ? <a href="{% url 'login' %}" class="fw-semibold text-accent text-decoration-none ms-1">Se connecter</a>
-    </div>
-  </div>
-
-  <!-- SweetAlert2 & Lucide Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="{% static 'js/forms.js' %}"></script>
+  <script src="{% static 'js/password-toggle.js' %}"></script>
+  <script src="{% static 'js/alert-dismiss.js' %}"></script>
   <script>
     if (window.lucide) {
       lucide.createIcons();
     }
 
-    // SweetAlert2 Toast Global Configuration (Bottom Right)
+    (function () {
+      // Tag input & suggested skill pills controller
+      var box = document.getElementById('skills-tag-input');
+      var field = document.getElementById('skills-field');
+      var tagsWrap = document.getElementById('skills-tags');
+      var hidden = document.getElementById('skills-hidden');
+      var form = document.getElementById('signup-candidat-form');
+      var suggestedBtns = document.querySelectorAll('.suggested-skill-btn');
+
+      var tags = [];
+      if (hidden && hidden.value.trim()) {
+        hidden.value.split(',').forEach(function (item) {
+          var clean = item.trim();
+          if (clean && tags.indexOf(clean) === -1) {
+            tags.push(clean);
+          }
+        });
+      }
+
+      function syncSuggestedButtons() {
+        suggestedBtns.forEach(function (btn) {
+          var skill = btn.getAttribute('data-skill');
+          var exists = tags.some(function (t) { return t.toLowerCase() === skill.toLowerCase(); });
+          btn.classList.toggle('active', exists);
+        });
+      }
+
+      function renderTags() {
+        if (!tagsWrap) return;
+        tagsWrap.innerHTML = '';
+        tags.forEach(function (tag, idx) {
+          var chip = document.createElement('span');
+          chip.className = 'tag-input__tag';
+          chip.appendChild(document.createTextNode(tag + ' '));
+
+          var removeBtn = document.createElement('button');
+          removeBtn.type = 'button';
+          removeBtn.className = 'tag-input__remove';
+          removeBtn.setAttribute('aria-label', 'Retirer ' + tag);
+          removeBtn.textContent = '×';
+          removeBtn.addEventListener('click', function () {
+            tags.splice(idx, 1);
+            renderTags();
+          });
+          chip.appendChild(removeBtn);
+          tagsWrap.appendChild(chip);
+        });
+        if (hidden) {
+          hidden.value = tags.join(', ');
+        }
+        syncSuggestedButtons();
+      }
+
+      function addSkillValue(raw) {
+        if (!raw) return;
+        raw.split(',').forEach(function (part) {
+          var val = part.trim();
+          if (val && !tags.some(function (t) { return t.toLowerCase() === val.toLowerCase(); })) {
+            tags.push(val);
+          }
+        });
+        renderTags();
+      }
+
+      if (box && field) {
+        box.addEventListener('click', function (e) {
+          if (e.target === box || e.target === tagsWrap) {
+            field.focus();
+          }
+        });
+
+        field.addEventListener('keydown', function (e) {
+          if ((e.key === 'Enter' || e.key === ',') && this.value.trim()) {
+            e.preventDefault();
+            addSkillValue(this.value);
+            this.value = '';
+          } else if (e.key === 'Backspace' && !this.value && tags.length) {
+            tags.pop();
+            renderTags();
+          }
+        });
+
+        field.addEventListener('change', function () {
+          if (this.value.trim()) {
+            addSkillValue(this.value);
+            this.value = '';
+          }
+        });
+      }
+
+      suggestedBtns.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var skill = this.getAttribute('data-skill');
+          var idx = -1;
+          tags.forEach(function (t, i) {
+            if (t.toLowerCase() === skill.toLowerCase()) idx = i;
+          });
+          if (idx === -1) {
+            tags.push(skill);
+          } else {
+            tags.splice(idx, 1);
+          }
+          renderTags();
+        });
+      });
+
+      if (form) {
+        form.addEventListener('submit', function () {
+          if (field && field.value.trim()) {
+            addSkillValue(field.value);
+            field.value = '';
+          }
+        });
+      }
+
+      renderTags();
+
+      // Dynamic 3-step indicator progress based on focused/filled section
+      var dots = document.querySelectorAll('#signup-steps .step-dot');
+      var labels = document.querySelectorAll('#signup-step-labels span');
+
+      function setActiveStep(stepNum) {
+        dots.forEach(function (dot) {
+          var s = parseInt(dot.getAttribute('data-step'), 10);
+          dot.classList.toggle('active', s === stepNum);
+          dot.classList.toggle('completed', s < stepNum);
+        });
+        labels.forEach(function (lbl) {
+          var s = parseInt(lbl.getAttribute('data-step'), 10);
+          lbl.classList.toggle('active', s === stepNum);
+          lbl.classList.toggle('completed', s < stepNum);
+        });
+      }
+
+      document.querySelectorAll('[data-step-section]').forEach(function (section) {
+        var stepNum = parseInt(section.getAttribute('data-step-section'), 10);
+        section.addEventListener('focusin', function () {
+          setActiveStep(stepNum);
+        });
+      });
+    })();
+
     window.Toast = Swal.mixin({
       toast: true,
       position: 'bottom-end',
       showConfirmButton: false,
       timer: 3500,
       timerProgressBar: true,
-      didOpen: (toast) => {
+      didOpen: function (toast) {
         toast.addEventListener('mouseenter', Swal.stopTimer);
         toast.addEventListener('mouseleave', Swal.resumeTimer);
       }
     });
 
     {% if messages %}
-      document.addEventListener('DOMContentLoaded', function() {
+      document.addEventListener('DOMContentLoaded', function () {
         {% for message in messages %}
           window.Toast.fire({
             icon: '{% if message.tags == "error" %}error{% elif message.tags == "warning" %}warning{% elif message.tags == "info" %}info{% else %}success{% endif %}',
@@ -359,19 +539,6 @@
         {% endfor %}
       });
     {% endif %}
-
-    function addSkill(skill) {
-      var input = document.getElementById('skills-input');
-      if (!input) return;
-      var current = input.value.trim();
-      if (current.length > 0) {
-        if (!current.includes(skill)) {
-          input.value = current + ', ' + skill;
-        }
-      } else {
-        input.value = skill;
-      }
-    }
   </script>
 </body>
 </html>

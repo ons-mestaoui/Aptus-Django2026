@@ -29,6 +29,47 @@ from market.views import (
     backoffice_rapport_detail,
 )
 
+def _validate_signup_common(request, require_nom_prenom=True):
+    """Validation commune aux formulaires d'inscription sans appel externe."""
+    from django.core.validators import validate_email
+    from django.core.exceptions import ValidationError
+    from accounts.models import Utilisateur
+
+    nom = (request.POST.get('nom') or '').strip()
+    prenom = (request.POST.get('prenom') or '').strip()
+    email = (request.POST.get('email') or '').strip().lower()
+    password = (request.POST.get('password') or '').strip()
+    password_confirm = (request.POST.get('password_confirm') or '').strip()
+
+    if require_nom_prenom and not (nom and prenom):
+        return None, "Veuillez remplir tous les champs obligatoires (*)."
+    if not (email and password):
+        return None, "Veuillez remplir tous les champs obligatoires (*)."
+    try:
+        validate_email(email)
+    except ValidationError:
+        return None, "Le format de l'adresse email est invalide."
+    if password != password_confirm:
+        return None, "Les mots de passe ne correspondent pas."
+    if len(password) < 8:
+        return None, "Le mot de passe doit contenir au moins 8 caractères."
+    if Utilisateur.objects.filter(email__iexact=email).exists():
+        return None, "Cette adresse email est déjà utilisée par un autre compte."
+
+    return {
+        'nom': nom,
+        'prenom': prenom,
+        'email': email,
+        'password': password,
+    }, None
+
+
+def inscription_choice(request):
+    """Choix du profil d'inscription répliquant signup_choice.php."""
+    from django.shortcuts import render
+    return render(request, 'accounts/signup_choice.html')
+
+
 def inscription_candidat(request):
     """Inscription candidat répliquant le flux authentique de signup_candidat.php"""
     from django.shortcuts import render, redirect
@@ -39,11 +80,11 @@ def inscription_candidat(request):
     from datetime import datetime
 
     if request.method == 'POST':
-        nom = (request.POST.get('nom') or '').strip()
-        prenom = (request.POST.get('prenom') or '').strip()
-        email = (request.POST.get('email') or '').strip()
-        password = (request.POST.get('password') or '').strip()
-        password_confirm = (request.POST.get('password_confirm') or '').strip()
+        base, error = _validate_signup_common(request, require_nom_prenom=True)
+        if error:
+            messages.error(request, error)
+            return render(request, 'accounts/signup_candidat.html', {'form_data': request.POST})
+
         telephone = (request.POST.get('telephone') or '').strip()
         linkedin = (request.POST.get('linkedin') or '').strip()
         competences = (request.POST.get('competences') or '').strip()
@@ -61,27 +102,11 @@ def inscription_candidat(request):
             except ValueError:
                 date_naissance = None
 
-        if not (nom and prenom and email and password):
-            messages.error(request, "Veuillez remplir tous les champs obligatoires (*).")
-            return render(request, 'accounts/signup_candidat.html', {'form_data': request.POST})
-
-        if password != password_confirm:
-            messages.error(request, "Les mots de passe ne correspondent pas.")
-            return render(request, 'accounts/signup_candidat.html', {'form_data': request.POST})
-
-        if len(password) < 8:
-            messages.error(request, "Le mot de passe doit contenir au moins 8 caractères.")
-            return render(request, 'accounts/signup_candidat.html', {'form_data': request.POST})
-
-        if Utilisateur.objects.filter(email__iexact=email).exists():
-            messages.error(request, "Cette adresse email est déjà utilisée par un autre compte.")
-            return render(request, 'accounts/signup_candidat.html', {'form_data': request.POST})
-
         user = Utilisateur.objects.create(
-            nom=nom,
-            prenom=prenom,
-            email=email,
-            mot_de_passe=make_password(password),
+            nom=base['nom'],
+            prenom=base['prenom'],
+            email=base['email'],
+            mot_de_passe=make_password(base['password']),
             role='Candidat',
             telephone=telephone or None
         )
@@ -105,6 +130,117 @@ def inscription_candidat(request):
 
     return render(request, 'accounts/signup_candidat.html')
 
+
+def inscription_entreprise(request):
+    """Inscription entreprise répliquant signup_entreprise.php sans blocage email."""
+    from django.shortcuts import render, redirect
+    from django.contrib import messages
+    from django.contrib.auth.hashers import make_password
+    from accounts.models import Utilisateur, Entreprise, Profil
+    from accounts.auth_helpers import login_user
+
+    if request.method == 'POST':
+        raison_sociale = (request.POST.get('raison_sociale') or '').strip()
+        siret = (request.POST.get('siret') or '').strip()
+        if not raison_sociale or not siret:
+            messages.error(request, "Veuillez renseigner la raison sociale et le numéro SIRET (*).")
+            return render(request, 'accounts/signup_entreprise.html', {'form_data': request.POST})
+
+        base, error = _validate_signup_common(request, require_nom_prenom=False)
+        if error:
+            messages.error(request, error)
+            return render(request, 'accounts/signup_entreprise.html', {'form_data': request.POST})
+
+        secteur = (request.POST.get('secteur') or '').strip()
+        telephone = (request.POST.get('telephone') or '').strip()
+        site_web = (request.POST.get('site_web') or '').strip()
+        linkedin = (request.POST.get('linkedin') or '').strip()
+        description = (request.POST.get('description') or '').strip()
+        adresse = (request.POST.get('adresse') or '').strip()
+        ville = (request.POST.get('ville') or '').strip()
+        pays = (request.POST.get('pays') or '').strip()
+
+        user = Utilisateur.objects.create(
+            nom=raison_sociale,
+            prenom='',
+            email=base['email'],
+            mot_de_passe=make_password(base['password']),
+            role='Entreprise',
+            telephone=telephone or None,
+        )
+        Entreprise.objects.create(
+            utilisateur=user,
+            secteur=secteur or None,
+            siret=siret[:14],
+            raison_sociale=raison_sociale,
+        )
+        Profil.objects.create(
+            utilisateur=user,
+            bio=description or None,
+            adresse=adresse or None,
+            ville=ville or None,
+            pays=pays or None,
+            linkedin=linkedin or None,
+            site_web=site_web or None,
+        )
+        login_user(request, user)
+        messages.success(request, f"Bienvenue {raison_sociale} ! Votre compte entreprise a été créé avec succès.")
+        return redirect('entreprise_posts')
+
+    return render(request, 'accounts/signup_entreprise.html')
+
+
+def inscription_tuteur(request):
+    """Inscription tuteur répliquant signup_tuteur.php sans blocage email."""
+    from django.shortcuts import render, redirect
+    from django.contrib import messages
+    from django.contrib.auth.hashers import make_password
+    from accounts.models import Utilisateur, Profil
+    from accounts.auth_helpers import login_user
+
+    if request.method == 'POST':
+        base, error = _validate_signup_common(request, require_nom_prenom=True)
+        if error:
+            messages.error(request, error)
+            return render(request, 'accounts/signup_tuteur.html', {'form_data': request.POST})
+
+        specialite = (request.POST.get('specialite') or '').strip()
+        if not specialite:
+            messages.error(request, "Veuillez indiquer votre spécialité / domaine (*).")
+            return render(request, 'accounts/signup_tuteur.html', {'form_data': request.POST})
+
+        telephone = (request.POST.get('telephone') or '').strip()
+        experience = (request.POST.get('experience') or '').strip()
+        biographie = (request.POST.get('biographie') or '').strip()
+        ville = (request.POST.get('ville') or '').strip()
+        pays = (request.POST.get('pays') or '').strip()
+
+        bio_parts = [f"Spécialité : {specialite}"]
+        if experience:
+            bio_parts.append(f"Expérience : {experience}")
+        if biographie:
+            bio_parts.append(biographie)
+
+        user = Utilisateur.objects.create(
+            nom=base['nom'],
+            prenom=base['prenom'],
+            email=base['email'],
+            mot_de_passe=make_password(base['password']),
+            role='Tuteur',
+            telephone=telephone or None,
+        )
+        Profil.objects.create(
+            utilisateur=user,
+            bio="\n".join(bio_parts),
+            ville=ville or None,
+            pays=pays or None,
+        )
+        login_user(request, user)
+        messages.success(request, f"Bienvenue {user.prenom} ! Votre compte tuteur a été créé avec succès.")
+        return redirect('training:formation_my')
+
+    return render(request, 'accounts/signup_tuteur.html')
+
 urlpatterns = [
     # ── Vue Front (Frontoffice - Expérience Candidat / Public) ──
     path('', landing, name='landing'),
@@ -114,6 +250,9 @@ urlpatterns = [
     path('deconnexion/', logout_view, name='logout'),
     path('logout/', logout_view, name='logout_alias'),
     path('inscription/', inscription_candidat, name='signup_candidat'),
+    path('inscription/choix/', inscription_choice, name='signup_choice'),
+    path('inscription/entreprise/', inscription_entreprise, name='signup_entreprise'),
+    path('inscription/tuteur/', inscription_tuteur, name='signup_tuteur'),
     path('signup/', inscription_candidat, name='signup_alias'),
     path('parametres/', account_settings, name='account_settings'),
     path('settings/', account_settings, name='settings_alias'),
