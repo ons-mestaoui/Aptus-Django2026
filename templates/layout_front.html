@@ -46,11 +46,11 @@
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border-color);
-      padding: 0.75rem 2rem;
+      padding: 0.75rem 1.5rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 1.5rem;
+      gap: 1rem;
     }
     [data-theme="dark"] .landing-nav {
       background: rgba(15, 23, 42, 0.85);
@@ -60,6 +60,7 @@
       align-items: center;
       gap: 0.6rem;
       text-decoration: none;
+      flex-shrink: 0;
     }
     .landing-nav__logo img {
       width: 36px;
@@ -75,21 +76,33 @@
     .landing-nav__links {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
-      flex-wrap: wrap;
+      gap: 0.35rem;
+      flex-wrap: nowrap;
+      min-width: 0;
     }
     .landing-nav__links a {
       display: flex;
       align-items: center;
-      gap: 0.45rem;
-      padding: 0.45rem 0.85rem;
-      font-size: var(--fs-sm);
+      gap: 0.4rem;
+      padding: 0.45rem 0.65rem;
+      font-size: 0.84rem;
       font-weight: 500;
       color: var(--text-secondary);
       border-radius: var(--radius-sm);
       text-decoration: none;
       transition: var(--transition-fast);
       white-space: nowrap;
+      flex-shrink: 0;
+    }
+    @media (max-width: 1180px) {
+      .landing-nav__links {
+        flex-wrap: wrap;
+        gap: 0.45rem;
+      }
+      .landing-nav__links a {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.8rem;
+      }
     }
     .landing-nav__links a:hover, .landing-nav__links a.active {
       color: var(--accent-primary);
@@ -103,6 +116,7 @@
       display: flex;
       align-items: center;
       gap: 0.75rem;
+      flex-shrink: 0;
     }
     .btn-backoffice-switch {
       background: var(--gradient-primary, linear-gradient(135deg, #6B34A3 0%, #00A3DA 100%)) !important;

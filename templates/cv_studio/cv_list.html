@@ -1,128 +1,442 @@
 {% extends 'layout_front.html' %}
 {% load static %}
 
-{% block title %}CV Builder &mdash; Aptus AI Studio{% endblock %}
+{% block title %}Mes CVs — CV Studio Aptus{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/cv_premium.css' %}">
+<style>
+  .dashboard-wrap {
+    padding: 2.25rem 1.25rem 3.5rem;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+  .dashboard-header-aptus {
+    margin-bottom: 2.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .title-with-icon {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .dashboard-title {
+    font-size: 2.2rem;
+    font-weight: 850;
+    color: var(--text-primary);
+    letter-spacing: -0.03em;
+    margin: 0;
+  }
+  .dashboard-subtitle {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    margin: 0.35rem 0 0;
+  }
+  .stats-row-aptus {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 2.5rem;
+  }
+  .stat-box-small {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    padding: 1.25rem 1.4rem;
+    border-radius: 20px;
+    box-shadow: var(--shadow-sm);
+  }
+  .stat-box-small .label {
+    font-size: 0.74rem;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+  }
+  .stat-box-small .val {
+    font-size: 1.75rem;
+    font-weight: 850;
+    color: var(--text-primary);
+    display: block;
+    margin-top: 6px;
+  }
+  .cv-compact-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(275px, 1fr));
+    gap: 2rem;
+  }
+  .cv-miniature-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 22px;
+    padding: 12px;
+    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+    position: relative;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+  }
+  .cv-miniature-card:hover {
+    border-color: var(--accent-primary);
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-xl);
+  }
+  .ready-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #fff;
+    padding: 5px 12px;
+    border-radius: 12px;
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    z-index: 5;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border: 2px solid #fff;
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
+  }
+  .cv-miniature__preview {
+    width: 100%;
+    aspect-ratio: 1 / 1.414;
+    background: #fff;
+    border-radius: 14px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid var(--border-color-light);
+  }
+  .cv-miniature__iframe {
+    width: 794px;
+    height: 1123px;
+    border: none;
+    transform-origin: top left;
+    pointer-events: none;
+    background: #fff;
+  }
+  .cv-miniature__overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: all 0.25s ease;
+    z-index: 2;
+  }
+  .cv-miniature-card:hover .cv-miniature__overlay {
+    background: rgba(15, 23, 42, 0.38);
+    opacity: 1;
+  }
+  .btn-aptus-eye {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border: none;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: var(--shadow-lg);
+    text-decoration: none;
+  }
+  .cv-miniature__info {
+    padding: 14px 6px 4px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+  .cv-miniature__name {
+    font-size: 1.05rem;
+    font-weight: 750;
+    color: var(--text-primary);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .cv-miniature__role {
+    font-size: 0.84rem;
+    color: var(--text-secondary);
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .cv-miniature__meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+  }
+  .cv-theme-dot {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    display: inline-block;
+    border: 1px solid rgba(0,0,0,0.12);
+    flex-shrink: 0;
+  }
+  .cv-miniature__actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-color-light);
+  }
+  .cv-action-group {
+    display: flex;
+    gap: 6px;
+  }
+  .btn-action-small {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+  }
+  .btn-action-small.view:hover { background: var(--accent-secondary); color: #fff; border-color: var(--accent-secondary); }
+  .btn-action-small.edit:hover { background: var(--accent-primary); color: #fff; border-color: var(--accent-primary); }
+  .btn-action-small.print:hover { background: #10b981; color: #fff; border-color: #10b981; }
+  .btn-action-small.danger { color: #ef4444; border-color: rgba(239, 68, 68, 0.25); background: rgba(239, 68, 68, 0.06); }
+  .btn-action-small.danger:hover { background: #ef4444; color: #fff; border-color: #ef4444; }
+  .aptus-total-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(10px);
+    z-index: 10000;
+    display: none;
+    flex-direction: column;
+  }
+  .aptus-total-modal.active { display: flex; }
+  .total-modal-header {
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #fff;
+  }
+  .total-modal-body {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    padding: 1rem;
+  }
+  .total-modal-cv-container {
+    height: 100%;
+    max-height: 78vh;
+    aspect-ratio: 1 / 1.414;
+    background: #fff;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.45);
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+  }
+  .total-modal-iframe {
+    width: 794px;
+    height: 1123px;
+    border: none;
+    transform-origin: top left;
+  }
+  .total-modal-footer {
+    padding: 1rem 2rem 1.5rem;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+  }
+</style>
+{% endblock %}
 
 {% block content %}
-<!-- Gradient Hero Banner (Révolution IA Intégrée) -->
-<div class="py-5 px-3 mb-5 text-white" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #db2777 100%); border-radius: 0 0 40px 40px; box-shadow: 0 10px 30px rgba(124, 58, 237, 0.2);">
-  <div class="container py-3" style="max-width: 1200px;">
-    <div class="row align-items-center g-4">
-      <div class="col-lg-8">
-        <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill mb-3" style="background: linear-gradient(90deg, #fbbf24, #f59e0b); color: #000; font-size: 0.75rem; font-weight: 800; letter-spacing: 1px;">
-          <span>🚀 RÉVOLUTION IA INTÉGRÉE</span>
-        </div>
-        <h1 class="display-5 fw-bold mb-3" style="letter-spacing: -1px; line-height: 1.15;">
-          Ne choisissez pas un design,<br><span style="color: #fbbf24;">choisissez la victoire.</span>
-        </h1>
-        <p class="lead mb-4 text-white-50" style="font-size: 1.1rem; max-width: 600px;">
-          Propulsez votre carrière avec notre suite d'outils de recrutement de nouvelle génération intégrée à chaque template.
-        </p>
+<div class="dashboard-wrap">
+  <div class="dashboard-header-aptus">
+    <div>
+      <div class="title-with-icon">
+        <i data-lucide="layers" style="width:34px;height:34px;color:var(--accent-primary);"></i>
+        <h1 class="dashboard-title">Mes CVs &amp; Créations</h1>
+      </div>
+      <p class="dashboard-subtitle">Consultez, éditez et exportez vos curriculums vitae avec leur rendu A4 authentique.</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+      <a href="{% url 'cv_studio:template_list' %}" class="btn btn-primary fw-bold px-4 py-2" style="border-radius:14px;">
+        <i data-lucide="plus" style="width:18px;height:18px;"></i>
+        <span>Nouveau CV</span>
+      </a>
+    </div>
+  </div>
 
-        <!-- 4 Feature Bullets -->
-        <div class="row g-3 mb-4">
-          <div class="col-sm-6 d-flex align-items-start gap-2">
-            <div class="p-2 rounded-3" style="background: rgba(255,255,255,0.15);"><i data-lucide="target" style="width: 18px; height: 18px;"></i></div>
-            <div>
-              <strong class="d-block small">CV Sur Mesure</strong>
-              <small class="text-white-50">Réécriture automatique selon l'offre.</small>
-            </div>
-          </div>
-          <div class="col-sm-6 d-flex align-items-start gap-2">
-            <div class="p-2 rounded-3" style="background: rgba(255,255,255,0.15);"><i data-lucide="shield-check" style="width: 18px; height: 18px;"></i></div>
-            <div>
-              <strong class="d-block small">Audit ATS High-Tech</strong>
-              <small class="text-white-50">Optimisation pour les algorithmes.</small>
-            </div>
-          </div>
-          <div class="col-sm-6 d-flex align-items-start gap-2">
-            <div class="p-2 rounded-3" style="background: rgba(255,255,255,0.15);"><i data-lucide="trending-up" style="width: 18px; height: 18px;"></i></div>
-            <div>
-              <strong class="d-block small">Stratégie Salariale</strong>
-              <small class="text-white-50">Maximisez votre rémunération.</small>
-            </div>
-          </div>
-          <div class="col-sm-6 d-flex align-items-start gap-2">
-            <div class="p-2 rounded-3" style="background: rgba(255,255,255,0.15);"><i data-lucide="brain" style="width: 18px; height: 18px;"></i></div>
-            <div>
-              <strong class="d-block small">Psychologie d'Entretien</strong>
-              <small class="text-white-50">Convainquez chaque recruteur.</small>
-            </div>
-          </div>
-        </div>
+  <!-- Compact 3-Card Stats Row -->
+  <div class="stats-row-aptus">
+    <div class="stat-box-small">
+      <span class="label">Total des documents</span>
+      <span class="val">{{ stats.total }} <small style="font-size:0.85rem;color:var(--text-tertiary);font-weight:500;">Version{{ stats.total|pluralize }}</small></span>
+    </div>
+    <div class="stat-box-small">
+      <span class="label">Prêt à l'envoi</span>
+      <span class="val" style="color:#10b981;">{{ stats.ready }} <small style="font-size:0.85rem;color:var(--text-tertiary);font-weight:500;">Complet{{ stats.ready|pluralize }}</small></span>
+    </div>
+    <div class="stat-box-small">
+      <span class="label">Dernière Édition</span>
+      <span class="val" style="color:var(--accent-primary);">{{ stats.last_edit }}</span>
+    </div>
+  </div>
 
-        <!-- Buttons -->
-        <div class="d-flex gap-3">
-          <a href="{% url 'cv_studio:template_list' %}" class="btn btn-light fw-bold px-4 py-2" style="border-radius: 12px; color: #4f46e5;">
-            <i data-lucide="zap" style="width: 18px; height: 18px; margin-right: 4px;"></i>
-            <span>Choisir un Template IA</span>
-          </a>
+  {% if cv_cards %}
+  <div class="cv-compact-grid">
+    {% for card in cv_cards %}
+    {% with cv=card.cv %}
+    <div class="cv-miniature-card">
+      {% if card.is_ready %}
+      <div class="ready-badge">
+        <i data-lucide="check-circle" style="width:12px;height:12px;"></i>
+        <span>Prêt à l'envoi</span>
+      </div>
+      {% endif %}
+
+      <div class="cv-miniature__preview">
+        <iframe
+          class="cv-miniature__iframe"
+          id="cv-thumb-{{ cv.pk }}"
+          srcdoc="{{ card.preview_srcdoc|escape }}"
+          title="Aperçu {{ cv.nom_document }}"></iframe>
+        <div class="cv-miniature__overlay">
+          <button
+            type="button"
+            class="btn-aptus-eye"
+            title="Aperçu rapide"
+            onclick="openQuickPreview('cv-thumb-{{ cv.pk }}', '{% url 'cv_studio:cv_print' cv.pk %}', '{% url 'cv_studio:cv_detail' cv.pk %}')">
+            <i data-lucide="eye" style="width:20px;height:20px;"></i>
+          </button>
         </div>
       </div>
 
-      <div class="col-lg-4 text-center d-none d-lg-block">
-        <div class="p-4 rounded-4" style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2);">
-          <i data-lucide="file-check-2" style="width: 80px; height: 80px; color: #fbbf24; margin-bottom: 1rem;"></i>
-          <h4 class="h5 fw-bold mb-1">Templates Certifiés ATS</h4>
-          <p class="small text-white-50 mb-0">Testés auprès de +500 recruteurs partenaires.</p>
+      <div class="cv-miniature__info">
+        <h3 class="cv-miniature__name">{{ cv.nom_document }}</h3>
+        <span class="cv-miniature__role">{{ cv.nom_complet }}{% if cv.titre_poste %} • {{ cv.titre_poste }}{% endif %}</span>
+        <div class="cv-miniature__meta">
+          <span class="cv-theme-dot" style="background:{{ card.theme }};"></span>
+          <span>{{ cv.template.nom|default:'Standard Aptus' }}</span>
+        </div>
+
+        <div class="cv-miniature__actions">
+          <span style="font-size:0.75rem; color:var(--text-tertiary);">{{ cv.date_mise_a_jour|date:"d/m/Y" }}</span>
+          <div class="cv-action-group">
+            <a href="{% url 'cv_studio:cv_detail' cv.pk %}" class="btn-action-small view" title="Détails">
+              <i data-lucide="eye" style="width:14px;height:14px;"></i>
+            </a>
+            <a href="{% url 'cv_studio:cv_update' cv.pk %}" class="btn-action-small edit" title="Modifier">
+              <i data-lucide="pencil" style="width:14px;height:14px;"></i>
+            </a>
+            <a href="{% url 'cv_studio:cv_print' cv.pk %}" target="_blank" class="btn-action-small print" title="Imprimer / PDF">
+              <i data-lucide="printer" style="width:14px;height:14px;"></i>
+            </a>
+            <button
+              type="button"
+              class="btn-action-small danger"
+              title="Supprimer"
+              onclick="aptusDeleteWithForm('{% url 'cv_studio:cv_delete' cv.pk %}', '{{ csrf_token }}', 'Supprimer ce CV ?', 'Êtes-vous sûr de vouloir supprimer définitivement « {{ cv.nom_document|escapejs }} » ?')">
+              <i data-lucide="trash-2" style="width:14px;height:14px;"></i>
+            </button>
+          </div>
         </div>
       </div>
     </div>
+    {% endwith %}
+    {% endfor %}
   </div>
+  {% else %}
+  <div class="text-center py-5 px-4" style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:24px;">
+    <i data-lucide="file-x" style="width:48px;height:48px;color:var(--text-tertiary);margin-bottom:12px;"></i>
+    <h3 class="h5 fw-bold mb-2">Aucun CV créé pour le moment</h3>
+    <p class="text-secondary small mb-4">Choisissez un modèle dans le catalogue ou démarrez directement votre premier CV.</p>
+    <div class="d-flex justify-content-center gap-3 flex-wrap">
+      <a href="{% url 'cv_studio:template_list' %}" class="btn btn-primary" style="border-radius:12px; padding:0.75rem 1.75rem;">Choisir un modèle</a>
+      <a href="{% url 'cv_studio:cv_create' %}" class="btn btn-secondary" style="border-radius:12px; padding:0.75rem 1.75rem;">Créer mon premier CV</a>
+    </div>
+  </div>
+  {% endif %}
 </div>
 
-<!-- Mes CVs / Templates Showcase -->
-<div class="container py-2 mb-5" style="max-width: 1200px;">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-      <h2 class="h4 fw-bold mb-1" style="color: var(--text-primary);">Mes Curriculums Vitae ({{ cvs.count }})</h2>
-      <p class="text-secondary small mb-0">Documents générés et optimisés pour vos candidatures.</p>
-    </div>
-    <a href="{% url 'cv_studio:template_list' %}" class="btn btn-primary" style="border-radius: 10px;">
-      <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
-      <span>Nouveau CV</span>
-    </a>
+<!-- Quick Total Preview Modal -->
+<div id="aptus-total-modal" class="aptus-total-modal" onclick="if(event.target===this) closeQuickPreview();">
+  <div class="total-modal-header">
+    <span style="font-weight:800; letter-spacing:0.06em;">APERÇU COMPLET</span>
+    <button type="button" class="btn btn-light btn-sm rounded-circle" style="width:38px;height:38px;" onclick="closeQuickPreview()">
+      <i data-lucide="x" style="width:18px;height:18px;"></i>
+    </button>
   </div>
-
-  <div class="row g-4">
-    {% for cv in cvs %}
-    <div class="col-md-6 col-lg-4">
-      <div class="card-flat p-4 h-100 d-flex flex-column" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; box-shadow: var(--shadow-sm);">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-          <span class="badge badge-info">{{ cv.statut|default:'Actif' }}</span>
-          <span class="text-tertiary small">{{ cv.date_mise_a_jour|date:"d/m/Y" }}</span>
-        </div>
-        <h3 class="h5 fw-bold mb-1" style="color: var(--text-primary);">{{ cv.nom_document }}</h3>
-        <p class="text-primary fw-semibold small mb-1">{{ cv.nom_complet }}</p>
-        <p class="text-secondary small mb-3"><i data-lucide="briefcase" style="width: 14px; height: 14px; margin-right: 4px;"></i> {{ cv.titre_poste|default:'Poste non spécifié' }}</p>
-        <p class="text-secondary small flex-grow-1">{{ cv.resume|truncatewords:16|default:'Aucun résumé renseigné.' }}</p>
-        
-        <div class="d-flex justify-content-between align-items-center pt-3 border-top" style="border-color: var(--border-color-light) !important;">
-          <a href="{% url 'cv_studio:cv_detail' cv.pk %}" class="btn btn-sm btn-secondary" style="border-radius: 8px;">
-            <i data-lucide="eye" style="width: 14px; height: 14px;"></i> Voir
-          </a>
-          <div class="d-flex gap-1">
-            <a href="{% url 'cv_studio:cv_print' cv.pk %}" target="_blank" class="btn btn-sm btn-ghost text-primary" title="Imprimer / Exporter"><i data-lucide="printer" style="width: 15px; height: 15px;"></i></a>
-            <a href="{% url 'cv_studio:cv_update' cv.pk %}" class="btn btn-sm btn-ghost text-warning" title="Modifier"><i data-lucide="pencil" style="width: 15px; height: 15px;"></i></a>
-            <button type="button" class="btn btn-sm btn-ghost text-danger" title="Supprimer" onclick="aptusDeleteWithForm('{% url 'cv_studio:cv_delete' cv.pk %}', '{{ csrf_token }}', 'Supprimer ce CV ?', 'Êtes-vous sûr de vouloir supprimer définitivement « {{ cv.nom_document|escapejs }} » ?')"><i data-lucide="trash-2" style="width: 15px; height: 15px;"></i></button>
-          </div>
-        </div>
-      </div>
+  <div class="total-modal-body">
+    <div class="total-modal-cv-container" id="total-cv-container">
+      <iframe id="total-iframe-target" class="total-modal-iframe" title="Aperçu complet du CV"></iframe>
     </div>
-    {% empty %}
-    <div class="col-12 text-center py-5 text-secondary">
-      <i data-lucide="file-x" style="width: 48px; height: 48px; color: var(--text-tertiary); margin-bottom: 12px;"></i>
-      <h4 class="h5 fw-bold mb-1">Aucun CV créé pour le moment</h4>
-      <p class="text-secondary small mb-4">Créez votre premier CV optimisé par IA en quelques minutes.</p>
-      <a href="{% url 'cv_studio:cv_create' %}" class="btn btn-primary" style="border-radius: 12px; padding: 0.75rem 2rem;">Créer mon premier CV</a>
-    </div>
-    {% endfor %}
+  </div>
+  <div class="total-modal-footer">
+    <a id="total-detail-link" href="#" class="btn btn-outline-light fw-semibold" style="border-radius:12px;">Voir la fiche</a>
+    <a id="total-print-link" href="#" target="_blank" class="btn btn-light fw-bold" style="border-radius:12px;color:#0f172a;">
+      <i data-lucide="printer" style="width:16px;height:16px;"></i> Imprimer / PDF
+    </a>
   </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-  if (window.lucide) lucide.createIcons();
+  function scaleMiniatureIframes() {
+    document.querySelectorAll('.cv-miniature__preview').forEach(box => {
+      const iframe = box.querySelector('.cv-miniature__iframe');
+      if (!iframe || box.clientWidth <= 0) return;
+      const scale = box.clientWidth / 794;
+      iframe.style.transform = `scale(${scale})`;
+    });
+  }
+
+  function openQuickPreview(sourceId, printUrl, detailUrl) {
+    const src = document.getElementById(sourceId);
+    const modal = document.getElementById('aptus-total-modal');
+    const target = document.getElementById('total-iframe-target');
+    if (!src || !modal || !target) return;
+    target.srcdoc = src.srcdoc;
+    document.getElementById('total-print-link').href = printUrl;
+    document.getElementById('total-detail-link').href = detailUrl;
+    modal.classList.add('active');
+    setTimeout(() => {
+      const cont = document.getElementById('total-cv-container');
+      if (cont && cont.clientWidth > 0) {
+        target.style.transform = `scale(${cont.clientWidth / 794})`;
+      }
+    }, 30);
+  }
+
+  function closeQuickPreview() {
+    document.getElementById('aptus-total-modal')?.classList.remove('active');
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    scaleMiniatureIframes();
+    window.addEventListener('resize', scaleMiniatureIframes);
+    if (window.lucide) lucide.createIcons();
+  });
 </script>
 {% endblock %}
