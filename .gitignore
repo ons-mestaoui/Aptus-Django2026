@@ -32,3 +32,7 @@ screenshots_verification/
 .idea/
 .DS_Store
 Thumbs.db
+
+# User uploads
+media/
+
