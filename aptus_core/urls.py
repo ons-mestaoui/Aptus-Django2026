@@ -25,6 +25,10 @@ from training.views import (
     formation_create, formation_update, formation_delete
 )
 
+from market.views import (
+    backoffice_rapport_detail,
+)
+
 def inscription_candidat(request):
     """Inscription candidat répliquant le flux authentique de signup_candidat.php"""
     from django.shortcuts import render, redirect
@@ -151,6 +155,7 @@ urlpatterns = [
 
     # Backoffice Veille Marché
     path('backoffice/veille/', backoffice_veille, name='backoffice_veille'),
+    path('backoffice/veille/<int:pk>/', backoffice_rapport_detail, name='backoffice_rapport_detail'),
 
     # Redirection de /admin/ vers le Backoffice Aptus authentique
     path('admin/', admin_dashboard, name='admin_home'),

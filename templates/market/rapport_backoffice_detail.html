@@ -1,0 +1,212 @@
+{% extends 'layout_back.html' %}
+{% load static %}
+
+{% block title %}{{ rapport.titre }} &mdash; Veille Marché &bull; Aptus Backoffice{% endblock %}
+
+{% block extra_css %}
+<style>
+  .rapport-rich-body h1,
+  .rapport-rich-body h2,
+  .rapport-rich-body h3,
+  .rapport-rich-body h4 {
+    color: var(--text-primary);
+    font-weight: 700;
+    margin-top: 1.25rem;
+    margin-bottom: 0.6rem;
+  }
+  .rapport-rich-body p {
+    margin-bottom: 0.9rem;
+  }
+  .rapport-rich-body ul,
+  .rapport-rich-body ol {
+    padding-left: 1.35rem;
+    margin-bottom: 1rem;
+  }
+  .rapport-rich-body a {
+    color: var(--accent-primary);
+    text-decoration: underline;
+  }
+  .rapport-rich-body blockquote {
+    border-left: 4px solid var(--accent-primary);
+    padding: 0.6rem 1rem;
+    background: var(--bg-secondary);
+    border-radius: 0 8px 8px 0;
+    color: var(--text-primary);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="back-page-header mb-4">
+  <div class="back-page-header__row d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <div>
+      <a href="{% url 'backoffice_veille' %}" class="btn btn-sm btn-secondary d-inline-flex align-items-center gap-2">
+        <i data-lucide="arrow-left" style="width: 16px; height: 16px;"></i>
+        <span>Retour à la veille marché</span>
+      </a>
+    </div>
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+      <a href="{% url 'market:rapport_update' rapport.pk %}" class="btn btn-warning d-inline-flex align-items-center gap-2">
+        <i data-lucide="pencil" style="width: 16px; height: 16px;"></i>
+        <span>Modifier</span>
+      </a>
+      <button type="button" class="btn btn-danger d-inline-flex align-items-center gap-2" onclick="aptusConfirmDelete('{% url 'market:rapport_delete' rapport.pk %}', 'Êtes-vous sûr de vouloir supprimer définitivement le rapport « {{ rapport.titre|escapejs }} » ?')">
+        <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+        <span>Supprimer</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Main Column -->
+  <div class="col-lg-8">
+    <div class="card p-4 p-md-5 mb-4">
+      {% if rapport.image_couverture %}
+      <div class="mb-4" style="overflow:hidden; border-radius:16px; border:1px solid var(--border-color-light);">
+        <img src="{{ rapport.image_couverture }}" alt="{{ rapport.titre }}" style="width:100%; max-height:300px; object-fit:cover; display:block;">
+      </div>
+      {% endif %}
+
+      <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
+        <span class="badge badge-primary" style="font-size:0.85rem; padding:0.45rem 0.9rem; border-radius:8px;">{{ rapport.secteur_principal|default:'Marché Tech' }}</span>
+        {% if rapport.date_publication %}
+        <span class="text-secondary small d-inline-flex align-items-center gap-1">
+          <i data-lucide="calendar" style="width:14px;height:14px;"></i>
+          Publié le {{ rapport.date_publication|date:"d/m/Y" }}
+        </span>
+        {% endif %}
+      </div>
+
+      <h1 class="h2 fw-bold mb-2" style="color:var(--text-primary); letter-spacing:-0.5px;">{{ rapport.titre }}</h1>
+      <p class="text-secondary small mb-4 d-flex align-items-center gap-2 flex-wrap">
+        <span class="d-inline-flex align-items-center gap-1">
+          <i data-lucide="map-pin" style="width:15px;height:15px;color:var(--accent-primary);"></i>
+          Région : <strong>{{ rapport.region|default:'Global' }}</strong>
+        </span>
+        <span>&bull;</span>
+        <span class="d-inline-flex align-items-center gap-1">
+          <i data-lucide="user-check" style="width:15px;height:15px;"></i>
+          Rédigé par <strong>{{ rapport.auteur|default:'Aptus Analytics' }}</strong>
+        </span>
+      </p>
+
+      <hr style="border-color:var(--border-color-light);">
+
+      <h5 class="fw-bold mb-3 d-flex align-items-center gap-2" style="color:var(--text-primary);">
+        <i data-lucide="file-text" style="width:18px;height:18px;color:var(--accent-primary);"></i>
+        <span>Analyse Sectorielle &amp; Tendances</span>
+      </h5>
+
+      {% if contenu_sanitized %}
+        {% if rapport.description %}
+        <div class="p-3 rounded-3 mb-4" style="background:var(--bg-secondary); border-left:4px solid var(--accent-primary); color:var(--text-primary); line-height:1.65;">
+          {{ rapport.description }}
+        </div>
+        {% endif %}
+        {% if '<' in contenu_sanitized and '>' in contenu_sanitized %}
+        <div class="rapport-rich-body" style="color:var(--text-secondary); line-height:1.75; font-size:1rem;">{{ contenu_sanitized|safe }}</div>
+        {% else %}
+        <div style="white-space: pre-line; color:var(--text-secondary); line-height:1.75; font-size:1rem;">{{ contenu_sanitized }}</div>
+        {% endif %}
+      {% else %}
+        <div style="white-space: pre-line; color:var(--text-secondary); line-height:1.75; font-size:1rem;">{{ rapport.description|default:"Aucune analyse détaillée renseignée." }}</div>
+      {% endif %}
+    </div>
+
+    <!-- Références & Sources -->
+    <div class="card p-4 mb-4">
+      <div class="pb-3 mb-3 d-flex justify-content-between align-items-center border-bottom" style="border-color:var(--border-color-light) !important;">
+        <h5 class="fw-bold mb-0 d-flex align-items-center gap-2" style="color:var(--text-primary);">
+          <i data-lucide="book-open" style="width:18px;height:18px;color:var(--accent-primary);"></i>
+          <span>Références &amp; Sources ({{ references.count }})</span>
+        </h5>
+      </div>
+
+      {% if references %}
+      <div class="d-flex flex-column gap-3">
+        {% for ref in references %}
+        <div class="p-3 rounded-3 d-flex justify-content-between align-items-start gap-3 flex-wrap" style="background:var(--bg-secondary); border:1px solid var(--border-color-light);">
+          <div>
+            <div class="fw-bold" style="color:var(--text-primary);">{{ ref.titre_source }}</div>
+            {% if ref.note_source %}
+            <div class="text-secondary small mt-1">{{ ref.note_source }}</div>
+            {% endif %}
+          </div>
+          {% if ref.url_source %}
+          <a href="{{ ref.url_source }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-secondary d-inline-flex align-items-center gap-1" style="border-radius:8px;">
+            <span>Consulter la source</span>
+            <i data-lucide="external-link" style="width:14px;height:14px;"></i>
+          </a>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="text-center text-secondary py-4">
+        Aucune référence ou source enregistrée pour ce rapport.
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Sidebar Column: Statistiques Salariales -->
+  <div class="col-lg-4">
+    <div class="card p-4 mb-4">
+      <h5 class="fw-bold mb-3 pb-2 border-bottom d-flex align-items-center gap-2" style="color:var(--text-primary); border-color:var(--border-color-light) !important;">
+        <i data-lucide="wallet" style="width:18px;height:18px;color:var(--accent-primary);"></i>
+        <span>Statistiques Salariales (TND)</span>
+      </h5>
+
+      <div class="d-flex flex-column gap-3">
+        <div class="p-3 rounded-3" style="background:var(--bg-secondary); border:1px solid var(--border-color-light);">
+          <div class="text-secondary small mb-1">Salaire Minimum Constaté</div>
+          <div class="fw-bold" style="color:var(--text-primary);">{% if rapport.salaire_min_global is not None %}{{ rapport.salaire_min_global|floatformat:"-2" }} TND{% else %}N/C{% endif %}</div>
+        </div>
+
+        <div class="p-3 rounded-3" style="background:var(--bg-secondary); border:1px solid var(--border-color-light);">
+          <div class="text-secondary small mb-1">Salaire Moyen Marché</div>
+          <div class="fw-bold text-success fs-4">{% if rapport.salaire_moyen_global is not None %}{{ rapport.salaire_moyen_global|floatformat:"-2" }} TND{% else %}N/C{% endif %}</div>
+        </div>
+
+        <div class="p-3 rounded-3" style="background:var(--bg-secondary); border:1px solid var(--border-color-light);">
+          <div class="text-secondary small mb-1">Salaire Maximum</div>
+          <div class="fw-bold" style="color:var(--text-primary);">{% if rapport.salaire_max_global is not None %}{{ rapport.salaire_max_global|floatformat:"-2" }} TND{% else %}N/C{% endif %}</div>
+        </div>
+
+        <div class="p-3 rounded-3" style="background:var(--bg-secondary); border:1px solid var(--border-color-light);">
+          <div class="text-secondary small mb-1">Tendance Globale du Marché</div>
+          <div><span class="badge badge-success">{{ rapport.tendance_generale|default:'Stable' }}</span></div>
+        </div>
+
+        <div class="p-3 rounded-3" style="background:var(--bg-secondary); border:1px solid var(--border-color-light);">
+          <div class="text-secondary small mb-1">Niveau de Demande</div>
+          <div class="fw-bold" style="color:var(--text-primary);">
+            {% if rapport.niveau_demande_global == 1 %}
+              1 — Faible
+            {% elif rapport.niveau_demande_global == 2 %}
+              2 — Modéré
+            {% elif rapport.niveau_demande_global == 3 %}
+              3 — Élevé
+            {% elif rapport.niveau_demande_global == 4 %}
+              4 — Très élevé / Critique
+            {% elif rapport.niveau_demande_global %}
+              {{ rapport.niveau_demande_global }}
+            {% else %}
+              N/C
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  if (window.lucide) {
+    lucide.createIcons();
+  }
+</script>
+{% endblock %}

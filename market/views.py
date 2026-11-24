@@ -1,3 +1,5 @@
+import re
+
 from django.contrib import messages
 from django.db import transaction
 from django.db.models import Count
@@ -7,6 +9,32 @@ from accounts.auth_helpers import admin_required, get_current_user
 from accounts.models import Administrateur
 from .forms import RapportMarcheForm, ReferenceRapportFormSet
 from .models import RapportMarche
+
+
+def _sanitize_rich_html(html):
+    """Strip unsafe executable tags, inline event handlers, and javascript: URIs."""
+    if not html:
+        return ''
+    cleaned = re.sub(
+        r'<\s*(script|iframe|object|embed)[^>]*>[\s\S]*?<\s*/\s*\1\s*>',
+        '',
+        html,
+        flags=re.IGNORECASE,
+    )
+    cleaned = re.sub(
+        r'<\s*(script|iframe|object|embed)[^>]*/?\s*>',
+        '',
+        cleaned,
+        flags=re.IGNORECASE,
+    )
+    cleaned = re.sub(
+        r'\s+on\w+\s*=\s*(?:"[^"]*"|\'[^\']*\'|[^\s>]+)',
+        '',
+        cleaned,
+        flags=re.IGNORECASE,
+    )
+    cleaned = re.sub(r'javascript\s*:', '', cleaned, flags=re.IGNORECASE)
+    return cleaned
 
 
 def _get_admin_profile(request):
@@ -32,6 +60,18 @@ def rapport_detail(request, pk):
     rapport = get_object_or_404(RapportMarche.objects.select_related('admin__utilisateur'), pk=pk)
     references = rapport.references.all()
     return render(request, 'market/rapport_detail.html', {'rapport': rapport, 'references': references})
+
+
+@admin_required
+def backoffice_rapport_detail(request, pk):
+    rapport = get_object_or_404(RapportMarche.objects.select_related('admin__utilisateur'), pk=pk)
+    references = rapport.references.all()
+    contenu_sanitized = _sanitize_rich_html(rapport.contenu_detaille or '')
+    return render(request, 'market/rapport_backoffice_detail.html', {
+        'rapport': rapport,
+        'references': references,
+        'contenu_sanitized': contenu_sanitized,
+    })
 
 
 @admin_required
