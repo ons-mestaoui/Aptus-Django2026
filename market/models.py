@@ -1,6 +1,7 @@
 from django.db import models
 from accounts.models import Administrateur
 
+
 class RapportMarche(models.Model):
     id_rapport_marche = models.AutoField(primary_key=True)
     admin = models.ForeignKey(
@@ -8,6 +9,8 @@ class RapportMarche(models.Model):
     )
     titre = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
+    contenu_detaille = models.TextField(null=True, blank=True)
+    image_couverture = models.TextField(null=True, blank=True)
     date_publication = models.DateField(null=True, blank=True)
     region = models.CharField(max_length=255, null=True, blank=True)
     secteur_principal = models.CharField(max_length=255, null=True, blank=True)
@@ -26,6 +29,24 @@ class RapportMarche(models.Model):
 
     def __str__(self):
         return f"{self.titre} ({self.region or 'National'})"
+
+
+class ReferenceRapport(models.Model):
+    id_reference = models.AutoField(primary_key=True)
+    rapport_marche = models.ForeignKey(
+        RapportMarche, on_delete=models.CASCADE, related_name='references'
+    )
+    titre_source = models.CharField(max_length=255)
+    url_source = models.URLField(max_length=500, null=True, blank=True)
+    note_source = models.CharField(max_length=255, null=True, blank=True)
+
+    class Meta:
+        db_table = 'reference_rapport'
+        verbose_name = 'Référence Rapport'
+        verbose_name_plural = 'Références Rapports'
+
+    def __str__(self):
+        return self.titre_source
 
 
 class DonneeMarche(models.Model):

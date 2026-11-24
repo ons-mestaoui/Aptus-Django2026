@@ -214,7 +214,7 @@
           <span>Utilisateurs</span>
         </a>
 
-        <a href="{% url 'backoffice_veille' %}" class="sidebar-link {% if 'marche' in request.path %}active{% endif %}" id="sidebar-veille">
+        <a href="{% url 'backoffice_veille' %}" class="sidebar-link {% if 'veille' in request.path or 'marche' in request.path %}active{% endif %}" id="sidebar-veille">
           <i data-lucide="line-chart"></i>
           <span>Veille Marché</span>
         </a>

@@ -11,7 +11,7 @@
         <i data-lucide="line-chart" style="width: 28px; height: 28px; color: var(--accent-primary);"></i>
         <span>Veille du Marché</span>
       </h1>
-      <p class="text-secondary mb-0">Gestion des rapports d'analyses et des indicateurs sectoriels</p>
+      <p class="text-secondary mb-0">Gestion des rapports d'analyses, rémunérations (TND) et sources de référence</p>
     </div>
     <div class="d-flex gap-2">
       <a href="{% url 'market:rapport_create' %}" class="btn btn-primary">
@@ -37,11 +37,11 @@
   <div class="col-sm-6 col-xl-3">
     <div class="stat-card h-100">
       <div>
-        <div class="stat-card__label">Points de Données</div>
-        <div class="stat-card__value">{{ stats.total_donnees|default:donnees.count }}</div>
-        <div class="stat-card__trend up"><i data-lucide="database" style="width: 14px; height: 14px;"></i> Indexés</div>
+        <div class="stat-card__label">Références Sources</div>
+        <div class="stat-card__value">{{ stats.total_references|default:0 }}</div>
+        <div class="stat-card__trend up"><i data-lucide="book-open" style="width: 14px; height: 14px;"></i> Citées</div>
       </div>
-      <div class="stat-card__icon teal"><i data-lucide="database" style="width: 22px; height: 22px;"></i></div>
+      <div class="stat-card__icon teal"><i data-lucide="book-open" style="width: 22px; height: 22px;"></i></div>
     </div>
   </div>
 
@@ -49,8 +49,8 @@
     <div class="stat-card h-100">
       <div>
         <div class="stat-card__label">Salaire Moyen Marché</div>
-        <div class="stat-card__value">{{ stats.salaire_moyen|default:'42,500 €' }}</div>
-        <div class="stat-card__trend up"><i data-lucide="wallet" style="width: 14px; height: 14px;"></i> Annuel</div>
+        <div class="stat-card__value">{{ stats.salaire_moyen|default:'N/C' }}</div>
+        <div class="stat-card__trend up"><i data-lucide="wallet" style="width: 14px; height: 14px;"></i> TND</div>
       </div>
       <div class="stat-card__icon blue"><i data-lucide="wallet" style="width: 22px; height: 22px;"></i></div>
     </div>
@@ -60,7 +60,7 @@
     <div class="stat-card h-100">
       <div>
         <div class="stat-card__label">Secteurs Actifs</div>
-        <div class="stat-card__value">{{ stats.secteurs|default:'8' }}</div>
+        <div class="stat-card__value">{{ stats.secteurs|default:0 }}</div>
         <div class="stat-card__trend up"><i data-lucide="check" style="width: 14px; height: 14px;"></i> Suivis</div>
       </div>
       <div class="stat-card__icon orange"><i data-lucide="pie-chart" style="width: 22px; height: 22px;"></i></div>
@@ -68,9 +68,16 @@
   </div>
 </div>
 
+<!-- Filtres locaux -->
+<div class="d-flex flex-wrap gap-3 mb-3 align-items-center">
+  <div style="flex: 1 1 260px; max-width: 400px;">
+    <input type="text" id="veille-search-input" class="form-control" placeholder="Filtrer par titre, région ou secteur...">
+  </div>
+</div>
+
 <div class="card-flat" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-card);">
   <div class="table-responsive">
-    <table class="data-table mb-0">
+    <table class="data-table mb-0" id="veille-admin-table">
       <thead>
         <tr>
           <th>Titre du Rapport</th>
@@ -78,25 +85,30 @@
           <th>Région</th>
           <th>Salaire Moyen</th>
           <th>Tendance</th>
+          <th>Références</th>
           <th class="text-end">Actions</th>
         </tr>
       </thead>
       <tbody>
         {% for r in rapports %}
-        <tr>
+        <tr class="veille-row" data-search="{{ r.titre|lower }} {{ r.secteur_principal|default:''|lower }} {{ r.region|default:''|lower }}">
           <td class="fw-bold"><a href="{% url 'market:rapport_detail' r.pk %}" class="text-primary">{{ r.titre }}</a></td>
           <td><span class="badge badge-primary">{{ r.secteur_principal|default:'Tech' }}</span></td>
           <td>{{ r.region|default:'Global' }}</td>
-          <td class="text-success fw-bold">{{ r.salaire_moyen_global|default:'N/C' }} €</td>
+          <td class="text-success fw-bold">{% if r.salaire_moyen_global is not None %}{{ r.salaire_moyen_global|floatformat:"-2" }} TND{% else %}N/C{% endif %}</td>
           <td><span class="badge badge-success">{{ r.tendance_generale|default:'Stable' }}</span></td>
+          <td>
+            <span class="badge badge-secondary">{{ r.references_count|default:0 }} source{{ r.references_count|default:0|pluralize }}</span>
+          </td>
           <td class="text-end">
-            <a href="{% url 'market:rapport_update' r.pk %}" class="btn btn-sm btn-ghost text-warning"><i data-lucide="pencil" style="width: 16px; height: 16px;"></i></a>
+            <a href="{% url 'market:rapport_detail' r.pk %}" class="btn btn-sm btn-ghost text-primary" title="Voir le détail"><i data-lucide="eye" style="width: 16px; height: 16px;"></i></a>
+            <a href="{% url 'market:rapport_update' r.pk %}" class="btn btn-sm btn-ghost text-warning" title="Modifier"><i data-lucide="pencil" style="width: 16px; height: 16px;"></i></a>
             <button type="button" class="btn btn-sm btn-ghost text-danger" title="Supprimer définitivement" onclick="aptusConfirmDelete('{% url 'market:rapport_delete' r.pk %}', 'Êtes-vous sûr de vouloir supprimer définitivement le rapport « {{ r.titre|escapejs }} » ?')"><i data-lucide="trash-2" style="width: 16px; height: 16px;"></i></button>
           </td>
         </tr>
         {% empty %}
         <tr>
-          <td colspan="6" class="text-center py-4 text-secondary">Aucun rapport publié.</td>
+          <td colspan="7" class="text-center py-4 text-secondary">Aucun rapport publié.</td>
         </tr>
         {% endfor %}
       </tbody>
@@ -108,5 +120,17 @@
 {% block extra_js %}
 <script>
   if (window.lucide) lucide.createIcons();
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('veille-search-input');
+    if (!searchInput) return;
+    searchInput.addEventListener('input', function() {
+      const q = searchInput.value.trim().toLowerCase();
+      document.querySelectorAll('#veille-admin-table .veille-row').forEach(function(row) {
+        const hay = row.getAttribute('data-search') || '';
+        row.style.display = (!q || hay.includes(q)) ? '' : 'none';
+      });
+    });
+  });
 </script>
 {% endblock %}

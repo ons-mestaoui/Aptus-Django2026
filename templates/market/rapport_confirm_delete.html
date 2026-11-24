@@ -10,17 +10,17 @@
       <div style="width:64px; height:64px; background:var(--accent-tertiary-light); color:var(--accent-tertiary); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto var(--space-4) auto;">
         <i data-lucide="alert-triangle" style="width:32px;height:32px;"></i>
       </div>
-      
+
       <h3 class="h4 fw-bold mb-2" style="color:var(--text-primary);">Confirmation de suppression</h3>
       <p class="text-secondary mb-4">
         Êtes-vous sûr de vouloir supprimer définitivement le rapport de marché :<br>
         <strong style="color:var(--text-primary); font-size:1.1rem;">{{ rapport.titre }}</strong> ?
-        <br><span class="text-danger small mt-2 d-inline-block">Les analyses et séries de données associées seront archivées.</span>
+        <br><span class="text-danger small mt-2 d-inline-block">Les analyses et références associées seront définitivement supprimées.</span>
       </p>
 
       <form method="POST" class="d-flex justify-content-center gap-3">
         {% csrf_token %}
-        <a href="{% url 'market:rapport_list' %}" class="btn btn-secondary">Annuler</a>
+        <a href="{% url 'backoffice_veille' %}" class="btn btn-secondary">Annuler</a>
         <button type="submit" class="btn btn-danger">
           <i data-lucide="trash-2" style="width:16px;height:16px;"></i>
           <span>Supprimer définitivement</span>

@@ -7,7 +7,7 @@ from jobs.forms import OffreEmploiForm
 from cv_studio.models import CV, Template
 from training.models import Formation, Inscription
 from training.forms import FormationForm
-from market.models import RapportMarche, DonneeMarche
+from market.models import RapportMarche, ReferenceRapport
 
 from accounts.auth_helpers import authenticate_user, login_user, logout_user, admin_required, candidat_required, get_current_user
 
@@ -174,15 +174,35 @@ def backoffice_utilisateurs(request):
 
 @admin_required
 def backoffice_veille(request):
-    rapports = RapportMarche.objects.select_related('admin__utilisateur').all()
-    donnees = DonneeMarche.objects.all()
+    from django.db.models import Avg, Count
+
+    rapports = (
+        RapportMarche.objects
+        .select_related('admin__utilisateur')
+        .annotate(references_count=Count('references'))
+        .order_by('-date_publication', '-id_rapport_marche')
+    )
+    avg_salary = RapportMarche.objects.aggregate(avg=Avg('salaire_moyen_global'))['avg']
+    if avg_salary is not None:
+        salaire_moyen_display = f"{avg_salary:,.0f} TND".replace(',', ' ')
+    else:
+        salaire_moyen_display = 'N/C'
+
+    distinct_secteurs = (
+        RapportMarche.objects
+        .exclude(secteur_principal__isnull=True)
+        .exclude(secteur_principal__exact='')
+        .values('secteur_principal')
+        .distinct()
+        .count()
+    )
+
     return render(request, 'market/rapport_admin.html', {
         'rapports': rapports,
-        'donnees': donnees,
         'stats': {
             'total_rapports': rapports.count(),
-            'total_donnees': donnees.count(),
-            'salaire_moyen': '42,500 €',
-            'secteurs': '8',
+            'total_references': ReferenceRapport.objects.count(),
+            'salaire_moyen': salaire_moyen_display,
+            'secteurs': distinct_secteurs,
         }
     })

@@ -23,7 +23,7 @@
       <span>L'Écho IA</span>
     </div>
     <div class="text-truncate small" style="opacity: 0.95;">
-      Marché Tech en croissance +12.1% &bull; Forte demande en Python, React, Cloud &bull; Salaires moyens constatés: 45 000 €
+      Marché Tech en croissance +12.1% &bull; Forte demande en Python, React, Cloud &bull; Salaires moyens constatés: 2 800 TND
     </div>
   </div>
 
@@ -62,7 +62,7 @@
           <div class="p-2 rounded mb-3 d-flex justify-content-between align-items-center small" style="background: var(--bg-secondary);">
             <span class="d-flex align-items-center gap-1">
               <i data-lucide="wallet" style="width: 14px; height: 14px; color: var(--accent-secondary);"></i>
-              <strong>Moy: {{ r.salaire_moyen_global|default:'N/C' }} €</strong>
+              <strong>Moy: {% if r.salaire_moyen_global is not None %}{{ r.salaire_moyen_global|floatformat:"-2" }} TND{% else %}N/C{% endif %}</strong>
             </span>
             <span class="badge badge-success">{{ r.tendance_generale|default:'En hausse' }}</span>
           </div>
@@ -90,7 +90,7 @@
         <div class="d-flex flex-column gap-3">
           <div class="p-3 rounded-3" style="background: var(--bg-secondary);">
             <span class="text-secondary small d-block">Salaire Médian Ingénieur</span>
-            <strong class="fs-5 text-success">48 500 € / an</strong>
+            <strong class="fs-5 text-success">2 800 TND / mois</strong>
           </div>
           <div class="p-3 rounded-3" style="background: var(--bg-secondary);">
             <span class="text-secondary small d-block">Indice de Tension Recrutement</span>

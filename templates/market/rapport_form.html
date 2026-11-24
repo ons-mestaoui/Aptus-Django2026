@@ -19,26 +19,32 @@
         <i data-lucide="line-chart" style="width:30px;height:30px;color:var(--accent-primary);"></i>
         <span>{{ title }}</span>
       </h2>
-      <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 0;">Saisissez les paramètres de synthèse, statistiques salariales et analyses de veille sectorielle.</p>
+      <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 0;">Saisissez les paramètres de synthèse, statistiques salariales (TND), contenu détaillé et sources de référence.</p>
     </div>
     <a href="{% url 'backoffice_veille' %}" style="width: 44px; height: 44px; border-radius: 12px; background: var(--bg-secondary); display: flex; align-items: center; justify-content: center; color: var(--text-secondary); transition: all 0.2s; text-decoration:none;" title="Fermer">
       <i data-lucide="x" style="width: 22px; height: 22px;"></i>
     </a>
   </div>
 
-  {% if form.errors %}
+  {% if form.errors or form.non_field_errors or formset.errors or formset.non_form_errors %}
   <div style="background: var(--accent-tertiary-light); border: 1px solid var(--accent-tertiary); color: var(--accent-tertiary); padding: 1.25rem; border-radius: 16px; margin-bottom: 2rem; display: flex; align-items: flex-start; gap: 1rem;">
     <i data-lucide="alert-circle" style="width: 24px; height: 24px; flex-shrink: 0; margin-top: 2px;"></i>
     <div>
       <strong style="display: block; margin-bottom: 0.25rem; font-size: 1rem;">Attention</strong>
       <p style="font-size: 0.9rem; line-height: 1.5; margin: 0;">Veuillez vérifier les informations saisies.</p>
+      {% if form.non_field_errors %}
+        <div class="small mt-1">{{ form.non_field_errors }}</div>
+      {% endif %}
+      {% if formset.non_form_errors %}
+        <div class="small mt-1">{{ formset.non_form_errors }}</div>
+      {% endif %}
     </div>
   </div>
   {% endif %}
 
   <form method="POST">
     {% csrf_token %}
-    
+
     <div class="form-grid-2cols" style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; width: 100%;">
       <!-- ═══ COLONNE GAUCHE ═══ -->
       <div style="display: flex; flex-direction: column; gap: 2rem;">
@@ -91,10 +97,18 @@
 
             <div class="form-group">
               <label class="form-label" style="font-weight: 600; margin-bottom: 0.4rem;" for="{{ form.description.id_for_label }}">
-                Analyse &amp; Commentaire Détaillé
+                Résumé Exécutif
               </label>
               {{ form.description }}
               {% if form.description.errors %}<div class="text-danger small mt-1">{{ form.description.errors }}</div>{% endif %}
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" style="font-weight: 600; margin-bottom: 0.4rem;" for="{{ form.contenu_detaille.id_for_label }}">
+                Contenu Détaillé du Rapport
+              </label>
+              {{ form.contenu_detaille }}
+              {% if form.contenu_detaille.errors %}<div class="text-danger small mt-1">{{ form.contenu_detaille.errors }}</div>{% endif %}
             </div>
           </div>
         </section>
@@ -107,29 +121,30 @@
             <i data-lucide="trending-up" style="width: 16px; height: 16px;"></i> Statistiques Salariales &amp; Tendance
           </h3>
           <div style="display: flex; flex-direction: column; gap: 1.25rem;">
-            <div class="form-group">
-              <label class="form-label" style="font-weight: 600; margin-bottom: 0.4rem;" for="{{ form.salaire_moyen_global.id_for_label }}">
-                Salaire Moyen Marché (€)
-              </label>
-              {{ form.salaire_moyen_global }}
-              {% if form.salaire_moyen_global.errors %}<div class="text-danger small mt-1">{{ form.salaire_moyen_global.errors }}</div>{% endif %}
-            </div>
-
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
               <div class="form-group">
                 <label class="form-label" style="font-weight: 600; margin-bottom: 0.4rem;" for="{{ form.salaire_min_global.id_for_label }}">
-                  Salaire Min (€)
+                  Salaire Min (TND)
                 </label>
                 {{ form.salaire_min_global }}
                 {% if form.salaire_min_global.errors %}<div class="text-danger small mt-1">{{ form.salaire_min_global.errors }}</div>{% endif %}
               </div>
               <div class="form-group">
                 <label class="form-label" style="font-weight: 600; margin-bottom: 0.4rem;" for="{{ form.salaire_max_global.id_for_label }}">
-                  Salaire Max (€)
+                  Salaire Max (TND)
                 </label>
                 {{ form.salaire_max_global }}
                 {% if form.salaire_max_global.errors %}<div class="text-danger small mt-1">{{ form.salaire_max_global.errors }}</div>{% endif %}
               </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" style="font-weight: 600; margin-bottom: 0.4rem;" for="{{ form.salaire_moyen_global.id_for_label }}">
+                Salaire Moyen Marché (TND)
+              </label>
+              {{ form.salaire_moyen_global }}
+              <div id="salary-auto-hint" class="small text-secondary mt-1">Laissez vide pour calculer automatiquement la moyenne entre Min et Max.</div>
+              {% if form.salaire_moyen_global.errors %}<div class="text-danger small mt-1">{{ form.salaire_moyen_global.errors }}</div>{% endif %}
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
@@ -142,26 +157,112 @@
               </div>
               <div class="form-group">
                 <label class="form-label" style="font-weight: 600; margin-bottom: 0.4rem;" for="{{ form.niveau_demande_global.id_for_label }}">
-                  Volume Demande (Offres)
+                  Niveau de Demande
                 </label>
                 {{ form.niveau_demande_global }}
                 {% if form.niveau_demande_global.errors %}<div class="text-danger small mt-1">{{ form.niveau_demande_global.errors }}</div>{% endif %}
               </div>
             </div>
 
-            {% if form.admin %}
-            <div class="form-group">
-              <label class="form-label" style="font-weight: 600; margin-bottom: 0.4rem;" for="{{ form.admin.id_for_label }}">
-                Administrateur Signataire
+            <!-- Image de couverture (URL ou fichier local base64) -->
+            <div class="form-group" style="margin-top: 0.5rem;">
+              <label class="form-label" style="font-weight: 600; margin-bottom: 0.4rem;" for="{{ form.image_couverture.id_for_label }}">
+                Image de Couverture (optionnelle)
               </label>
-              {{ form.admin }}
-              {% if form.admin.errors %}<div class="text-danger small mt-1">{{ form.admin.errors }}</div>{% endif %}
+              {{ form.image_couverture }}
+              {% if form.image_couverture.errors %}<div class="text-danger small mt-1">{{ form.image_couverture.errors }}</div>{% endif %}
+              <div class="d-flex align-items-center gap-2 mt-2 flex-wrap">
+                <label for="cover-file-input" class="btn btn-sm btn-secondary mb-0" style="cursor:pointer; border-radius: 8px;">
+                  <i data-lucide="image" style="width:14px;height:14px;"></i> Importer une image
+                </label>
+                <input type="file" id="cover-file-input" accept="image/*" style="display:none;">
+                <button type="button" id="cover-clear-btn" class="btn btn-sm btn-ghost text-danger" style="display:none;">
+                  <i data-lucide="trash-2" style="width:14px;height:14px;"></i> Retirer
+                </button>
+              </div>
+              <div id="cover-preview-box" class="mt-2" style="display:none;">
+                <img id="cover-preview-img" src="" alt="Aperçu couverture" style="max-height: 150px; width: 100%; object-fit: cover; border-radius: 12px; border: 1px solid var(--border-color);">
+              </div>
             </div>
-            {% endif %}
           </div>
         </section>
       </div>
     </div>
+
+    <!-- ═══ RÉFÉRENCES & SOURCES D'INFORMATION ═══ -->
+    <section style="margin-top: 2.75rem; padding-top: 2rem; border-top: 1px solid var(--border-color);">
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
+        <div>
+          <h3 style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent-primary); font-weight: 700; margin-bottom: 0.35rem; display: flex; align-items: center; gap: 0.5rem;">
+            <i data-lucide="book-open" style="width: 16px; height: 16px;"></i> Références &amp; Sources d'information
+          </h3>
+          <p class="text-secondary small mb-0">Indiquez d'où proviennent les données de ce rapport (organismes, études, enquêtes, liens URL ou notes méthodologiques).</p>
+        </div>
+        <button type="button" id="add-reference-btn" class="btn btn-sm btn-primary" style="border-radius: 10px; font-weight: 600;">
+          <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
+          <span>+ Ajouter une référence</span>
+        </button>
+      </div>
+
+      {{ formset.management_form }}
+
+      <div id="references-container" style="display: flex; flex-direction: column; gap: 1rem;">
+        {% for ref_form in formset %}
+        <div class="reference-row p-3 rounded-3" style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
+          {{ ref_form.id_reference }}
+          <div class="d-none">{{ ref_form.DELETE }}</div>
+          <div style="display: grid; grid-template-columns: 1.2fr 1.2fr 1fr auto; gap: 0.85rem; align-items: start;" class="reference-row-grid">
+            <div>
+              <label class="form-label small fw-semibold mb-1">Source / Organisme</label>
+              {{ ref_form.titre_source }}
+              {% if ref_form.titre_source.errors %}<div class="text-danger small mt-1">{{ ref_form.titre_source.errors }}</div>{% endif %}
+            </div>
+            <div>
+              <label class="form-label small fw-semibold mb-1">Lien URL (optionnel)</label>
+              {{ ref_form.url_source }}
+              {% if ref_form.url_source.errors %}<div class="text-danger small mt-1">{{ ref_form.url_source.errors }}</div>{% endif %}
+            </div>
+            <div>
+              <label class="form-label small fw-semibold mb-1">Précision / Note</label>
+              {{ ref_form.note_source }}
+              {% if ref_form.note_source.errors %}<div class="text-danger small mt-1">{{ ref_form.note_source.errors }}</div>{% endif %}
+            </div>
+            <div style="padding-top: 1.65rem;">
+              <button type="button" class="btn btn-sm btn-ghost text-danger btn-remove-ref" title="Supprimer cette référence">
+                <i data-lucide="trash-2" style="width: 17px; height: 17px;"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <template id="reference-empty-form">
+        <div class="reference-row p-3 rounded-3" style="background: var(--bg-secondary); border: 1px solid var(--border-color);">
+          {{ formset.empty_form.id_reference }}
+          <div class="d-none">{{ formset.empty_form.DELETE }}</div>
+          <div style="display: grid; grid-template-columns: 1.2fr 1.2fr 1fr auto; gap: 0.85rem; align-items: start;" class="reference-row-grid">
+            <div>
+              <label class="form-label small fw-semibold mb-1">Source / Organisme</label>
+              {{ formset.empty_form.titre_source }}
+            </div>
+            <div>
+              <label class="form-label small fw-semibold mb-1">Lien URL (optionnel)</label>
+              {{ formset.empty_form.url_source }}
+            </div>
+            <div>
+              <label class="form-label small fw-semibold mb-1">Précision / Note</label>
+              {{ formset.empty_form.note_source }}
+            </div>
+            <div style="padding-top: 1.65rem;">
+              <button type="button" class="btn btn-sm btn-ghost text-danger btn-remove-ref" title="Supprimer cette référence">
+                <i data-lucide="trash-2" style="width: 17px; height: 17px;"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </template>
+    </section>
 
     <!-- Form Footer Actions -->
     <div style="margin-top: 3rem; padding-top: 1.75rem; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 1.25rem; align-items: center;">
@@ -178,9 +279,9 @@
 {% block extra_js %}
 <style>
   @media (max-width: 900px) {
-    .form-grid-2cols {
+    .form-grid-2cols, .reference-row-grid {
       grid-template-columns: 1fr !important;
-      gap: 1.5rem !important;
+      gap: 1.25rem !important;
     }
   }
 </style>
@@ -188,5 +289,117 @@
   if (window.lucide) {
     lucide.createIcons();
   }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    // 1. Dynamic inline formset for Références
+    const container = document.getElementById('references-container');
+    const addBtn = document.getElementById('add-reference-btn');
+    const template = document.getElementById('reference-empty-form');
+    const totalFormsInput = document.getElementById('id_references-TOTAL_FORMS');
+
+    function bindRemoveButton(row) {
+      const btn = row.querySelector('.btn-remove-ref');
+      if (!btn) return;
+      btn.addEventListener('click', function() {
+        const deleteCheckbox = row.querySelector('input[type="checkbox"][name$="-DELETE"]');
+        if (deleteCheckbox) {
+          deleteCheckbox.checked = true;
+        }
+        row.style.display = 'none';
+      });
+    }
+
+    container.querySelectorAll('.reference-row').forEach(function(row) {
+      const deleteCheckbox = row.querySelector('input[type="checkbox"][name$="-DELETE"]');
+      if (deleteCheckbox && deleteCheckbox.checked) {
+        row.style.display = 'none';
+      }
+      bindRemoveButton(row);
+    });
+
+    if (addBtn && template && totalFormsInput) {
+      addBtn.addEventListener('click', function() {
+        const index = parseInt(totalFormsInput.value, 10);
+        const html = template.innerHTML.replace(/__prefix__/g, index);
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = html.trim();
+        const newRow = wrapper.firstElementChild;
+        container.appendChild(newRow);
+        totalFormsInput.value = index + 1;
+        bindRemoveButton(newRow);
+        if (window.lucide) lucide.createIcons();
+      });
+    }
+
+    // 2. Cover image file-to-base64 & preview
+    const coverInput = document.getElementById('id_image_couverture');
+    const coverFile = document.getElementById('cover-file-input');
+    const coverPreviewBox = document.getElementById('cover-preview-box');
+    const coverPreviewImg = document.getElementById('cover-preview-img');
+    const coverClearBtn = document.getElementById('cover-clear-btn');
+
+    function refreshCoverPreview() {
+      if (!coverInput) return;
+      const val = (coverInput.value || '').trim();
+      if (val) {
+        coverPreviewImg.src = val;
+        coverPreviewBox.style.display = 'block';
+        coverClearBtn.style.display = 'inline-flex';
+      } else {
+        coverPreviewImg.src = '';
+        coverPreviewBox.style.display = 'none';
+        coverClearBtn.style.display = 'none';
+      }
+    }
+
+    if (coverInput) {
+      refreshCoverPreview();
+      coverInput.addEventListener('input', refreshCoverPreview);
+    }
+
+    if (coverFile && coverInput) {
+      coverFile.addEventListener('change', function(e) {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          coverInput.value = evt.target.result;
+          refreshCoverPreview();
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    if (coverClearBtn && coverInput) {
+      coverClearBtn.addEventListener('click', function() {
+        coverInput.value = '';
+        if (coverFile) coverFile.value = '';
+        refreshCoverPreview();
+      });
+    }
+
+    // 3. Auto-compute hint for salaire_moyen_global
+    const minInput = document.getElementById('id_salaire_min_global');
+    const maxInput = document.getElementById('id_salaire_max_global');
+    const moyInput = document.getElementById('id_salaire_moyen_global');
+    const hint = document.getElementById('salary-auto-hint');
+
+    function updateSalaryHint() {
+      if (!minInput || !maxInput || !moyInput || !hint) return;
+      const minVal = parseFloat(minInput.value);
+      const maxVal = parseFloat(maxInput.value);
+      if (!isNaN(minVal) && !isNaN(maxVal) && minVal <= maxVal && !moyInput.value.trim()) {
+        const avg = Math.round(((minVal + maxVal) / 2) * 100) / 100;
+        hint.textContent = 'Calcul automatique prévu à l’enregistrement : ' + avg + ' TND';
+      } else {
+        hint.textContent = 'Laissez vide pour calculer automatiquement la moyenne entre Min et Max.';
+      }
+    }
+
+    [minInput, maxInput, moyInput].forEach(function(el) {
+      if (el) el.addEventListener('input', updateSalaryHint);
+    });
+    updateSalaryHint();
+  });
 </script>
 {% endblock %}

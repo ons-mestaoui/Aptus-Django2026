@@ -16,8 +16,20 @@
     <!-- Main Column -->
     <div class="col-lg-8">
       <div class="card p-4 p-md-5 mb-4" style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:24px; box-shadow:0 10px 40px rgba(0,0,0,0.05);">
+        {% if rapport.image_couverture %}
+        <div class="mb-4" style="overflow:hidden; border-radius:16px; border:1px solid var(--border-color-light);">
+          <img src="{{ rapport.image_couverture }}" alt="{{ rapport.titre }}" style="width:100%; max-height:280px; object-fit:cover; display:block;">
+        </div>
+        {% endif %}
+
         <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
           <span class="badge badge-primary" style="font-size:0.85rem; padding:0.45rem 0.9rem; border-radius:8px;">{{ rapport.secteur_principal|default:'Marché Tech' }}</span>
+          {% if rapport.date_publication %}
+          <span class="text-secondary small d-inline-flex align-items-center gap-1">
+            <i data-lucide="calendar" style="width:14px;height:14px;"></i>
+            Publié le {{ rapport.date_publication|date:"d/m/Y" }}
+          </span>
+          {% endif %}
         </div>
 
         <h1 class="h2 fw-bold mb-2" style="color:var(--text-primary); letter-spacing:-0.5px;">{{ rapport.titre }}</h1>
@@ -38,45 +50,52 @@
           <i data-lucide="file-text" style="width:18px;height:18px;color:var(--accent-primary);"></i>
           <span>Analyse Sectorielle &amp; Tendances</span>
         </h5>
-        <div style="white-space: pre-line; color:var(--text-secondary); line-height:1.75; font-size:1rem;">
-          {{ rapport.description }}
-        </div>
+
+        {% if rapport.contenu_detaille %}
+          {% if rapport.description %}
+          <div class="p-3 rounded-3 mb-4" style="background:var(--bg-secondary); border-left:4px solid var(--accent-primary); color:var(--text-primary); line-height:1.65;">
+            {{ rapport.description }}
+          </div>
+          {% endif %}
+          <div style="white-space: pre-line; color:var(--text-secondary); line-height:1.75; font-size:1rem;">{{ rapport.contenu_detaille }}</div>
+        {% else %}
+          <div style="white-space: pre-line; color:var(--text-secondary); line-height:1.75; font-size:1rem;">{{ rapport.description|default:"Aucune analyse détaillée renseignée." }}</div>
+        {% endif %}
       </div>
 
-      <!-- Données Marché Associées -->
+      <!-- Références & Sources -->
       <div class="card p-4 mb-4" style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:24px; box-shadow:0 10px 40px rgba(0,0,0,0.05);">
         <div class="p-2 mb-3 d-flex justify-content-between align-items-center border-bottom" style="border-color:var(--border-color-light) !important;">
           <h5 class="fw-bold mb-0 d-flex align-items-center gap-2" style="color:var(--text-primary);">
-            <i data-lucide="database" style="width:18px;height:18px;color:var(--accent-primary);"></i>
-            <span>Données Collectées &amp; Compétences Clés ({{ donnees.count }})</span>
+            <i data-lucide="book-open" style="width:18px;height:18px;color:var(--accent-primary);"></i>
+            <span>Références &amp; Sources ({{ references.count }})</span>
           </h5>
         </div>
-        <div class="table-responsive">
-          <table class="table mb-0 align-middle">
-            <thead>
-              <tr>
-                <th>Compétence</th>
-                <th>Domaine</th>
-                <th>Salaire Moyen</th>
-                <th>Volume de Demande</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for d in donnees %}
-              <tr>
-                <td class="fw-bold" style="color:var(--text-primary);">{{ d.competence }}</td>
-                <td class="text-secondary small">{{ d.domaine|default:'-' }}</td>
-                <td class="fw-semibold text-success">{{ d.salaire_moyen|default:'-' }} €</td>
-                <td><span class="badge badge-primary">{{ d.demande|default:'0' }} offres</span></td>
-              </tr>
-              {% empty %}
-              <tr>
-                <td colspan="4" class="text-center text-secondary py-4">Aucune donnée granulaire enregistrée pour ce rapport.</td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+
+        {% if references %}
+        <div class="d-flex flex-column gap-3">
+          {% for ref in references %}
+          <div class="p-3 rounded-3 d-flex justify-content-between align-items-start gap-3 flex-wrap" style="background:var(--bg-secondary); border:1px solid var(--border-color-light);">
+            <div>
+              <div class="fw-bold" style="color:var(--text-primary);">{{ ref.titre_source }}</div>
+              {% if ref.note_source %}
+              <div class="text-secondary small mt-1">{{ ref.note_source }}</div>
+              {% endif %}
+            </div>
+            {% if ref.url_source %}
+            <a href="{{ ref.url_source }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-secondary d-inline-flex align-items-center gap-1" style="border-radius:8px;">
+              <span>Consulter la source</span>
+              <i data-lucide="external-link" style="width:14px;height:14px;"></i>
+            </a>
+            {% endif %}
+          </div>
+          {% endfor %}
         </div>
+        {% else %}
+        <div class="text-center text-secondary py-4">
+          Aucune référence ou source enregistrée pour ce rapport.
+        </div>
+        {% endif %}
       </div>
     </div>
 
@@ -84,26 +103,45 @@
     <div class="col-lg-4">
       <div class="card p-4 mb-4" style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:24px; box-shadow:0 10px 40px rgba(0,0,0,0.06);">
         <h5 class="fw-bold mb-3 pb-2 border-bottom" style="color:var(--text-primary); border-color:var(--border-color-light) !important;">Statistiques Salariales</h5>
-        
+
         <div class="d-flex flex-column gap-3">
           <div class="p-3 rounded-3" style="background:var(--bg-secondary); border:1px solid var(--border-color-light);">
             <div class="text-secondary small mb-1">Salaire Minimum Constaté</div>
-            <div class="fw-bold" style="color:var(--text-primary);">{{ rapport.salaire_min_global|default:'N/C' }} €</div>
+            <div class="fw-bold" style="color:var(--text-primary);">{% if rapport.salaire_min_global is not None %}{{ rapport.salaire_min_global|floatformat:"-2" }} TND{% else %}N/C{% endif %}</div>
           </div>
 
           <div class="p-3 rounded-3" style="background:var(--bg-secondary); border:1px solid var(--border-color-light);">
             <div class="text-secondary small mb-1">Salaire Moyen Marché</div>
-            <div class="fw-bold text-success fs-4">{{ rapport.salaire_moyen_global|default:'N/C' }} €</div>
+            <div class="fw-bold text-success fs-4">{% if rapport.salaire_moyen_global is not None %}{{ rapport.salaire_moyen_global|floatformat:"-2" }} TND{% else %}N/C{% endif %}</div>
           </div>
 
           <div class="p-3 rounded-3" style="background:var(--bg-secondary); border:1px solid var(--border-color-light);">
             <div class="text-secondary small mb-1">Salaire Maximum</div>
-            <div class="fw-bold" style="color:var(--text-primary);">{{ rapport.salaire_max_global|default:'N/C' }} €</div>
+            <div class="fw-bold" style="color:var(--text-primary);">{% if rapport.salaire_max_global is not None %}{{ rapport.salaire_max_global|floatformat:"-2" }} TND{% else %}N/C{% endif %}</div>
           </div>
 
           <div class="p-3 rounded-3" style="background:var(--bg-secondary); border:1px solid var(--border-color-light);">
             <div class="text-secondary small mb-1">Tendance Globale du Marché</div>
             <div><span class="badge badge-success">{{ rapport.tendance_generale|default:'Stable' }}</span></div>
+          </div>
+
+          <div class="p-3 rounded-3" style="background:var(--bg-secondary); border:1px solid var(--border-color-light);">
+            <div class="text-secondary small mb-1">Niveau de Demande</div>
+            <div class="fw-bold" style="color:var(--text-primary);">
+              {% if rapport.niveau_demande_global == 1 %}
+                1 — Faible
+              {% elif rapport.niveau_demande_global == 2 %}
+                2 — Modéré
+              {% elif rapport.niveau_demande_global == 3 %}
+                3 — Élevé
+              {% elif rapport.niveau_demande_global == 4 %}
+                4 — Très élevé / Critique
+              {% elif rapport.niveau_demande_global %}
+                {{ rapport.niveau_demande_global }}
+              {% else %}
+                N/C
+              {% endif %}
+            </div>
           </div>
         </div>
       </div>
