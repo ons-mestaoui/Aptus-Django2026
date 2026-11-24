@@ -52,6 +52,9 @@
   align-items: center;
   gap: 0.4rem;
 }
+.d-none {
+  display: none !important;
+}
 </style>
 {% endblock %}
 
@@ -215,21 +218,65 @@
             <form method="POST" action="{% url 'jobs:entreprise_candidatures' %}" class="d-flex align-items-center gap-2 flex-wrap">
               {% csrf_token %}
               <input type="hidden" name="id_candidature" value="{{ cand.id_candidature }}">
-              
-              <button type="submit" name="update_statut" value="Shortlisté" class="btn btn-sm btn-secondary" style="border-radius:10px; font-weight:600;">
-                <i data-lucide="star" style="width:14px;height:14px;"></i>
-                <span>Shortlister</span>
-              </button>
-              
-              <button type="submit" name="update_statut" value="Accepté" class="btn btn-sm btn-success" style="border-radius:10px; font-weight:600; background:#10b981; border:none; color:white;">
-                <i data-lucide="check" style="width:14px;height:14px;"></i>
-                <span>Accepter</span>
-              </button>
 
-              <button type="submit" name="update_statut" value="Refusé" class="btn btn-sm btn-danger" style="border-radius:10px; font-weight:600;">
-                <i data-lucide="x" style="width:14px;height:14px;"></i>
-                <span>Refuser</span>
-              </button>
+              {% if cand.statut == 'accepte' or cand.statut == 'refuse' or cand.statut == 'shortliste' %}
+                <div id="decision-summary-{{ cand.id_candidature }}" class="d-flex align-items-center gap-2 flex-wrap">
+                  {% if cand.statut == 'accepte' %}
+                    <span class="badge badge-success d-inline-flex align-items-center gap-1" style="padding:0.45rem 0.85rem; font-size:0.85rem; border-radius:10px; font-weight:700;">
+                      <i data-lucide="check-circle" style="width:14px;height:14px;"></i>
+                      <span>Acceptée</span>
+                    </span>
+                  {% elif cand.statut == 'refuse' %}
+                    <span class="badge badge-danger d-inline-flex align-items-center gap-1" style="padding:0.45rem 0.85rem; font-size:0.85rem; border-radius:10px; font-weight:700;">
+                      <i data-lucide="x-circle" style="width:14px;height:14px;"></i>
+                      <span>Refusée</span>
+                    </span>
+                  {% elif cand.statut == 'shortliste' %}
+                    <span class="badge badge-primary d-inline-flex align-items-center gap-1" style="padding:0.45rem 0.85rem; font-size:0.85rem; border-radius:10px; font-weight:700;">
+                      <i data-lucide="star" style="width:14px;height:14px;"></i>
+                      <span>Shortlistée</span>
+                    </span>
+                  {% endif %}
+
+                  <button type="button"
+                          class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1 js-toggle-decision"
+                          data-target="decision-actions-{{ cand.id_candidature }}"
+                          data-summary="decision-summary-{{ cand.id_candidature }}"
+                          aria-expanded="false"
+                          style="border-radius:10px; font-weight:600;">
+                    <i data-lucide="edit-2" style="width:14px;height:14px;"></i>
+                    <span>Changer la décision</span>
+                  </button>
+                </div>
+              {% endif %}
+
+              <div id="decision-actions-{{ cand.id_candidature }}"
+                   class="decision-actions d-flex align-items-center gap-2 flex-wrap{% if cand.statut == 'accepte' or cand.statut == 'refuse' or cand.statut == 'shortliste' %} d-none{% endif %}">
+                <button type="submit" name="update_statut" value="Shortlisté" class="btn btn-sm btn-secondary" style="border-radius:10px; font-weight:600;">
+                  <i data-lucide="star" style="width:14px;height:14px;"></i>
+                  <span>Shortlister</span>
+                </button>
+
+                <button type="submit" name="update_statut" value="Accepté" class="btn btn-sm btn-success" style="border-radius:10px; font-weight:600; background:#10b981; border:none; color:white;">
+                  <i data-lucide="check" style="width:14px;height:14px;"></i>
+                  <span>Accepter</span>
+                </button>
+
+                <button type="submit" name="update_statut" value="Refusé" class="btn btn-sm btn-danger" style="border-radius:10px; font-weight:600;">
+                  <i data-lucide="x" style="width:14px;height:14px;"></i>
+                  <span>Refuser</span>
+                </button>
+
+                {% if cand.statut == 'accepte' or cand.statut == 'refuse' or cand.statut == 'shortliste' %}
+                  <button type="button"
+                          class="btn btn-sm btn-ghost js-cancel-decision"
+                          data-target="decision-actions-{{ cand.id_candidature }}"
+                          data-summary="decision-summary-{{ cand.id_candidature }}"
+                          style="border-radius:10px; font-weight:600; color:var(--text-secondary);">
+                    <span>Annuler</span>
+                  </button>
+                {% endif %}
+              </div>
 
               <button type="button" class="btn btn-sm btn-outline-danger" style="border-radius:10px; font-weight:600;" title="Supprimer définitivement cette candidature" onclick="aptusConfirm('Supprimer cette candidature ?', 'Êtes-vous sûr de vouloir supprimer définitivement cette candidature ?', 'Oui, supprimer', 'error').then(ok => { if (ok) { const f = this.closest('form'); const inp = document.createElement('input'); inp.type='hidden'; inp.name='delete_candidature'; inp.value='1'; f.appendChild(inp); f.submit(); } });">
                 <i data-lucide="trash-2" style="width:14px;height:14px;"></i>
@@ -254,5 +301,35 @@
 {% block extra_js %}
 <script>
   if (window.lucide) lucide.createIcons();
+
+  document.addEventListener('click', function (event) {
+    const toggleBtn = event.target.closest('.js-toggle-decision');
+    if (toggleBtn) {
+      const actionsEl = document.getElementById(toggleBtn.dataset.target);
+      const summaryEl = document.getElementById(toggleBtn.dataset.summary);
+      if (actionsEl) {
+        actionsEl.classList.remove('d-none');
+      }
+      if (summaryEl) {
+        summaryEl.classList.add('d-none');
+      }
+      toggleBtn.setAttribute('aria-expanded', 'true');
+      return;
+    }
+
+    const cancelBtn = event.target.closest('.js-cancel-decision');
+    if (cancelBtn) {
+      const actionsEl = document.getElementById(cancelBtn.dataset.target);
+      const summaryEl = document.getElementById(cancelBtn.dataset.summary);
+      if (actionsEl) {
+        actionsEl.classList.add('d-none');
+      }
+      if (summaryEl) {
+        summaryEl.classList.remove('d-none');
+        const btn = summaryEl.querySelector('.js-toggle-decision');
+        if (btn) btn.setAttribute('aria-expanded', 'false');
+      }
+    }
+  });
 </script>
 {% endblock %}
