@@ -132,9 +132,9 @@
               <a href="{% url 'backoffice_template_update' t.pk %}" class="btn btn-sm btn-ghost" title="Modifier">
                 <i data-lucide="pencil" style="width:16px;height:16px;"></i>
               </a>
-              <a href="{% url 'backoffice_template_delete' t.pk %}" class="btn btn-sm btn-ghost text-danger" title="Supprimer définitivement">
+              <button type="button" class="btn btn-sm btn-ghost text-danger" title="Supprimer définitivement" onclick="aptusConfirmDelete('{% url 'backoffice_template_delete' t.pk %}', 'Êtes-vous sûr de vouloir supprimer définitivement le modèle « {{ t.nom|escapejs }} » ?')">
                 <i data-lucide="trash-2" style="width:16px;height:16px;"></i>
-              </a>
+              </button>
             </div>
           </td>
         </tr>

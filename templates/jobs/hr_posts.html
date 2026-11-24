@@ -119,9 +119,9 @@
                 <a href="{% url 'jobs:offre_update' o.pk %}" class="btn btn-sm btn-ghost" title="Modifier">
                   <i data-lucide="pencil" style="width:16px;height:16px;"></i>
                 </a>
-                <a href="{% url 'jobs:offre_delete' o.pk %}" class="btn btn-sm btn-ghost text-danger" title="Supprimer">
+                <button type="button" class="btn btn-sm btn-ghost text-danger" title="Supprimer" onclick="aptusDeleteWithForm('{% url 'jobs:offre_delete' o.pk %}', '{{ csrf_token }}', 'Supprimer l\'offre ?', 'Êtes-vous sûr de vouloir supprimer définitivement « {{ o.titre|escapejs }} » ?')">
                   <i data-lucide="trash-2" style="width:16px;height:16px;"></i>
-                </a>
+                </button>
               </div>
             </td>
           </tr>

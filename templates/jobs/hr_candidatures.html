@@ -212,7 +212,7 @@
               {% endif %}
             </div>
 
-            <form method="POST" action="{% url 'jobs:entreprise_candidatures' %}" class="d-flex align-items-center gap-2 flex-wrap" onsubmit="if (event.submitter && event.submitter.name === 'delete_candidature') { return confirm('Êtes-vous sûr de vouloir supprimer définitivement cette candidature ?'); }">
+            <form method="POST" action="{% url 'jobs:entreprise_candidatures' %}" class="d-flex align-items-center gap-2 flex-wrap">
               {% csrf_token %}
               <input type="hidden" name="id_candidature" value="{{ cand.id_candidature }}">
               
@@ -231,7 +231,7 @@
                 <span>Refuser</span>
               </button>
 
-              <button type="submit" name="delete_candidature" value="1" class="btn btn-sm btn-outline-danger" style="border-radius:10px; font-weight:600;" title="Supprimer définitivement cette candidature">
+              <button type="button" class="btn btn-sm btn-outline-danger" style="border-radius:10px; font-weight:600;" title="Supprimer définitivement cette candidature" onclick="aptusConfirm('Supprimer cette candidature ?', 'Êtes-vous sûr de vouloir supprimer définitivement cette candidature ?', 'Oui, supprimer', 'error').then(ok => { if (ok) { const f = this.closest('form'); const inp = document.createElement('input'); inp.type='hidden'; inp.name='delete_candidature'; inp.value='1'; f.appendChild(inp); f.submit(); } });">
                 <i data-lucide="trash-2" style="width:14px;height:14px;"></i>
                 <span>Supprimer</span>
               </button>

@@ -276,7 +276,7 @@
       window.speechSynthesis.cancel();
       window.speechSynthesis.speak(utterance);
     } else {
-      alert("La synthèse vocale n'est pas supportée par votre navigateur.");
+      if (window.Toast) { window.Toast.fire({ icon: 'info', title: "La synthèse vocale n'est pas supportée par votre navigateur." }); }
     }
   }
 
@@ -286,7 +286,7 @@
   function toggleDictation() {
     var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      alert("La dictée vocale n'est pas supportée par votre navigateur.");
+      if (window.Toast) { window.Toast.fire({ icon: 'info', title: "La dictée vocale n'est pas supportée par votre navigateur." }); }
       return;
     }
 

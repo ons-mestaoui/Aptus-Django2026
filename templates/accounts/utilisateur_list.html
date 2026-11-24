@@ -138,9 +138,9 @@
               <a href="{% url 'accounts:utilisateur_update' u.pk %}" class="btn btn-sm btn-ghost" style="color:var(--accent-warning);" title="Modifier">
                 <i data-lucide="pencil" style="width:16px;height:16px;"></i>
               </a>
-              <a href="{% url 'accounts:utilisateur_delete' u.pk %}" class="btn btn-sm btn-ghost" style="color:var(--accent-tertiary);" title="Supprimer définitivement de la base">
+              <button type="button" class="btn btn-sm btn-ghost" style="color:var(--accent-tertiary);" title="Supprimer définitivement de la base" onclick="aptusConfirmDelete('{% url 'accounts:utilisateur_delete' u.pk %}', 'Êtes-vous sûr de vouloir supprimer définitivement cet utilisateur ({{ u.prenom|escapejs }} {{ u.nom|default:''|escapejs }}) ?')">
                 <i data-lucide="trash-2" style="width:16px;height:16px;"></i>
-              </a>
+              </button>
             </div>
           </td>
         </tr>

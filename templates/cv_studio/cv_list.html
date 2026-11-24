@@ -104,7 +104,7 @@
           <div class="d-flex gap-1">
             <a href="{% url 'cv_studio:cv_print' cv.pk %}" target="_blank" class="btn btn-sm btn-ghost text-primary" title="Imprimer / Exporter"><i data-lucide="printer" style="width: 15px; height: 15px;"></i></a>
             <a href="{% url 'cv_studio:cv_update' cv.pk %}" class="btn btn-sm btn-ghost text-warning" title="Modifier"><i data-lucide="pencil" style="width: 15px; height: 15px;"></i></a>
-            <a href="{% url 'cv_studio:cv_delete' cv.pk %}" class="btn btn-sm btn-ghost text-danger" title="Supprimer"><i data-lucide="trash-2" style="width: 15px; height: 15px;"></i></a>
+            <button type="button" class="btn btn-sm btn-ghost text-danger" title="Supprimer" onclick="aptusDeleteWithForm('{% url 'cv_studio:cv_delete' cv.pk %}', '{{ csrf_token }}', 'Supprimer ce CV ?', 'Êtes-vous sûr de vouloir supprimer définitivement « {{ cv.nom_document|escapejs }} » ?')"><i data-lucide="trash-2" style="width: 15px; height: 15px;"></i></button>
           </div>
         </div>
       </div>

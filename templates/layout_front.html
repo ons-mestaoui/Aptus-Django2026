@@ -433,12 +433,12 @@
       lucide.createIcons();
     }
 
-    // SweetAlert2 Toast Global Configuration (Authentic Aptus Style)
+    // SweetAlert2 Toast Global Configuration (Authentic Aptus Style - Bottom Right)
     window.Toast = Swal.mixin({
       toast: true,
-      position: 'top-end',
+      position: 'bottom-end',
       showConfirmButton: false,
-      timer: 4000,
+      timer: 3500,
       timerProgressBar: true,
       didOpen: (toast) => {
         toast.addEventListener('mouseenter', Swal.stopTimer);
@@ -459,11 +459,44 @@
         buttonsStyling: false,
         customClass: {
           popup: 'aptus-swal-popup',
-          confirmButton: 'btn btn-primary px-4 py-2 mx-1',
+          confirmButton: icon === 'warning' ? 'btn btn-primary px-4 py-2 mx-1' : 'btn btn-danger px-4 py-2 mx-1',
           cancelButton: 'btn btn-secondary px-4 py-2 mx-1',
           actions: 'd-flex gap-2 justify-content-center mt-3'
         }
       }).then(res => res.isConfirmed);
+    };
+
+    // Global in-place form submit confirmation with SweetAlert2
+    window.aptusDeleteWithForm = function(actionUrl, csrfToken, title = "Supprimer définitivement ?", text = "Cette action est irréversible.") {
+      Swal.fire({
+        title: title,
+        text: text,
+        icon: 'warning',
+        iconColor: '#ef4444',
+        showCancelButton: true,
+        confirmButtonText: 'Oui, supprimer',
+        cancelButtonText: 'Annuler',
+        buttonsStyling: false,
+        customClass: {
+          popup: 'aptus-swal-popup',
+          confirmButton: 'btn btn-danger px-4 py-2 mx-1',
+          cancelButton: 'btn btn-secondary px-4 py-2 mx-1',
+          actions: 'd-flex gap-2 justify-content-center mt-3'
+        }
+      }).then((result) => {
+        if (result.isConfirmed) {
+          const form = document.createElement('form');
+          form.method = 'POST';
+          form.action = actionUrl;
+          const csrf = document.createElement('input');
+          csrf.type = 'hidden';
+          csrf.name = 'csrfmiddlewaretoken';
+          csrf.value = csrfToken;
+          form.appendChild(csrf);
+          document.body.appendChild(form);
+          form.submit();
+        }
+      });
     };
 
     // Render flash messages globally as SweetAlert2 toasts

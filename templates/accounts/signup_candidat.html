@@ -1,84 +1,179 @@
-{% extends 'layout_front.html' %}
 {% load static %}
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inscription Candidat &bull; Aptus</title>
 
-{% block title %}Inscription Candidat &mdash; Aptus Platform{% endblock %}
+  <!-- Google Fonts Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/auth.css' %}">
-<style>
-  .signup-wrapper {
-    min-height: calc(100vh - 160px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: var(--space-8) var(--space-4);
-  }
-  .auth-card--candidat {
-    width: 100%;
-    max-width: 820px;
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-lg);
-    padding: var(--space-8);
-  }
-  .steps-dots {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    margin-bottom: var(--space-6);
-  }
-  .step-dot {
-    width: 28px;
-    height: 6px;
-    border-radius: 9999px;
-    background: var(--border-color);
-    transition: var(--transition-fast);
-  }
-  .step-dot.active {
-    background: var(--accent-primary);
-    width: 44px;
-  }
-  .form-grid-2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-4);
-  }
-  @media (max-width: 768px) {
-    .form-grid-2 {
-      grid-template-columns: 1fr;
+  <!-- Bootstrap 5 Grid -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Aptus CSS -->
+  <link rel="stylesheet" href="{% static 'css/variables.css' %}">
+  <link rel="stylesheet" href="{% static 'css/global.css' %}">
+  <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+
+  <!-- Theme Toggle -->
+  <script src="{% static 'js/theme-toggle.js' %}"></script>
+
+  <style>
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-body);
+      font-family: var(--font-family);
+      padding: 2.5rem 1rem;
+      position: relative;
+      overflow-x: hidden;
     }
-  }
-  .suggested-pill {
-    cursor: pointer;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    border-radius: 9999px;
-    padding: 4px 12px;
-    font-size: var(--fs-xs);
-    font-weight: 500;
-    color: var(--text-secondary);
-    transition: var(--transition-fast);
-  }
-  .suggested-pill:hover {
-    border-color: var(--accent-primary);
-    color: var(--accent-primary);
-    background: var(--accent-primary-light);
-  }
-</style>
-{% endblock %}
+    .auth-bg-blobs {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .auth-blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.12;
+      animation: floatBlob 12s infinite alternate ease-in-out;
+    }
+    .auth-blob--1 {
+      width: 480px;
+      height: 480px;
+      background: var(--accent-primary);
+      top: -120px;
+      left: -120px;
+    }
+    .auth-blob--2 {
+      width: 400px;
+      height: 400px;
+      background: var(--accent-secondary);
+      bottom: -100px;
+      right: -100px;
+    }
+    @keyframes floatBlob {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(30px, 40px) scale(1.08); }
+    }
+    .auth-top-bar {
+      position: absolute;
+      top: 1.5rem;
+      left: 1.5rem;
+      right: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+    }
+    .auth-card--candidat {
+      width: 100%;
+      max-width: 820px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      padding: var(--space-8);
+      position: relative;
+      z-index: 5;
+      margin-top: 2rem;
+    }
+    @media (max-width: 768px) {
+      .auth-card--candidat {
+        padding: var(--space-5);
+      }
+    }
+    .steps-dots {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: var(--space-6);
+    }
+    .step-dot {
+      width: 28px;
+      height: 6px;
+      border-radius: 9999px;
+      background: var(--border-color);
+      transition: var(--transition-fast);
+    }
+    .step-dot.active {
+      background: var(--accent-primary);
+      width: 44px;
+    }
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-4);
+    }
+    @media (max-width: 768px) {
+      .form-grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+    .suggested-pill {
+      cursor: pointer;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 9999px;
+      padding: 4px 12px;
+      font-size: var(--fs-xs);
+      font-weight: 500;
+      color: var(--text-secondary);
+      transition: var(--transition-fast);
+    }
+    .suggested-pill:hover {
+      border-color: var(--accent-primary);
+      color: var(--accent-primary);
+      background: var(--accent-primary-light);
+    }
+  </style>
+</head>
+<body>
+  <!-- Ambient Animated Blobs -->
+  <div class="auth-bg-blobs">
+    <div class="auth-blob auth-blob--1"></div>
+    <div class="auth-blob auth-blob--2"></div>
+  </div>
 
-{% block content %}
-<div class="signup-wrapper">
+  <!-- Top Utilities Bar (Logo + Retour + Theme Toggle) -->
+  <div class="auth-top-bar">
+    <a href="{% url 'landing' %}" class="d-inline-flex align-items-center gap-2 text-decoration-none text-primary fw-bold" style="font-family:var(--font-heading);">
+      <img src="{% static 'img/logo sans bg.png' %}" alt="Aptus" style="height:32px;width:auto;">
+      <span style="font-size:1.25rem;letter-spacing:-0.5px;">Aptus</span>
+    </a>
+
+    <div class="d-flex align-items-center gap-2">
+      <button class="theme-toggle" id="theme-toggle" title="Basculer le thème" aria-label="Basculer le thème">
+        <i data-lucide="sun" class="sun-icon"></i>
+        <i data-lucide="moon" class="moon-icon"></i>
+      </button>
+      <a href="{% url 'landing' %}" class="btn btn-sm btn-secondary d-inline-flex align-items-center gap-1" style="border-radius:var(--radius-sm);">
+        <i data-lucide="arrow-left" style="width:14px;height:14px;"></i>
+        <span>Retour</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Main Card -->
   <div class="auth-card--candidat">
     <!-- Header -->
-    <div class="text-center mb-6">
+    <div class="text-center mb-5">
       <div class="d-inline-flex align-items-center gap-1 px-3 py-1 rounded-pill mb-2" style="background:var(--accent-primary-light);color:var(--accent-primary);font-size:var(--fs-xs);font-weight:700;">
         <i data-lucide="user" style="width:14px;height:14px;"></i>
         <span>ESPACE CANDIDAT</span>
       </div>
       <h1 class="h2 fw-bold text-primary mb-1">Créer votre compte Candidat</h1>
-      <p class="text-secondary text-sm">Rejoignez Aptus et accédez à des offres qualifiées par IA et du coaching personnalisé</p>
+      <p class="text-secondary text-sm mb-0">Rejoignez Aptus et accédez à des offres qualifiées par IA et du coaching personnalisé</p>
     </div>
 
     <!-- Steps -->
@@ -87,14 +182,6 @@
       <span class="step-dot"></span>
       <span class="step-dot"></span>
     </div>
-
-    {% if messages %}
-      {% for msg in messages %}
-        <div class="alert alert-{{ msg.tags|default:'info' }} rounded-3 py-2 px-3 mb-4 text-sm">
-          {{ msg }}
-        </div>
-      {% endfor %}
-    {% endif %}
 
     <!-- Form -->
     <form method="POST" action="{% url 'signup_candidat' %}" id="signup-candidat-form">
@@ -229,7 +316,7 @@
       </div>
 
       <!-- Bouton Soumettre -->
-      <button type="submit" class="btn btn-primary w-100 py-2 fw-bold" style="border-radius:var(--radius-sm);font-size:var(--fs-sm);">
+      <button type="submit" class="btn btn-primary w-100 py-3 fw-bold" style="border-radius:var(--radius-sm);font-size:var(--fs-sm);">
         <i data-lucide="user-plus" style="width:18px;height:18px;margin-right:6px;"></i>
         <span>Créer mon compte Candidat</span>
       </button>
@@ -240,22 +327,51 @@
       Déjà inscrit ? <a href="{% url 'login' %}" class="fw-semibold text-accent text-decoration-none ms-1">Se connecter</a>
     </div>
   </div>
-</div>
-{% endblock %}
 
-{% block extra_js %}
-<script>
-  function addSkill(skill) {
-    var input = document.getElementById('skills-input');
-    if (!input) return;
-    var current = input.value.trim();
-    if (current.length > 0) {
-      if (!current.includes(skill)) {
-        input.value = current + ', ' + skill;
-      }
-    } else {
-      input.value = skill;
+  <!-- SweetAlert2 & Lucide Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    if (window.lucide) {
+      lucide.createIcons();
     }
-  }
-</script>
-{% endblock %}
+
+    // SweetAlert2 Toast Global Configuration (Bottom Right)
+    window.Toast = Swal.mixin({
+      toast: true,
+      position: 'bottom-end',
+      showConfirmButton: false,
+      timer: 3500,
+      timerProgressBar: true,
+      didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer);
+        toast.addEventListener('mouseleave', Swal.resumeTimer);
+      }
+    });
+
+    {% if messages %}
+      document.addEventListener('DOMContentLoaded', function() {
+        {% for message in messages %}
+          window.Toast.fire({
+            icon: '{% if message.tags == "error" %}error{% elif message.tags == "warning" %}warning{% elif message.tags == "info" %}info{% else %}success{% endif %}',
+            title: '{{ message|escapejs }}'
+          });
+        {% endfor %}
+      });
+    {% endif %}
+
+    function addSkill(skill) {
+      var input = document.getElementById('skills-input');
+      if (!input) return;
+      var current = input.value.trim();
+      if (current.length > 0) {
+        if (!current.includes(skill)) {
+          input.value = current + ', ' + skill;
+        }
+      } else {
+        input.value = skill;
+      }
+    }
+  </script>
+</body>
+</html>

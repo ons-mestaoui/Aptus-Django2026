@@ -1,31 +1,265 @@
 {% extends 'layout_front.html' %}
 {% load static %}
 
-{% block title %}{% if is_tuteur_view %}Espace Formateur — Aptus{% else %}Mes Formations — Aptus{% endif %}{% endblock %}
+{% block title %}{% if is_tuteur_view %}Espace Formateur — Aptus{% else %}Mon Parcours d'Apprentissage — Aptus{% endif %}{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* ── Welcome Banner ── */
+  .welcome-banner {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 2rem 2.5rem;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .welcome-banner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--gradient-primary);
+  }
+
+  .welcome-banner__info h1 {
+    font-size: 1.75rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+    font-weight: 800;
+  }
+
+  .welcome-banner__info p {
+    color: var(--text-secondary);
+    margin: 0;
+    font-size: 0.95rem;
+  }
+
+  .welcome-banner__stats {
+    display: flex;
+    gap: 1.25rem;
+    flex-shrink: 0;
+  }
+
+  .mini-stat-card {
+    text-align: center;
+    padding: 0.75rem 1.25rem;
+    border-radius: 12px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    min-width: 85px;
+  }
+
+  .mini-stat-card__value {
+    font-size: 1.5rem;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .mini-stat-card__value.cyan {
+    color: var(--primary-cyan);
+  }
+
+  .mini-stat-card__value.green {
+    color: #10B981;
+  }
+
+  .mini-stat-card__value.purple {
+    color: var(--accent-primary);
+  }
+
+  .mini-stat-card__label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-tertiary);
+    margin-top: 0.35rem;
+    font-weight: 600;
+  }
+
+  /* ── Global Progress ── */
+  .global-progress {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1rem;
+    max-width: 440px;
+  }
+
+  .global-progress__bar {
+    flex: 1;
+    height: 10px;
+    background: var(--bg-tertiary);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .global-progress__fill {
+    height: 100%;
+    border-radius: 999px;
+    background: var(--gradient-primary);
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .global-progress__text {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--primary-cyan);
+    white-space: nowrap;
+  }
+
+  /* ── Tabs ── */
+  .formations-tabs {
+    display: flex;
+    gap: 0.35rem;
+    background: var(--bg-card);
+    padding: 0.35rem;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 2rem;
+    width: fit-content;
+  }
+
+  .formations-tab {
+    padding: 0.6rem 1.25rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .formations-tab:hover {
+    color: var(--text-primary);
+    background: var(--bg-secondary);
+  }
+
+  .formations-tab.active {
+    background: var(--gradient-primary);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(107, 52, 163, 0.3);
+  }
+
+  .formations-tab__count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0 6px;
+  }
+
+  .formations-tab.active .formations-tab__count {
+    background: rgba(255, 255, 255, 0.25);
+    color: #fff;
+  }
+
+  .formations-tab:not(.active) .formations-tab__count {
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+  }
+
+  /* ── Formation Card ── */
+  .formation-card {
+    padding: 1.25rem;
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+  }
+
+  .formation-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+    border-color: var(--accent-primary);
+  }
+
+  .formation-card__image {
+    width: 100%;
+    height: 150px;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+    position: relative;
+    background: var(--bg-secondary);
+  }
+
+  .formation-card__image-bg {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(107, 52, 163, 0.12), rgba(0, 163, 218, 0.12));
+    color: var(--accent-primary);
+  }
+
+  @media (max-width: 768px) {
+    .welcome-banner {
+      flex-direction: column;
+      text-align: center;
+      padding: 1.5rem;
+    }
+    .welcome-banner__stats {
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .formations-tabs {
+      width: 100%;
+      justify-content: stretch;
+    }
+    .formations-tab {
+      flex: 1;
+      justify-content: center;
+      padding: 0.5rem 0.5rem;
+      font-size: 0.8rem;
+    }
+  }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container py-4" style="max-width: 1100px;">
+<div class="container py-4" style="max-width: 1200px;">
   {% if is_tuteur_view %}
     <!-- ═══════════════════════════════════════════════════════
          VUE FORMATEUR / TUTEUR (Enseignement & Mentorat)
          ═══════════════════════════════════════════════════════ -->
-    <div class="card-flat p-4 p-md-5 mb-5" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 24px; position: relative; overflow: hidden; box-shadow: var(--shadow-sm);">
-      <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--gradient-primary);"></div>
-      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-4">
-        <div>
-          <span class="badge badge-primary mb-2">Espace Enseignant / Tuteur</span>
-          <h1 class="h2 fw-bold mb-1" style="color: var(--text-primary); letter-spacing: -0.5px;">Mes Formations &amp; Apprenants</h1>
-          <p class="text-secondary mb-0">Supervisez l'avancement des étudiants inscrits à vos modules et démarrez vos sessions visio.</p>
+    <div class="welcome-banner">
+      <div class="welcome-banner__info">
+        <span class="badge badge-primary mb-2">Espace Enseignant / Tuteur</span>
+        <h1>Mes Formations &amp; Apprenants</h1>
+        <p>Supervisez l'avancement des étudiants inscrits à vos modules et démarrez vos sessions visio.</p>
+      </div>
+      <div class="welcome-banner__stats">
+        <div class="mini-stat-card">
+          <div class="mini-stat-card__value purple">{{ total_cours }}</div>
+          <div class="mini-stat-card__label">Modules</div>
         </div>
-        <div class="d-flex gap-3">
-          <div class="text-center p-3 rounded-4" style="background: var(--bg-secondary); border: 1px solid var(--border-color-light); min-width: 100px;">
-            <div class="h3 fw-bold mb-0 text-primary">{{ total_cours }}</div>
-            <small class="text-secondary">Modules</small>
-          </div>
-          <div class="text-center p-3 rounded-4" style="background: var(--bg-secondary); border: 1px solid var(--border-color-light); min-width: 100px;">
-            <div class="h3 fw-bold mb-0 text-success">{{ total_students }}</div>
-            <small class="text-secondary">Apprenants</small>
-          </div>
+        <div class="mini-stat-card">
+          <div class="mini-stat-card__value green">{{ total_students }}</div>
+          <div class="mini-stat-card__label">Apprenants</div>
         </div>
       </div>
     </div>
@@ -111,127 +345,154 @@
 
   {% else %}
     <!-- ═══════════════════════════════════════════════════════
-         VUE ÉTUDIANT / CANDIDAT (Suivi de ses cours)
+         VUE ÉTUDIANT / CANDIDAT (Portage Fidèle formations_my.php)
          ═══════════════════════════════════════════════════════ -->
-    <div class="card-flat p-4 p-md-5 mb-5" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 24px; position: relative; overflow: hidden; box-shadow: var(--shadow-sm);">
-      <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--gradient-primary);"></div>
-      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-4">
-        <div>
-          <h1 class="h2 fw-bold mb-1" style="color: var(--text-primary); letter-spacing: -0.5px;">Bienvenue dans votre espace d'apprentissage</h1>
-          <p class="text-secondary mb-3">Suivez votre progression pédagogique et accédez à vos sessions de formation.</p>
-          
-          <!-- Global Progress Bar -->
-          <div style="max-width: 400px;">
-            <div class="d-flex justify-content-between small fw-bold mb-1">
-              <span>Progression globale</span>
-              <span class="text-primary">{{ global_progress }}%</span>
+    <div class="welcome-banner">
+      <div class="welcome-banner__info">
+        <h1>Mon Parcours d'Apprentissage</h1>
+        {% if total_cours > 0 %}
+          <p>
+            Vous avez complété <strong>{{ completed_cours }}</strong> formation{{ completed_cours|pluralize:"s" }} sur <strong>{{ total_cours }}</strong>.
+            {% if completed_cours == total_cours %}
+              🎉 Bravo, parcours complet !
+            {% else %}
+              Continuez votre apprentissage pour débloquer vos badges et certificats.
+            {% endif %}
+          </p>
+          <div class="global-progress">
+            <div class="global-progress__bar">
+              <div class="global-progress__fill" style="width: {{ global_progress }}%;"></div>
             </div>
-            <div class="progress" style="height: 10px; border-radius: 20px; background: var(--bg-secondary);">
-              <div class="progress-bar" style="width: {{ global_progress }}%; background: var(--gradient-primary); border-radius: 20px;"></div>
+            <span class="global-progress__text">{{ global_progress }}%</span>
+          </div>
+        {% else %}
+          <p>Commencez votre parcours en explorant notre catalogue de formations certifiantes.</p>
+        {% endif %}
+      </div>
+
+      {% if total_cours > 0 %}
+        <div class="welcome-banner__stats">
+          <div class="mini-stat-card">
+            <div class="mini-stat-card__value cyan">{{ en_cours_cours }}</div>
+            <div class="mini-stat-card__label">En cours</div>
+          </div>
+          <div class="mini-stat-card">
+            <div class="mini-stat-card__value green">{{ completed_cours }}</div>
+            <div class="mini-stat-card__label">Terminées</div>
+          </div>
+          <div class="mini-stat-card">
+            <div class="mini-stat-card__value purple">{{ total_cours }}</div>
+            <div class="mini-stat-card__label">Total</div>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Category Tabs -->
+    {% if total_cours > 0 %}
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div class="formations-tabs" id="formationsTabs">
+          <button class="formations-tab active" data-filter="all">
+            <span>Toutes</span> <span class="formations-tab__count">{{ total_cours }}</span>
+          </button>
+          <button class="formations-tab" data-filter="en-cours">
+            <span>En cours</span> <span class="formations-tab__count">{{ en_cours_cours }}</span>
+          </button>
+          <button class="formations-tab" data-filter="terminee">
+            <span>Terminées</span> <span class="formations-tab__count">{{ completed_cours }}</span>
+          </button>
+        </div>
+
+        <a href="{% url 'training:formation_list' %}" class="btn btn-sm btn-secondary d-inline-flex align-items-center gap-2" style="border-radius: 10px;">
+          <i data-lucide="plus" style="width: 14px; height: 14px;"></i>
+          <span>Explorer d'autres cours</span>
+        </a>
+      </div>
+    {% endif %}
+
+    <!-- Formations Card Grid -->
+    <div id="formationsGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem;">
+      {% for i in inscriptions %}
+      <div class="formation-card" data-category="{% if i.progression == 100 or i.statut == 'Terminée' %}terminee{% elif i.progression > 0 %}en-cours{% else %}all{% endif %}">
+        <!-- Thumbnail -->
+        <div class="formation-card__image">
+          {% if i.formation.image_base64 %}
+            <div style="width:100%;height:100%;background:url('{{ i.formation.image_base64 }}') center/cover;"></div>
+          {% else %}
+            <div class="formation-card__image-bg">
+              <i data-lucide="graduation-cap" style="width: 48px; height: 48px; opacity: 0.8;"></i>
             </div>
+          {% endif %}
+        </div>
+
+        <!-- Badges header -->
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span class="badge" style="background:var(--bg-secondary); color:var(--text-secondary); border:1px solid var(--border-color); font-size:0.72rem;">
+            {% if i.formation.is_online %}
+              <i data-lucide="wifi" style="width:12px;height:12px;margin-right:3px;"></i> En ligne
+            {% else %}
+              <i data-lucide="map-pin" style="width:12px;height:12px;margin-right:3px;"></i> Présentiel
+            {% endif %}
+          </span>
+          <span class="badge" style="font-size:0.72rem; {% if i.progression == 100 or i.statut == 'Terminée' %}background:rgba(16,185,129,0.12);color:#10B981;border:1px solid rgba(16,185,129,0.25);{% elif i.progression > 0 %}background:rgba(14,165,233,0.12);color:#0EA5E9;border:1px solid rgba(14,165,233,0.25);{% else %}background:rgba(245,158,11,0.12);color:#F59E0B;border:1px solid rgba(245,158,11,0.25);{% endif %}">
+            {% if i.progression == 100 or i.statut == 'Terminée' %}Terminée{% elif i.progression > 0 %}En cours{% else %}En attente{% endif %}
+          </span>
+        </div>
+
+        <!-- Title & Tutor -->
+        <h3 class="h5 fw-bold mb-1" style="color: var(--text-primary); min-height: 2.6rem;">{{ i.formation.titre }}</h3>
+        <div class="text-secondary small mb-3">
+          Tuteur : <strong class="text-primary">{{ i.formation.tuteur.prenom|default:'Formateur Référent' }} {{ i.formation.tuteur.nom|default:'' }}</strong>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="mb-4">
+          <div class="d-flex justify-content-between text-xs fw-bold mb-1">
+            <span class="text-secondary">Progression</span>
+            <span class="{% if i.progression == 100 %}text-success{% elif i.progression > 0 %}text-info{% else %}text-secondary{% endif %}">{{ i.progression }}%</span>
+          </div>
+          <div class="progress" style="height: 8px; border-radius: 999px; background: var(--bg-secondary);">
+            <div class="progress-bar" style="width: {{ i.progression }}%; {% if i.progression == 100 %}background: linear-gradient(90deg, #10B981, #00A3DA);{% elif i.progression > 0 %}background: var(--gradient-primary);{% endif %} border-radius: 999px; transition: width 0.4s ease;"></div>
           </div>
         </div>
 
-        <!-- Mini Stats Row -->
-        <div class="d-flex gap-3">
-          <div class="text-center p-3 rounded-4" style="background: var(--bg-secondary); border: 1px solid var(--border-color-light); min-width: 90px;">
-            <div class="h3 fw-bold mb-0 text-primary">{{ total_cours }}</div>
-            <small class="text-secondary">Total</small>
-          </div>
-          <div class="text-center p-3 rounded-4" style="background: var(--bg-secondary); border: 1px solid var(--border-color-light); min-width: 90px;">
-            <div class="h3 fw-bold mb-0 text-success">{{ completed_cours }}</div>
-            <small class="text-secondary">Terminés</small>
-          </div>
-          <div class="text-center p-3 rounded-4" style="background: var(--bg-secondary); border: 1px solid var(--border-color-light); min-width: 90px;">
-            <div class="h3 fw-bold mb-0 text-warning">{{ en_cours_cours }}</div>
-            <small class="text-secondary">En cours</small>
-          </div>
-          {% if en_attente_cours > 0 %}
-          <div class="text-center p-3 rounded-4" style="background: var(--bg-secondary); border: 1px solid var(--border-color-light); min-width: 90px;">
-            <div class="h3 fw-bold mb-0" style="color: #F59E0B;">{{ en_attente_cours }}</div>
-            <small class="text-secondary">En attente</small>
-          </div>
+        <!-- Actions -->
+        <div class="mt-auto d-flex flex-column gap-2">
+          {% if i.progression == 100 or i.statut == 'Terminée' %}
+            <div class="p-2 rounded-3 text-center small fw-semibold" style="background:var(--accent-primary-light); color:var(--accent-primary);">
+              🎓 Badge "{{ i.formation.niveau }}" validé
+            </div>
+            <a href="{% url 'training:formation_viewer' i.formation.pk %}" class="btn btn-sm btn-primary w-100 py-2 fw-semibold d-inline-flex align-items-center justify-content-center gap-2" style="border-radius:10px;">
+              <i data-lucide="award" style="width: 15px; height: 15px;"></i>
+              <span>Revoir le Cours & Certificat</span>
+            </a>
+          {% else %}
+            <a href="{% url 'training:formation_viewer' i.formation.pk %}" class="btn btn-sm btn-primary w-100 py-2 fw-semibold d-inline-flex align-items-center justify-content-center gap-2" style="border-radius:10px;">
+              <i data-lucide="play-circle" style="width: 15px; height: 15px;"></i>
+              <span>{% if i.progression > 0 %}Continuer le cours{% else %}Démarrer le cours{% endif %}</span>
+            </a>
+            
+            <div class="d-flex gap-2">
+              {% if i.formation.lien_api_room %}
+                <a href="{{ i.formation.lien_api_room }}" target="_blank" class="btn btn-sm btn-secondary flex-grow-1 d-inline-flex align-items-center justify-content-center gap-1" style="border-radius:10px;">
+                  <i data-lucide="video" style="width: 14px; height: 14px;"></i>
+                  <span>Visio</span>
+                </a>
+              {% endif %}
+              <button type="button" class="btn btn-sm btn-ghost text-danger {% if not i.formation.lien_api_room %}w-100{% endif %}" style="border: 1px solid var(--border-color); border-radius: 10px;" title="Se désinscrire de cette formation" onclick="aptusConfirm('Se désinscrire ?', 'Voulez-vous vraiment vous désinscrire de « {{ i.formation.titre|escapejs }} » ?', 'Oui, me désinscrire', 'warning').then(ok => { if (ok) window.location.href = '{% url 'training:formation_desinscrire' i.pk %}'; });">
+                <i data-lucide="x" style="width: 14px; height: 14px;"></i>
+                <span class="small ms-1">Désinscription</span>
+              </button>
+            </div>
           {% endif %}
         </div>
       </div>
-    </div>
-
-    <!-- Enrolled Courses List -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h2 class="h4 fw-bold mb-0" style="color: var(--text-primary);">Mes Cours Inscrits</h2>
-      <a href="{% url 'training:formation_list' %}" class="btn btn-sm btn-secondary" style="border-radius: 10px;">
-        <i data-lucide="plus" style="width: 14px; height: 14px;"></i>
-        <span>Explorer le catalogue</span>
-      </a>
-    </div>
-
-    <div class="d-flex flex-column gap-3">
-      {% for i in inscriptions %}
-      <div class="card-flat p-4" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
-        <div class="row align-items-center g-3">
-          <div class="col-auto">
-            <div style="width: 52px; height: 52px; border-radius: 14px; background: var(--accent-primary-light); color: var(--accent-primary); display: flex; align-items: center; justify-content: center;">
-              <i data-lucide="graduation-cap" style="width: 26px; height: 26px;"></i>
-            </div>
-          </div>
-
-          <div class="col">
-            <h3 class="h5 fw-bold mb-1" style="color: var(--text-primary);">{{ i.formation.titre }}</h3>
-            <p class="text-secondary small mb-0 d-flex align-items-center gap-2 flex-wrap">
-              <span>Tuteur : {{ i.formation.tuteur.prenom|default:'Formateur Référent' }}</span>
-              <span>&bull;</span>
-              <span>Statut :</span>
-              {% if i.statut == 'Terminée' or i.progression >= 100 %}
-                <span class="badge" style="background: rgba(16, 185, 129, 0.12); color: #10B981; font-weight: 700; border: 1px solid rgba(16, 185, 129, 0.25);">
-                  <i data-lucide="check-circle" style="width: 12px; height: 12px; margin-right: 3px; vertical-align: -1px;"></i>Terminée
-                </span>
-              {% elif i.statut == 'En cours' or i.progression > 0 %}
-                <span class="badge" style="background: rgba(14, 165, 233, 0.12); color: #0EA5E9; font-weight: 700; border: 1px solid rgba(14, 165, 233, 0.25);">
-                  <i data-lucide="play-circle" style="width: 12px; height: 12px; margin-right: 3px; vertical-align: -1px;"></i>En cours
-                </span>
-              {% else %}
-                <span class="badge" style="background: rgba(245, 158, 11, 0.12); color: #F59E0B; font-weight: 700; border: 1px solid rgba(245, 158, 11, 0.25);">
-                  <i data-lucide="clock" style="width: 12px; height: 12px; margin-right: 3px; vertical-align: -1px;"></i>En attente
-                </span>
-              {% endif %}
-            </p>
-          </div>
-
-          <div class="col-md-3">
-            <div class="d-flex justify-content-between small fw-bold mb-1">
-              <span>Avancement</span>
-              <span class="{% if i.progression == 100 %}text-success{% elif i.progression > 0 %}text-info{% else %}text-secondary{% endif %}">{{ i.progression }}%</span>
-            </div>
-            <div class="progress" style="height: 8px; border-radius: 20px; background: var(--bg-secondary);">
-              <div class="progress-bar" style="width: {{ i.progression }}%; {% if i.progression == 100 %}background: linear-gradient(90deg, #10B981, #00A3DA);{% elif i.progression > 0 %}background: #00A3DA;{% endif %} border-radius: 20px; transition: width 0.4s ease;"></div>
-            </div>
-          </div>
-
-          <div class="col-auto d-flex align-items-center gap-2">
-            <a href="{% url 'training:formation_viewer' i.formation.pk %}" class="btn btn-sm btn-primary" style="border-radius: 10px; font-weight:600;">
-              <i data-lucide="play" style="width: 14px; height: 14px;"></i>
-              <span>Accéder au cours</span>
-            </a>
-            {% if i.formation.lien_api_room %}
-              <a href="{{ i.formation.lien_api_room }}" target="_blank" class="btn btn-sm btn-secondary" style="border-radius: 10px;" title="Visio Room">
-                <i data-lucide="video" style="width: 14px; height: 14px;"></i>
-                <span>Visio</span>
-              </a>
-            {% endif %}
-            {% if i.statut != 'Terminée' and i.progression < 100 %}
-              <a href="{% url 'training:formation_desinscrire' i.pk %}" onclick="event.preventDefault(); const url = this.href; aptusConfirm('Se désinscrire ?', 'Êtes-vous sûr de vouloir vous désinscrire de cette formation ?', 'Oui, me désinscrire').then(ok => { if (ok) window.location.href = url; });" class="btn btn-sm btn-ghost text-danger" style="border-radius: 10px; border: 1px solid var(--border-color);" title="Se désinscrire">
-                <i data-lucide="x" style="width: 15px; height: 15px;"></i>
-              </a>
-            {% endif %}
-          </div>
-        </div>
-      </div>
       {% empty %}
-      <div class="card-flat p-5 text-center" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px;">
+      <div class="card-flat p-5 text-center" style="grid-column: 1 / -1; background: var(--bg-card); border: 2px dashed var(--border-color); border-radius: 20px;">
         <i data-lucide="book-open" style="width: 48px; height: 48px; color: var(--text-tertiary); margin-bottom: 1rem;"></i>
         <h3 class="h5 fw-bold mb-1">Aucune inscription active</h3>
         <p class="text-secondary small mb-3">Explorez notre catalogue de formations certifiantes et développez vos compétences.</p>
-        <a href="{% url 'training:formation_list' %}" class="btn btn-primary" style="border-radius: 12px;">
+        <a href="{% url 'training:formation_list' %}" class="btn btn-primary px-4 py-2" style="border-radius: 12px;">
           <span>Découvrir les formations</span>
         </a>
       </div>
@@ -243,8 +504,31 @@
 
 {% block extra_js %}
 <script>
-  if (window.lucide) {
-    lucide.createIcons();
-  }
+  document.addEventListener('DOMContentLoaded', function() {
+    if (window.lucide) {
+      lucide.createIcons();
+    }
+
+    // Category Tabs Filtering (Fidèle à formations_my.php)
+    const tabs = document.querySelectorAll('.formations-tab');
+    const cards = document.querySelectorAll('#formationsGrid .formation-card');
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', function() {
+        tabs.forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+
+        const filter = this.getAttribute('data-filter');
+        cards.forEach(card => {
+          const category = card.getAttribute('data-category');
+          if (filter === 'all' || category === filter) {
+            card.style.display = 'flex';
+          } else {
+            card.style.display = 'none';
+          }
+        });
+      });
+    });
+  });
 </script>
 {% endblock %}

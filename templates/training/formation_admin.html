@@ -141,9 +141,9 @@
               <a href="{% url 'backoffice_formation_update' f.pk %}" class="btn btn-sm btn-ghost text-warning" title="Modifier">
                 <i data-lucide="pencil" style="width: 16px; height: 16px;"></i>
               </a>
-              <a href="{% url 'backoffice_formation_delete' f.pk %}" class="btn btn-sm btn-ghost text-danger" title="Supprimer définitivement">
+              <button type="button" class="btn btn-sm btn-ghost text-danger" title="Supprimer définitivement" onclick="aptusConfirmDelete('{% url 'backoffice_formation_delete' f.pk %}', 'Êtes-vous sûr de vouloir supprimer définitivement la formation « {{ f.titre|escapejs }} » ?')">
                 <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
-              </a>
+              </button>
             </div>
           </td>
         </tr>

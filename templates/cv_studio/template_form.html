@@ -347,7 +347,7 @@ document.addEventListener('DOMContentLoaded', function() {
     btnGenerate.addEventListener('click', function() {
       const code = htmlInput.value.trim();
       if (!code) {
-        alert("Veuillez saisir du code HTML dans la zone Code Structure avant de scanner.");
+        if (window.Toast) { window.Toast.fire({ icon: 'warning', title: "Veuillez saisir du code HTML dans la zone Code Structure avant de scanner." }); }
         return;
       }
       modal.classList.add('active');

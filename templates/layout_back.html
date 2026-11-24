@@ -374,12 +374,12 @@
       lucide.createIcons();
     }
 
-    // SweetAlert2 Toast Global Configuration (Authentic Aptus Backoffice)
+    // SweetAlert2 Toast Global Configuration (Authentic Aptus Backoffice - Bottom Right)
     window.Toast = Swal.mixin({
       toast: true,
-      position: 'top-end',
+      position: 'bottom-end',
       showConfirmButton: false,
-      timer: 4000,
+      timer: 3500,
       timerProgressBar: true,
       didOpen: (toast) => {
         toast.addEventListener('mouseenter', Swal.stopTimer);

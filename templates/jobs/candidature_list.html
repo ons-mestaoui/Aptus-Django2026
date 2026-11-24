@@ -71,7 +71,7 @@
             <span>Voir l'offre</span>
             <i data-lucide="chevron-right" style="width: 14px; height: 14px;"></i>
           </a>
-          <form method="POST" action="{% url 'jobs:candidature_annuler' c.pk %}" style="display:inline;" onsubmit="return confirm('Êtes-vous sûr de vouloir retirer votre candidature ?');">
+          <form method="POST" action="{% url 'jobs:candidature_annuler' c.pk %}" style="display:inline;" onsubmit="event.preventDefault(); const form = this; aptusConfirm('Retirer votre candidature ?', 'Êtes-vous sûr de vouloir retirer votre dossier pour le poste « {{ c.offre.titre|escapejs }} » ?', 'Oui, retirer', 'warning').then(ok => { if (ok) form.submit(); });">
             {% csrf_token %}
             <button type="submit" class="btn btn-sm btn-ghost text-danger" style="border-radius: 10px; border: 1px solid var(--border-color);" title="Retirer ma candidature">
               <i data-lucide="trash-2" style="width: 15px; height: 15px;"></i>

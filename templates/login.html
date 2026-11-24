@@ -168,15 +168,6 @@
         <h2 class="fw-bold mb-1 fs-3">Connexion</h2>
         <p class="text-secondary text-sm mb-0">Ravi de vous revoir ! Accédez à votre espace intelligent.</p>
       </div>
-
-      {% if messages %}
-        {% for message in messages %}
-          <div class="alert alert-{{ message.tags|default:'info' }} p-3 mb-3 text-sm" style="border-radius:var(--radius-sm);">
-            {{ message }}
-          </div>
-        {% endfor %}
-      {% endif %}
-
       <!-- Quick Demo Login Shortcuts (4 Roles Authentiques) -->
       <div class="p-3 mb-4 rounded-3 text-start" style="background:var(--bg-secondary);border:1px dashed var(--accent-primary);">
         <div class="d-flex align-items-center justify-content-between mb-2">
@@ -219,7 +210,7 @@
         <div class="mb-3">
           <div class="d-flex justify-content-between align-items-center mb-1">
             <label class="form-label text-xs fw-bold text-uppercase text-secondary mb-0">Mot de Passe</label>
-            <a href="#" class="text-xs text-decoration-none text-accent" onclick="alert('Module de récupération de mot de passe disponible prochainement.')">Mot de passe oublié ?</a>
+            <a href="#" class="text-xs text-decoration-none text-accent" onclick="Swal.fire({icon:'info', title:'Mot de passe oublié', text:'Le service de réinitialisation par email sera disponible très prochainement.', confirmButtonText:'D\'accord', customClass:{confirmButton:'btn btn-primary px-4 py-2'}, buttonsStyling:false}); return false;">Mot de passe oublié ?</a>
           </div>
           <div class="input-group">
             <span class="input-group-text bg-transparent border-end-0" style="border-color:var(--border-color);"><i data-lucide="lock" style="width:16px;height:16px;color:var(--text-tertiary);"></i></span>
@@ -298,12 +289,37 @@
     </div>
   </div>
 
-  <!-- Lucide Icons & Scripts -->
+  <!-- SweetAlert2 & Lucide Icons -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script>
     if (window.lucide) {
       lucide.createIcons();
     }
+
+    // SweetAlert2 Toast Global Configuration (Bottom Right)
+    window.Toast = Swal.mixin({
+      toast: true,
+      position: 'bottom-end',
+      showConfirmButton: false,
+      timer: 3500,
+      timerProgressBar: true,
+      didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer);
+        toast.addEventListener('mouseleave', Swal.resumeTimer);
+      }
+    });
+
+    {% if messages %}
+      document.addEventListener('DOMContentLoaded', function() {
+        {% for message in messages %}
+          window.Toast.fire({
+            icon: '{% if message.tags == "error" %}error{% elif message.tags == "warning" %}warning{% elif message.tags == "info" %}info{% else %}success{% endif %}',
+            title: '{{ message|escapejs }}'
+          });
+        {% endfor %}
+      });
+    {% endif %}
 
     function togglePasswordVisibility() {
       const pwd = document.getElementById('login-password');

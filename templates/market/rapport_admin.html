@@ -91,7 +91,7 @@
           <td><span class="badge badge-success">{{ r.tendance_generale|default:'Stable' }}</span></td>
           <td class="text-end">
             <a href="{% url 'market:rapport_update' r.pk %}" class="btn btn-sm btn-ghost text-warning"><i data-lucide="pencil" style="width: 16px; height: 16px;"></i></a>
-            <a href="{% url 'market:rapport_delete' r.pk %}" class="btn btn-sm btn-ghost text-danger" title="Supprimer définitivement"><i data-lucide="trash-2" style="width: 16px; height: 16px;"></i></a>
+            <button type="button" class="btn btn-sm btn-ghost text-danger" title="Supprimer définitivement" onclick="aptusConfirmDelete('{% url 'market:rapport_delete' r.pk %}', 'Êtes-vous sûr de vouloir supprimer définitivement le rapport « {{ r.titre|escapejs }} » ?')"><i data-lucide="trash-2" style="width: 16px; height: 16px;"></i></button>
           </td>
         </tr>
         {% empty %}

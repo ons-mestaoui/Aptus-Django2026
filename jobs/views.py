@@ -377,10 +377,12 @@ def offre_delete(request, pk):
         return redirect('backoffice_offres')
 
     return_url = 'entreprise_posts' if is_entreprise else 'backoffice_offres'
+    layout_template = 'layout_front.html' if is_entreprise else 'layout_back.html'
     return render(request, 'jobs/offre_confirm_delete.html', {
         'offre': offre,
         'is_entreprise': is_entreprise,
-        'return_url': return_url
+        'return_url': return_url,
+        'layout_template': layout_template,
     })
 
 

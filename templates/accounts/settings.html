@@ -538,7 +538,7 @@
         La suppression de votre compte est irréversible. Toutes vos données personnelles, candidatures et CVs associés seront définitivement effacés.
       </div>
 
-      <form method="POST" action="{% url 'account_settings' %}" onsubmit="return confirm('Êtes-vous absolument sûr de vouloir supprimer définitivement votre compte Aptus ? Cette action est irréversible.');">
+      <form method="POST" action="{% url 'account_settings' %}" onsubmit="event.preventDefault(); const form = this; aptusConfirm('Supprimer votre compte ?', 'Cette action est irréversible. Toutes vos données personnelles, candidatures et CVs seront définitivement effacés.', 'Oui, supprimer définitivement', 'error').then(ok => { if (ok) form.submit(); });">
         {% csrf_token %}
         <input type="hidden" name="action" value="delete_account">
         <div class="mb-3" style="max-width: 450px;">

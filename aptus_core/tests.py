@@ -1,21 +1,21 @@
 from django.test import TestCase, Client
 from django.urls import reverse
+from accounts.models import Utilisateur
 
 class AptusCRUDTests(TestCase):
     def setUp(self):
         self.client = Client()
-
-    def test_homepage(self):
-        from accounts.models import Utilisateur
-        admin = Utilisateur.objects.create(
+        self.admin = Utilisateur.objects.create(
             nom="Admin", prenom="Super", email="admin.test@aptus.tn",
             mot_de_passe="admin123", role="Admin"
         )
         session = self.client.session
-        session['id_utilisateur'] = admin.id_utilisateur
-        session['user_id'] = admin.id_utilisateur
+        session['id_utilisateur'] = self.admin.id_utilisateur
+        session['user_id'] = self.admin.id_utilisateur
         session['role'] = 'Admin'
         session.save()
+
+    def test_homepage(self):
         response = self.client.get(reverse('home'))
         self.assertEqual(response.status_code, 200)
 
@@ -28,6 +28,17 @@ class AptusCRUDTests(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_cv_studio_crud_list(self):
+        from accounts.models import Candidat
+        candidat_user = Utilisateur.objects.create(
+            nom="Test", prenom="Candidat", email="candidat.test@aptus.tn",
+            mot_de_passe="pass123", role="Candidat"
+        )
+        Candidat.objects.create(utilisateur=candidat_user)
+        session = self.client.session
+        session['id_utilisateur'] = candidat_user.id_utilisateur
+        session['user_id'] = candidat_user.id_utilisateur
+        session['role'] = 'Candidat'
+        session.save()
         response = self.client.get(reverse('cv_studio:cv_list'))
         self.assertEqual(response.status_code, 200)
 
@@ -38,3 +49,4 @@ class AptusCRUDTests(TestCase):
     def test_market_crud_list(self):
         response = self.client.get(reverse('market:rapport_list'))
         self.assertEqual(response.status_code, 200)
+
