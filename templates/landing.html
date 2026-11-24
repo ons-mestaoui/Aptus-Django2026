@@ -42,6 +42,16 @@
       align-items: center;
       justify-content: center;
     }
+    .hero-stats-glass .hero__stat-label {
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+    [data-theme="dark"] .hero-stats-glass .hero__stat-label {
+      color: rgba(255, 255, 255, 0.78);
+    }
+    .typewrite > .wrap {
+      border-right: 0.08em solid var(--accent-primary);
+    }
   </style>
 </head>
 <body class="landing-page-body">
@@ -73,7 +83,7 @@
       </button>
 
       <a href="{% url 'login' %}" class="btn btn-ghost nav-btn-login" style="font-weight:600; color:var(--text-primary); text-decoration:none; padding:0.45rem 1rem;">Se connecter</a>
-      <a href="{% url 'signup_candidat' %}" class="btn btn-primary glow-btn" style="border-radius:24px; font-weight:700; padding:0.45rem 1.25rem;">S'inscrire</a>
+      <a href="{% url 'signup_choice' %}" class="btn btn-primary glow-btn" style="border-radius:24px; font-weight:700; padding:0.45rem 1.25rem;">S'inscrire</a>
     </div>
 
     <button class="hamburger-landing" id="hamburger-landing" aria-label="Menu">
@@ -89,7 +99,7 @@
     <a href="#resources" class="nav-anchor">Ressources</a>
     <div class="mobile-menu-actions mt-4">
       <a href="{% url 'login' %}" class="btn btn-ghost w-100 mb-2">Se connecter</a>
-      <a href="{% url 'signup_candidat' %}" class="btn btn-primary w-100">S'inscrire</a>
+      <a href="{% url 'signup_choice' %}" class="btn btn-primary w-100">S'inscrire</a>
     </div>
   </div>
 

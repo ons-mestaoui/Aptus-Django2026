@@ -1,0 +1,190 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inscription Tuteur &mdash; Aptus</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/variables.css' %}">
+  <link rel="stylesheet" href="{% static 'css/global.css' %}">
+  <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+  <script src="{% static 'js/theme-toggle.js' %}"></script>
+  <style>
+    .auth-alert {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.75rem 1rem;
+      margin-bottom: var(--space-4);
+      border-radius: var(--radius-sm);
+      font-size: var(--fs-sm);
+      font-weight: 500;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      background: var(--bg-danger);
+      color: var(--text-danger);
+    }
+    .auth-card__header h1 {
+      color: var(--text-primary);
+      font-weight: var(--fw-bold);
+    }
+    .required-star {
+      color: #ef4444;
+    }
+    .auth-footer-alt {
+      margin-top: var(--space-2);
+      font-size: var(--fs-xs);
+      color: var(--text-tertiary);
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-page">
+    <div class="auth-card auth-card--wide">
+      <!-- Theme toggle -->
+      <div style="position:absolute;top:var(--space-4);right:var(--space-4);">
+        <button type="button" class="theme-toggle" id="theme-toggle-btn" aria-label="Basculer le thème" title="Basculer le thème">
+          <i data-lucide="sun" class="icon-sun" style="display:none;"></i>
+          <i data-lucide="moon" class="icon-moon"></i>
+        </button>
+      </div>
+
+      <!-- Logo -->
+      <div class="auth-card__logo">
+        <a href="{% url 'landing' %}" style="display:flex;align-items:center;gap:var(--space-2);text-decoration:none;color:inherit;">
+          <img src="{% static 'img/logo.png' %}" alt="Aptus" class="auth-card__logo-icon" style="background:none;padding:4px;">
+          <span class="auth-card__logo-text">Aptus</span>
+        </a>
+      </div>
+
+      <!-- Header -->
+      <div class="auth-card__header">
+        <span class="auth-card__type-badge" style="background: rgba(16, 185, 129, 0.14); color: #059669;">
+          <i data-lucide="graduation-cap" style="width:14px;height:14px;"></i>
+          Tuteur
+        </span>
+        <h1>Créer votre compte Tuteur</h1>
+        <p>Partagez votre expertise et accompagnez les futurs talents</p>
+      </div>
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="auth-alert" role="alert">
+            <span>{{ message }}</span>
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      <form class="auth-form" id="signup-tuteur-form" method="POST" action="{% url 'signup_tuteur' %}" data-validate>
+        {% csrf_token %}
+
+        <div class="auth-form__row">
+          <div class="form-group">
+            <label class="form-label" for="tuteur-nom">Nom <span class="required-star">*</span></label>
+            <input type="text" class="input" id="tuteur-nom" name="nom" value="{{ form_data.nom|default:'' }}" placeholder="Votre nom" required>
+            <span class="form-error"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="tuteur-prenom">Prénom <span class="required-star">*</span></label>
+            <input type="text" class="input" id="tuteur-prenom" name="prenom" value="{{ form_data.prenom|default:'' }}" placeholder="Votre prénom" required>
+            <span class="form-error"></span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="tuteur-email">Adresse Email <span class="required-star">*</span></label>
+          <div class="input-icon-wrapper">
+            <i data-lucide="mail" style="width:18px;height:18px;"></i>
+            <input type="email" class="input" id="tuteur-email" name="email" value="{{ form_data.email|default:'' }}" placeholder="votre@email.com" required>
+          </div>
+          <span class="form-error"></span>
+        </div>
+
+        <div class="auth-form__row">
+          <div class="form-group">
+            <label class="form-label" for="tuteur-password">Mot de passe <span class="required-star">*</span></label>
+            <div class="input-icon-wrapper">
+              <i data-lucide="lock" style="width:18px;height:18px;"></i>
+              <input type="password" class="input" id="tuteur-password" name="password" placeholder="Min. 8 caractères" required minlength="8">
+            </div>
+            <span class="form-error"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="tuteur-password2">Confirmer <span class="required-star">*</span></label>
+            <div class="input-icon-wrapper">
+              <i data-lucide="lock" style="width:18px;height:18px;"></i>
+              <input type="password" class="input" id="tuteur-password2" name="password_confirm" placeholder="Confirmez" required minlength="8" data-match="tuteur-password">
+            </div>
+            <span class="form-error"></span>
+          </div>
+        </div>
+
+        <div class="auth-form__row">
+          <div class="form-group">
+            <label class="form-label" for="tuteur-tel">Téléphone</label>
+            <div class="input-icon-wrapper">
+              <i data-lucide="phone" style="width:18px;height:18px;"></i>
+              <input type="text" class="input" id="tuteur-tel" name="telephone" value="{{ form_data.telephone|default:'' }}" placeholder="+216 XX XXX XXX">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="tuteur-specialite">Spécialité / Domaine <span class="required-star">*</span></label>
+            <div class="input-icon-wrapper">
+              <i data-lucide="award" style="width:18px;height:18px;"></i>
+              <input type="text" class="input" id="tuteur-specialite" name="specialite" value="{{ form_data.specialite|default:'' }}" placeholder="Ex: Développement Web, IA..." required>
+            </div>
+            <span class="form-error"></span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="tuteur-exp">Expérience (Années)</label>
+          <input type="text" class="input" id="tuteur-exp" name="experience" value="{{ form_data.experience|default:'' }}" placeholder="Ex: 5 ans">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="tuteur-bio">Biographie / Présentation</label>
+          <textarea class="textarea" id="tuteur-bio" name="biographie" placeholder="Parlez-nous de votre parcours...">{{ form_data.biographie|default:'' }}</textarea>
+        </div>
+
+        <div class="auth-form__row">
+          <div class="form-group">
+            <label class="form-label" for="tuteur-pays">Pays</label>
+            <input type="text" class="input" id="tuteur-pays" name="pays" value="{{ form_data.pays|default:'' }}" placeholder="Ex: Tunisie">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="tuteur-ville">Ville</label>
+            <input type="text" class="input" id="tuteur-ville" name="ville" value="{{ form_data.ville|default:'' }}" placeholder="Ex: Tunis">
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg w-full" id="signup-tuteur-submit" style="background: linear-gradient(135deg, #059669 0%, #10B981 100%);">
+          <i data-lucide="user-plus" style="width:18px;height:18px;"></i>
+          Créer mon compte Tuteur
+        </button>
+      </form>
+
+      <div class="auth-footer">
+        <div style="margin-bottom: var(--space-2);">Déjà inscrit ? <a href="{% url 'login' %}">Se connecter</a></div>
+        <div class="auth-footer-alt">
+          <a href="{% url 'signup_choice' %}">Changer de profil</a>
+        </div>
+        <a href="{% url 'landing' %}" class="back-to-site">
+          <i data-lucide="arrow-left" style="width:16px;height:16px;"></i>
+          Retour au site
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="{% static 'js/forms.js' %}"></script>
+  <script src="{% static 'js/password-toggle.js' %}"></script>
+  <script src="{% static 'js/alert-dismiss.js' %}"></script>
+  <script>
+    if (window.lucide) lucide.createIcons();
+  </script>
+</body>
+</html>
