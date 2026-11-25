@@ -1,2 +1,5 @@
 Django>=4.2,<6.0
 Pillow>=9.0.0
+bcrypt>=4.0.0
+# Optional (only for Playwright UI tests: pip install playwright && playwright install chromium)
+# playwright>=1.40.0
